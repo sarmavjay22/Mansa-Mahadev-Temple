@@ -107,7 +107,6 @@ export default function AartiSection() {
   return (
     <section id="aarti-section" className="w-full max-w-4xl mx-auto px-4 py-6">
       <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center gap-2 mb-6">
-        <FlameKindling className="w-5 h-5 text-orange-500 fill-orange-200 animate-pulse" />
         <span>नित्य आरती संग्रह</span>
         <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700">स्तुति वंदना</span>
       </h2>
@@ -118,7 +117,9 @@ export default function AartiSection() {
           <motion.div
             key={aarti.id}
             whileHover={{ y: -4, scale: 1.01 }}
-            className="cursor-pointer bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-6 shadow-lg shadow-sky-100/30 flex flex-col justify-between group relative overflow-hidden"
+            className={`cursor-pointer bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 flex flex-col justify-between group relative overflow-hidden ${
+              (aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') ? 'p-4 self-center sm:self-stretch' : 'p-6'
+            }`}
             onClick={() => {
               setActiveAarti(aarti);
               setSearchQuery('');
@@ -127,28 +128,42 @@ export default function AartiSection() {
             {/* Decorative Saffron Arch & Diya Indicator */}
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-bl-full pointer-events-none"></div>
             
-            <div className="flex items-start justify-between">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-md shadow-orange-500/20 group-hover:rotate-6 transition-all duration-300">
-                <FlameKindling className="w-6 h-6 text-white" />
+            {!(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') && (
+              <div className="flex items-start justify-between">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-md shadow-orange-500/20 group-hover:rotate-6 transition-all duration-300">
+                  <FlameKindling className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-100">
+                  {aarti.deity === 'Shiv' ? 'महादेव वंदना' : 'हनुमान चालीसा/आरती'}
+                </span>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-100">
-                {aarti.deity === 'Shiv' ? 'महादेव वंदना' : 'हनुमान चालीसा/आरती'}
-              </span>
-            </div>
+            )}
 
-            <div className="mt-5">
-              <h3 className="text-lg md:text-xl font-bold text-slate-800 tracking-wide font-sans mb-2">
-                {aarti.hindiTitle}
+            <div className={(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') ? 'mt-0 text-center w-full' : 'mt-5 w-full'}>
+              <h3 className={`text-lg md:text-xl font-bold text-slate-800 tracking-wide font-sans mb-0 ${
+                (aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') ? 'text-center w-full' : ''
+              }`}>
+                {(aarti.deity === 'Hanuman' || aarti.deity === 'Shiv') ? (
+                  <span className="inline-block bg-[#fffdf5] border border-amber-300 text-slate-800 px-6 py-2.5 rounded-full shadow-sm">
+                    {aarti.hindiTitle}
+                  </span>
+                ) : (
+                  aarti.hindiTitle
+                )}
               </h3>
-              <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                {aarti.text.substring(0, 100)}...
-              </p>
+              {!(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') && (
+                <p className="mt-2 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                  {aarti.text.substring(0, 100)}...
+                </p>
+              )}
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:text-orange-700 transition">
-              <span>आरती पाठ आरंभ करें</span>
-              <span>→</span>
-            </div>
+            {!(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') && (
+              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:text-orange-700 transition">
+                <span>आरती पाठ आरंभ करें</span>
+                <span>→</span>
+              </div>
+            )}
           </motion.div>
         ))}
       </div>
@@ -179,16 +194,24 @@ export default function AartiSection() {
               <div className={`p-5 flex flex-col gap-3 border-b shrink-0 ${
                 isDarkMode ? 'border-slate-800 bg-slate-950/50' : 'border-sky-100 bg-sky-50/50'
               }`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="relative flex items-center justify-between w-full">
+                  <div className={`flex items-center gap-2 ${
+                    (activeAarti.deity === 'Shiv' || activeAarti.deity === 'Hanuman') ? 'w-full justify-center pr-9' : ''
+                  }`}>
                     <FlameKindling className="w-5 h-5 text-orange-500 animate-bounce" />
-                    <h3 className="text-lg font-extrabold tracking-wide">{activeAarti.hindiTitle}</h3>
+                    {(activeAarti.deity === 'Hanuman' || activeAarti.deity === 'Shiv') ? (
+                      <span className="inline-block bg-[#fffdf5] dark:bg-slate-800/90 border border-amber-300 dark:border-amber-500/50 text-red-600 dark:text-red-500 px-6 py-2 rounded-full shadow-md font-extrabold tracking-wide text-center">
+                        {activeAarti.hindiTitle}
+                      </span>
+                    ) : (
+                      <h3 className="text-lg font-extrabold tracking-wide text-center">{activeAarti.hindiTitle}</h3>
+                    )}
                   </div>
                   
                   {/* Close */}
                   <button
                     onClick={() => setActiveAarti(null)}
-                    className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+                    className={`absolute right-0 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                       isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-100 hover:bg-slate-200'
                     }`}
                   >
@@ -205,16 +228,16 @@ export default function AartiSection() {
                     <Type className="w-3.5 h-3.5 text-slate-500" />
                     <button
                       onClick={() => setFontSize(prev => Math.max(14, prev - 2))}
-                      className="w-5 h-5 font-bold hover:scale-110 active:scale-95 text-center flex items-center justify-center text-sm"
+                      className="w-5 h-5 font-extrabold hover:scale-110 active:scale-95 text-center flex items-center justify-center text-base"
                     >
-                      <Minus className="w-3 h-3" />
+                      <Minus className="w-4 h-4 stroke-[3]" />
                     </button>
-                    <span className="font-mono font-bold px-1 select-none">{fontSize}px</span>
+                    <span className="font-mono font-extrabold px-1.5 select-none text-sm">{fontSize}px</span>
                     <button
                       onClick={() => setFontSize(prev => Math.min(32, prev + 2))}
-                      className="w-5 h-5 font-bold hover:scale-110 active:scale-95 text-center flex items-center justify-center text-sm"
+                      className="w-5 h-5 font-extrabold hover:scale-110 active:scale-95 text-center flex items-center justify-center text-base"
                     >
-                      <Plus className="w-3 h-3" />
+                      <Plus className="w-4 h-4 stroke-[3]" />
                     </button>
                   </div>
 
@@ -241,12 +264,12 @@ export default function AartiSection() {
                       {copySuccess ? (
                         <>
                           <Check className="w-3.5 h-3.5 text-emerald-500" />
-                          <span className="text-[10px] text-emerald-500 font-bold">कॉपी हो गया!</span>
+                          <span className="text-xs text-emerald-500 font-extrabold">कॉपी हो गया!</span>
                         </>
                       ) : (
                         <>
                           <Copy className="w-3.5 h-3.5" />
-                          <span className="text-[10px]">आरती कॉपी करें</span>
+                          <span className="text-xs font-extrabold">आरती कॉपी करें</span>
                         </>
                       )}
                     </button>
@@ -254,10 +277,10 @@ export default function AartiSection() {
                     {/* Share */}
                     <button
                       onClick={handleShare}
-                      className={`h-8 px-2.5 rounded-xl flex items-center gap-1 text-white font-semibold transition bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600`}
+                      className={`h-8 px-2.5 rounded-xl flex items-center gap-1 text-white font-extrabold transition bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600`}
                     >
                       <Share2 className="w-3.5 h-3.5" />
-                      <span className="text-[10px]">शेयर</span>
+                      <span className="text-xs font-extrabold">शेयर</span>
                     </button>
                   </div>
                 </div>
@@ -307,10 +330,10 @@ export default function AartiSection() {
               </div>
 
               {/* Status footer bar */}
-              <div className={`p-4 shrink-0 text-center text-[10px] font-bold border-t select-none ${
+              <div className={`p-4 shrink-0 text-center text-xs font-extrabold border-t select-none ${
                 isDarkMode ? 'border-slate-800 bg-slate-950/30 text-slate-500' : 'border-sky-100 bg-sky-50/20 text-slate-400'
               }`}>
-                श्री मंसा महादेव मंदिर तितरड़ी, उदयपुर (राज.) • नित्य स्तुति
+                श्री मंसा महादेव मँदिर तितरडी, उदयपुर (राजस्थान) नित्य स्तुति
               </div>
             </motion.div>
           </motion.div>

@@ -100,7 +100,7 @@ const DEFAULT_AARTIS: AartiItem[] = [
     id: "aarti_shiv",
     title: "Shiv Aarti",
     deity: "Shiv",
-    hindiTitle: "शिव आरती - जय शिव ओंकारा",
+    hindiTitle: "भगवान् भोलेनाथ की आरती",
     text: `जय शिव ओंकारा, हर ॐ जय शिव ओंकारा।
 ब्रह्मा, विष्णु, सदाशिव, अर्द्धांगी धारा॥ ॐ जय...
 
@@ -132,7 +132,7 @@ const DEFAULT_AARTIS: AartiItem[] = [
     id: "aarti_hanuman",
     title: "Hanuman Aarti",
     deity: "Hanuman",
-    hindiTitle: "हनुमान आरती - आरती कीजै हनुमान लला की",
+    hindiTitle: "हनुमान जी की आरती",
     text: `आरती कीजै हनुमान लला की। दुष्ट दलन रघुनाथ कला की॥
 
 जाके बल से गिरिवर कांपे। रोग दोष जाके निकट न झांके॥
@@ -405,7 +405,33 @@ export const db = {
   // Aartis
   getAartis(): AartiItem[] {
     const data = localStorage.getItem('mm_aartis');
-    return data ? JSON.parse(data) : DEFAULT_AARTIS;
+    if (!data) return DEFAULT_AARTIS;
+    try {
+      const aartis = JSON.parse(data) as AartiItem[];
+      let modified = false;
+      const updatedAartis = aartis.map(a => {
+        let changed = false;
+        let hindiTitle = a.hindiTitle;
+        if (a.id === 'aarti_shiv' && a.hindiTitle !== 'भगवान् भोलेनाथ की आरती') {
+          hindiTitle = 'भगवान् भोलेनाथ की आरती';
+          changed = true;
+        } else if (a.id === 'aarti_hanuman' && a.hindiTitle !== 'हनुमान जी की आरती') {
+          hindiTitle = 'हनुमान जी की आरती';
+          changed = true;
+        }
+        if (changed) {
+          modified = true;
+          return { ...a, hindiTitle };
+        }
+        return a;
+      });
+      if (modified) {
+        localStorage.setItem('mm_aartis', JSON.stringify(updatedAartis));
+      }
+      return updatedAartis;
+    } catch (e) {
+      return DEFAULT_AARTIS;
+    }
   },
 
   updateAarti(id: string, updatedText: string) {

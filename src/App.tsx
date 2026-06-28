@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import NotificationBanner from './components/NotificationBanner';
 import TodayDarshan from './components/TodayDarshan';
@@ -10,12 +10,27 @@ import TempleInfoSection from './components/TempleInfoSection';
 import AdminPanel from './components/AdminPanel';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles } from 'lucide-react';
+import { subscribeToTempleSettings, getCachedTempleSettings } from './lib/settings';
+import { TempleSettings } from './types';
 
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [settings, setSettings] = useState<TempleSettings>(getCachedTempleSettings());
+
+  useEffect(() => {
+    const unsubscribe = subscribeToTempleSettings((fetched) => {
+      setSettings(fetched);
+    });
+    return unsubscribe;
+  }, []);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-[#e3f2fd] via-[#f7f9fc] to-[#e3f2fd] text-slate-800 font-sans selection:bg-amber-200 selection:text-amber-950 pb-16 overflow-x-hidden">
+    <div 
+      className="relative min-h-screen text-slate-800 font-sans selection:bg-amber-200 selection:text-amber-950 pb-16 overflow-x-hidden transition-colors duration-500"
+      style={{
+        background: `linear-gradient(to bottom, ${settings.primaryThemeColor || '#e3f2fd'}, ${settings.secondaryThemeColor || '#f7f9fc'}, ${settings.primaryThemeColor || '#e3f2fd'})`
+      }}
+    >
       
       {/* Decorative Aura Background Elements */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-sky-400/5 via-sky-300/2 to-transparent rounded-full blur-3xl pointer-events-none"></div>
@@ -69,8 +84,11 @@ export default function App() {
 
           {/* Credits */}
           <div className="text-[10px] md:text-xs text-slate-500 font-semibold space-y-1">
-            <p>श्री मंसा महादेव मंदिर सेवा समिति, तितरड़ी, उदयपुर (राज.)</p>
+            <p>{settings.footerCopyright || "श्री मंसा महादेव मंदिर सेवा समिति, तितरड़ी, उदयपुर (राज.)"}</p>
             <p className="text-slate-400 font-medium">सर्व सुखिनः भवन्तु • समस्त मंगल कामनाएं</p>
+            {settings.developerName && (
+              <p className="text-amber-700/80 font-mono text-[9px] mt-2">डिजाइन एवं विकसित: {settings.developerName}</p>
+            )}
           </div>
         </div>
       </footer>

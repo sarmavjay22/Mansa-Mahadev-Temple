@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db, subscribeToDBUpdates } from '../lib/db';
-import { TempleInfo, TempleTiming } from '../types';
+import { TempleInfo, TempleTiming, TempleSettings } from '../types';
+import { subscribeToTempleSettings, getCachedTempleSettings } from '../lib/settings';
 import { 
   Clock, 
   MapPin, 
@@ -38,6 +39,8 @@ export default function TempleInfoSection() {
   const [editedTimings, setEditedTimings] = useState<TempleTiming[]>([]);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const [settings, setSettings] = useState<TempleSettings>(getCachedTempleSettings());
+
   useEffect(() => {
     setInfo(db.getTempleInfo());
     setTimings(db.getTempleTimings());
@@ -48,7 +51,15 @@ export default function TempleInfoSection() {
       setTimings(db.getTempleTimings());
       setIsAdmin(db.isAdminLoggedIn());
     });
-    return unsubscribe;
+
+    const unsubSettings = subscribeToTempleSettings((fetched) => {
+      setSettings(fetched);
+    });
+
+    return () => {
+      unsubscribe();
+      unsubSettings();
+    };
   }, []);
 
   const handleStartEdit = () => {
@@ -102,6 +113,24 @@ export default function TempleInfoSection() {
   };
 
   if (!info) return null;
+
+  const displayAbout = settings.aboutTemple || info.about;
+  const displayHistory = settings.templeHistory || info.history;
+  const displayPhone = settings.phone || info.contact.phone;
+  const displayEmail = settings.email || info.contact.email;
+  const displayWhatsApp = settings.whatsApp || info.contact.whatsApp;
+  const displayAddress = settings.templeAddress || info.contact.address;
+  const displayMapLink = settings.googleMapsLink || info.contact.googleMapsLink;
+
+  const displayTimings = timings.map(t => {
+    if (t.id === "1" && settings.morningDarshanTime) {
+      return { ...t, time: settings.morningDarshanTime };
+    }
+    if (t.id === "5" && settings.eveningDarshanTime) {
+      return { ...t, time: settings.eveningDarshanTime };
+    }
+    return t;
+  });
 
   return (
     <section id="temple-info" className="w-full max-w-4xl mx-auto px-4 py-6">
@@ -311,7 +340,7 @@ export default function TempleInfoSection() {
 
               {/* Timings List */}
               <div className="flex flex-col gap-2.5">
-                {timings.map(item => (
+                {displayTimings.map(item => (
                   <div 
                     key={item.id}
                     className="flex items-center justify-between p-3.5 bg-white/60 hover:bg-white rounded-2xl border border-sky-100/50 shadow-sm transition"
@@ -344,7 +373,7 @@ export default function TempleInfoSection() {
                   <span>मंदिर परिचय</span>
                 </h3>
                 <p className="text-xs md:text-sm leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap">
-                  {info.about}
+                  {displayAbout}
                 </p>
               </div>
 
@@ -355,7 +384,7 @@ export default function TempleInfoSection() {
                   <span>धार्मिक मान्यता एवं इतिहास</span>
                 </h3>
                 <p className="text-xs md:text-sm leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap">
-                  {info.history}
+                  {displayHistory}
                 </p>
               </div>
             </div>
@@ -375,7 +404,7 @@ export default function TempleInfoSection() {
                     <span>मंदिर का मुख्य पता</span>
                   </p>
                   <p className="text-xs md:text-sm font-bold text-slate-700">
-                    {info.contact.address}
+                    {displayAddress}
                   </p>
                 </div>
 
@@ -384,7 +413,7 @@ export default function TempleInfoSection() {
                   
                   {/* Dial Phone Button */}
                   <a
-                    href={`tel:${info.contact.phone}`}
+                    href={`tel:${displayPhone}`}
                     className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 transition text-slate-700"
                   >
                     <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
@@ -392,13 +421,13 @@ export default function TempleInfoSection() {
                     </div>
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">फ़ोन संपर्क</p>
-                      <p className="text-xs font-bold font-mono">{info.contact.phone}</p>
+                      <p className="text-xs font-bold font-mono">{displayPhone}</p>
                     </div>
                   </a>
 
                   {/* Direct WhatsApp trigger */}
                   <a
-                    href={`https://wa.me/91${info.contact.whatsApp}?text=जय+मंसा+महादेव+जी+मंगला+दर्शन+आरती+की+जानकारी+चाहिए।`}
+                    href={`https://wa.me/91${displayWhatsApp}?text=जय+मंसा+महादेव+जी+मंगला+दर्शन+आरती+की+जानकारी+चाहिए।`}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 transition text-slate-700"
@@ -414,7 +443,7 @@ export default function TempleInfoSection() {
 
                   {/* Direct Email trigger */}
                   <a
-                    href={`mailto:${info.contact.email}`}
+                    href={`mailto:${displayEmail}`}
                     className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 transition text-slate-700"
                   >
                     <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
@@ -422,13 +451,13 @@ export default function TempleInfoSection() {
                     </div>
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">ईमेल आईडी</p>
-                      <p className="text-xs font-bold font-mono truncate max-w-[150px]">{info.contact.email}</p>
+                      <p className="text-xs font-bold font-mono truncate max-w-[150px]">{displayEmail}</p>
                     </div>
                   </a>
 
                   {/* Google maps link button */}
                   <a
-                    href={info.contact.googleMapsLink}
+                    href={displayMapLink}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold shadow hover:scale-101 transition"
@@ -457,7 +486,7 @@ export default function TempleInfoSection() {
                 
                 {/* Floating Map directions badge */}
                 <a
-                  href={info.contact.googleMapsLink}
+                  href={displayMapLink}
                   target="_blank"
                   rel="noreferrer"
                   className="absolute bottom-3 right-3 bg-black/80 hover:bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-md backdrop-blur-sm transition"

@@ -68,3 +68,35 @@ export interface NotificationItem {
   date: string;
   type: 'general' | 'festival' | 'alert';
 }
+
+export interface TempleSettings {
+  templeNameHindi: string;
+  templeNameEnglish: string;
+  templeLogo: string;
+  templeCoverImage: string;
+  templeAddress: string;
+  village: string;
+  city: string;
+  state: string;
+  pincode: string;
+  phone: string;
+  whatsApp: string;
+  email: string;
+  googleMapsLink: string;
+  facebook: string;
+  instagram: string;
+  youtube: string;
+  donationQR: string;
+  upiId: string;
+  morningDarshanTime: string;
+  eveningDarshanTime: string;
+  templeHistory: string;
+  aboutTemple: string;
+  shortDescription: string;
+  primaryThemeColor: string;
+  secondaryThemeColor: string;
+  accentColor: string;
+  footerCopyright: string;
+  developerName: string;
+}
+

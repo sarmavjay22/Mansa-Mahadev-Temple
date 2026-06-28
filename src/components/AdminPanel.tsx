@@ -20,9 +20,11 @@ import {
   Eye,
   Info,
   Sliders,
-  Sparkles
+  Sparkles,
+  Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import TempleSettingsTab from './TempleSettingsTab';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -34,7 +36,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'temple_settings'>('overview');
 
   // Stats State
   const [stats, setStats] = useState({
@@ -292,6 +294,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                   <Image className="w-4 h-4" />
                   <span>विगत गैलरी अपलोड</span>
                 </button>
+
+                <button
+                  onClick={() => setActiveTab('temple_settings')}
+                  className={`flex-1 py-3.5 flex items-center justify-center gap-1.5 transition ${
+                    activeTab === 'temple_settings' ? 'text-amber-600 bg-white border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>मंदिर सेटिंग्स</span>
+                </button>
               </div>
 
               {/* Subtab Contents Container */}
@@ -335,7 +347,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         लॉगिन रहने पर, आप सीधे मंदिर की वेबसाइट के मुख्य पृष्ठ (Homepage) पर घूमते हुए निम्नलिखित संपादित कर सकते हैं:
                       </p>
                       <ul className="list-disc list-inside text-xs text-slate-500 font-semibold space-y-1 pl-1">
-                        <li>आज का श्रृंगार दर्शन: "श्रृंगार बदलें" बटन पर क्लिक करके बदलें।</li>
+                        <li>भोलेनाथ के श्रृंगार दर्शन: "श्रृंगार बदलें" बटन पर क्लिक करके बदलें।</li>
                         <li>यूट्यूब वीडियो: सीधे यूट्यूब वीडियो के ऊपर "वीडियो जोड़ें" पर क्लिक करें।</li>
                         <li>आरती के बोल: आरती खोलने पर दिखाई देने वाले फ़ील्ड्स में सीधे संपादन कर सकते हैं।</li>
                         <li>भजन प्लेलिस्ट: सीधे प्लेलिस्ट के नीचे "भजन जोड़ें" बटन दबाएं।</li>
@@ -540,6 +552,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       </div>
                     )}
                   </div>
+                )}
+
+                {activeTab === 'temple_settings' && (
+                  <TempleSettingsTab />
                 )}
               </div>
             </div>

@@ -204,17 +204,19 @@ export default function TodayDarshan() {
   return (
     <section id="today-darshan" className="w-full max-w-4xl mx-auto px-4 py-6">
       {/* Golden Accented Title Card */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500" />
-          <span>आज का श्रृंगार दर्शन</span>
-          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-600 animate-pulse">मंसा दर्शन</span>
+      <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center gap-2 flex-wrap">
+          <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500 shrink-0" />
+          <span className="inline-block bg-[#fffdf5] dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm text-lg md:text-xl font-bold tracking-wide font-sans">
+            भोलेनाथ के श्रृंगार दर्शन
+          </span>
+          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-600 animate-pulse shrink-0">मंसा दर्शन</span>
         </h2>
         
         {isAdmin && !isEditing && (
           <button
             onClick={handleStartEdit}
-            className="flex items-center gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-xl transition duration-300 shadow"
+            className="flex items-center gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-xl transition duration-300 shadow shrink-0"
           >
             <Edit2 className="w-3.5 h-3.5" />
             <span>श्रृंगार बदलें</span>
@@ -364,7 +366,7 @@ export default function TodayDarshan() {
           <img
             ref={imageRef}
             src={darshan.imageUrl}
-            alt="आज का श्रृंगार दर्शन"
+            alt="भोलेनाथ के श्रृंगार दर्शन"
             className="w-full h-full object-cover select-none transition-transform duration-300"
             style={{
               transform: `scale(${zoomScale}) translate(${panPosition.x / zoomScale}px, ${panPosition.y / zoomScale}px)`,

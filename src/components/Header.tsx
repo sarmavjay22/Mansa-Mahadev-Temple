@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { db, subscribeToDBUpdates } from '../lib/db';
 import { LogIn, LogOut, ShieldCheck, Database, Calendar, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
+import { subscribeToTempleSettings, getCachedTempleSettings } from '../lib/settings';
+import { TempleSettings } from '../types';
 
 interface HeaderProps {
   onOpenAdmin: () => void;
@@ -10,14 +12,21 @@ interface HeaderProps {
 export default function Header({ onOpenAdmin }: HeaderProps) {
   const [isAdmin, setIsAdmin] = useState(db.isAdminLoggedIn());
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [settings, setSettings] = useState<TempleSettings>(getCachedTempleSettings());
 
   useEffect(() => {
     const unsubscribe = subscribeToDBUpdates(() => {
       setIsAdmin(db.isAdminLoggedIn());
     });
+    
+    const unsubSettings = subscribeToTempleSettings((fetched) => {
+      setSettings(fetched);
+    });
+
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => {
       unsubscribe();
+      unsubSettings();
       clearInterval(timer);
     };
   }, []);
@@ -54,7 +63,7 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span className="text-slate-600 font-mono flex items-center gap-1">
+            <span className="text-slate-800 font-mono font-bold text-sm flex items-center gap-1">
               <Database className="w-3.5 h-3.5 text-sky-500" />
               लाइव डेटाबेस: सक्रिय
             </span>
@@ -64,7 +73,7 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
           {isAdmin ? (
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-3 py-1.5 rounded-full transition-all duration-300 shadow-md hover:shadow-rose-500/20 active:scale-95"
+              className="flex items-center gap-1.5 bg-rose-500 hover:bg-rose-600 text-white font-semibold px-3 py-1.5 rounded-full transition-all duration-300 shadow-md hover:shadow-rose-500/20 active:scale-95 text-xs"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>लॉगआउट</span>
@@ -72,9 +81,9 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
           ) : (
             <button
               onClick={onOpenAdmin}
-              className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-3 py-1.5 rounded-full transition-all duration-300 shadow-md hover:shadow-amber-500/20 active:scale-95 border border-amber-400"
+              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 text-black font-bold text-sm px-3 py-1.5 rounded-full transition-all duration-300 shadow-md hover:shadow-slate-200 active:scale-95 border border-slate-300"
             >
-              <LogIn className="w-3.5 h-3.5" />
+              <LogIn className="w-3.5 h-3.5 text-black" />
               <span>प्रबंधक लॉगिन</span>
             </button>
           )}
@@ -92,8 +101,8 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
             <div className="absolute inset-0 bg-gradient-to-tr from-amber-400 to-orange-500 rounded-full blur opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
             <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full p-1 bg-white/90 backdrop-blur shadow-lg border-2 border-amber-300/60 overflow-hidden flex items-center justify-center">
               <img
-                src="/src/assets/images/temple_logo_1782657591698.jpg"
-                alt="मंसा महादेव लोगो"
+                src={settings.templeLogo || "/src/assets/images/temple_logo_1782657591698.jpg"}
+                alt={settings.templeNameHindi || "लोगो"}
                 className="w-full h-full object-cover rounded-full"
                 referrerPolicy="no-referrer"
               />
@@ -106,19 +115,25 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
           </div>
 
           {/* Hindi Name */}
-          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-800 tracking-wide font-sans drop-shadow-sm select-none">
-            मंसा महादेव मंदिर
+          <h1 className="text-4xl md:text-5xl font-extrabold text-red-600 tracking-wide font-sans drop-shadow-sm select-none">
+            {settings.templeNameHindi || "मंसा महादेव मंदिर"}
           </h1>
 
           {/* Location details */}
-          <p className="flex items-center gap-1 mt-1.5 text-xs md:text-sm text-slate-600 font-medium">
+          <p className="flex items-center gap-1 mt-1.5 text-sm md:text-base text-slate-600 font-semibold">
             <MapPin className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-            <span>उपला फलां, तितरड़ी, उदयपुर (राजस्थान)</span>
+            <span>
+              {settings.village === "उपला फलां" && settings.city === "उदयपुर"
+                ? "उपला फलां, तितरडी, उदयपुर, (राजस्थान)"
+                : settings.village && settings.city 
+                  ? `${settings.village}, ${settings.city} (${settings.state})` 
+                  : "उपला फलां, तितरडी, उदयपुर, (राजस्थान)"}
+            </span>
           </p>
 
           {/* Subtitle in english */}
-          <p className="text-[10px] md:text-xs font-bold text-amber-600 tracking-widest mt-2 uppercase">
-            MANSA MAHADEV TEMPLE • UDAIPUR
+          <p className="text-xs md:text-sm font-extrabold text-amber-600 tracking-widest mt-2 uppercase">
+            {(settings.templeNameEnglish || "MANSA MAHADEV TEMPLE").toUpperCase()}
           </p>
         </motion.div>
 
