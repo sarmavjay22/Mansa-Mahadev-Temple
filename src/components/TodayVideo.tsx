@@ -76,22 +76,24 @@ export default function TodayVideo() {
 
   return (
     <section id="today-video" className="w-full max-w-4xl mx-auto px-4 py-6">
-      <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center gap-2 flex-wrap">
+      <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-4 mb-6 relative flex flex-wrap items-center justify-center gap-3">
+        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center justify-center gap-2 flex-wrap w-full">
           <Youtube className="w-5 h-5 text-red-600 fill-red-100 shrink-0" />
-          <span className="inline-block bg-[#fffdf5] dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm text-lg md:text-xl font-bold tracking-wide font-sans">
+          <span className="inline-block bg-[#fffdf5] dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm text-lg md:text-xl font-bold tracking-wide font-sans text-center">
             भोलेनाथ की आरती वीडियो
           </span>
         </h2>
 
         {isAdmin && !isEditing && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="flex items-center gap-1 text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-xl transition duration-300 shadow shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>वीडियो जोड़ें</span>
-          </button>
+          <div className="md:absolute md:right-4">
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-1 text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-xl transition duration-300 shadow shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>वीडियो जोड़ें</span>
+            </button>
+          </div>
         )}
       </div>
 

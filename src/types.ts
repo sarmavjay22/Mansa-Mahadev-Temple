@@ -28,7 +28,7 @@ export interface VideoDarshan {
 export interface AartiItem {
   id: string;
   title: string;
-  deity: 'Shiv' | 'Hanuman' | 'Other';
+  deity: 'Shiv' | 'Hanuman' | 'Ram' | 'Sundarkand' | 'HanumanChalisa' | 'Other';
   hindiTitle: string;
   text: string; // The complete lyrics/text in Hindi
 }

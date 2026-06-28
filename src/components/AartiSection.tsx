@@ -118,7 +118,7 @@ export default function AartiSection() {
             key={aarti.id}
             whileHover={{ y: -4, scale: 1.01 }}
             className={`cursor-pointer bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 flex flex-col justify-between group relative overflow-hidden ${
-              (aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') ? 'p-4 self-center sm:self-stretch' : 'p-6'
+              (aarti.deity === 'Shiv' || aarti.deity === 'Hanuman' || aarti.deity === 'Ram' || aarti.deity === 'Sundarkand' || aarti.deity === 'HanumanChalisa') ? 'p-3 py-3.5 self-center sm:self-stretch' : 'p-6'
             }`}
             onClick={() => {
               setActiveAarti(aarti);
@@ -128,7 +128,7 @@ export default function AartiSection() {
             {/* Decorative Saffron Arch & Diya Indicator */}
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-bl-full pointer-events-none"></div>
             
-            {!(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') && (
+            {!(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman' || aarti.deity === 'Ram' || aarti.deity === 'Sundarkand' || aarti.deity === 'HanumanChalisa') && (
               <div className="flex items-start justify-between">
                 <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-md shadow-orange-500/20 group-hover:rotate-6 transition-all duration-300">
                   <FlameKindling className="w-6 h-6 text-white" />
@@ -139,26 +139,26 @@ export default function AartiSection() {
               </div>
             )}
 
-            <div className={(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') ? 'mt-0 text-center w-full' : 'mt-5 w-full'}>
+            <div className={(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman' || aarti.deity === 'Ram' || aarti.deity === 'Sundarkand' || aarti.deity === 'HanumanChalisa') ? 'mt-0 text-center w-full' : 'mt-5 w-full'}>
               <h3 className={`text-lg md:text-xl font-bold text-slate-800 tracking-wide font-sans mb-0 ${
-                (aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') ? 'text-center w-full' : ''
+                (aarti.deity === 'Shiv' || aarti.deity === 'Hanuman' || aarti.deity === 'Ram' || aarti.deity === 'Sundarkand' || aarti.deity === 'HanumanChalisa') ? 'text-center w-full' : ''
               }`}>
-                {(aarti.deity === 'Hanuman' || aarti.deity === 'Shiv') ? (
-                  <span className="inline-block bg-[#fffdf5] border border-amber-300 text-slate-800 px-6 py-2.5 rounded-full shadow-sm">
+                {(aarti.deity === 'Hanuman' || aarti.deity === 'Shiv' || aarti.deity === 'Ram' || aarti.deity === 'Sundarkand' || aarti.deity === 'HanumanChalisa') ? (
+                  <span className="inline-block bg-[#fffdf5] border border-amber-300 text-slate-800 px-5 py-1.5 rounded-full shadow-sm">
                     {aarti.hindiTitle}
                   </span>
                 ) : (
                   aarti.hindiTitle
                 )}
               </h3>
-              {!(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') && (
+              {!(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman' || aarti.deity === 'Ram' || aarti.deity === 'Sundarkand' || aarti.deity === 'HanumanChalisa') && (
                 <p className="mt-2 text-xs text-slate-500 line-clamp-2 leading-relaxed">
                   {aarti.text.substring(0, 100)}...
                 </p>
               )}
             </div>
 
-            {!(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman') && (
+            {!(aarti.deity === 'Shiv' || aarti.deity === 'Hanuman' || aarti.deity === 'Ram' || aarti.deity === 'Sundarkand' || aarti.deity === 'HanumanChalisa') && (
               <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-orange-600 group-hover:text-orange-700 transition">
                 <span>आरती पाठ आरंभ करें</span>
                 <span>→</span>
@@ -196,11 +196,11 @@ export default function AartiSection() {
               }`}>
                 <div className="relative flex items-center justify-between w-full">
                   <div className={`flex items-center gap-2 ${
-                    (activeAarti.deity === 'Shiv' || activeAarti.deity === 'Hanuman') ? 'w-full justify-center pr-9' : ''
+                    (activeAarti.deity === 'Shiv' || activeAarti.deity === 'Hanuman' || activeAarti.deity === 'Ram' || activeAarti.deity === 'Sundarkand' || activeAarti.deity === 'HanumanChalisa') ? 'w-full justify-center px-9' : ''
                   }`}>
-                    <FlameKindling className="w-5 h-5 text-orange-500 animate-bounce" />
-                    {(activeAarti.deity === 'Hanuman' || activeAarti.deity === 'Shiv') ? (
-                      <span className="inline-block bg-[#fffdf5] dark:bg-slate-800/90 border border-amber-300 dark:border-amber-500/50 text-red-600 dark:text-red-500 px-6 py-2 rounded-full shadow-md font-extrabold tracking-wide text-center">
+                    <FlameKindling className="w-5 h-5 text-orange-500 animate-bounce animate-pulse" />
+                    {(activeAarti.deity === 'Hanuman' || activeAarti.deity === 'Shiv' || activeAarti.deity === 'Ram' || activeAarti.deity === 'Sundarkand' || activeAarti.deity === 'HanumanChalisa') ? (
+                      <span className="inline-block bg-[#fffdf5] dark:bg-slate-800/90 border border-amber-300 dark:border-amber-500/50 text-red-600 dark:text-red-500 px-6 py-2.5 rounded-full shadow-md font-bold tracking-wide text-center">
                         {activeAarti.hindiTitle}
                       </span>
                     ) : (

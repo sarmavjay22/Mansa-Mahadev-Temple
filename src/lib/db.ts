@@ -63,16 +63,8 @@ const DEFAULT_GALLERY: GalleryItem[] = [
     imageUrl: "https://images.unsplash.com/photo-1634547565985-78e718fe4f8b?q=80&w=600&auto=format&fit=crop",
     date: "2026-06-20",
     festivalName: "अमरनाथ झांकी दर्शन",
-    description: "बर्फ की सुंदर झांकी के बीच मंसा महादेव के हिम-स्वरूप के अलौकिक दर्शन। शत-शत नमन।",
+    description: "बर्फ की सुंदर झांकी के बीच मंसा महादेव के हिम-स्वरूप के अलौकिक दर्शन।",
     uploadedAt: "2026-06-20T19:00:00.000Z"
-  },
-  {
-    id: "gal_4",
-    imageUrl: "https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?q=80&w=600&auto=format&fit=crop",
-    date: "2026-06-15",
-    festivalName: "महाकाल स्वरूप श्रृंगार",
-    description: "उज्जैन के राजा महाकाल की तर्ज पर मंसा महादेव का भस्म और सूखे मेवों से अद्भुत महाकाल श्रृंगार।",
-    uploadedAt: "2026-06-15T19:00:00.000Z"
   }
 ];
 
@@ -151,7 +143,223 @@ const DEFAULT_AARTIS: AartiItem[] = [
 कंचन थार कपूर लौ छाई। आरती करत अंजना माई॥ आरती कीजै...
 
 जो हनुमानजी की आरती गावे। बसि बैकुंठ परम पद पावे॥
-लंका विध्वंस कीन्ह रघुराई। तुलसीदास प्रभु कीरति गाई॥ आरती कीजै...`
+मम हृदय कंज निवास कुरु, कामादि खल दल गंजनम्॥ आरती कीजै...`
+  },
+  {
+    id: "chalisa_hanuman",
+    title: "Hanuman Chalisa",
+    deity: "HanumanChalisa",
+    hindiTitle: "हनुमान चालीसा",
+    text: `॥ श्री हनुमान चालीसा ॥
+
+दोहा:
+श्रीगुरु चरन सरोज रज निज मनु मुकुरु सुधारि।
+बरनउँ रघुबर बिमल जसु जो दायकु फल चारि॥
+
+बुद्धिहीन तनु जानिके सुमिरौ पवन-कुमार।
+बल बुधि बिद्या देहु मोहि हरहु कलेस बिकार॥
+
+चौपाई:
+जय हनुमान ज्ञान गुन सागर।
+जय कपीस तिहुँ लोक उजागर॥१॥
+
+राम दूत अतुलित बल धामा।
+अंजनि-पुत्र पवनसुत नामा॥२॥
+
+महाबीर बिक्रम बजरंगी।
+कुमति निवार सुमति के संगी॥३॥
+
+कंचन बरन बिराज सुबेसा।
+कानन कुंडल कुंचित केसा॥४॥
+
+हाथ बज्र औ ध्वजा बिराजै।
+काँधे मूँज जनेऊ साजै॥५॥
+
+शंकर सुवन केसरी नंदन।
+तेज प्रताप महा जग बंदन॥६॥
+
+बिद्यावान गुनी अति चातुर।
+राम काज करिबे को आतुर॥७॥
+
+प्रभु चरित्र सुनिबे को रसिया।
+राम लखन सीता मन बसिया॥८॥
+
+सूक्ष्म रूप धरि सियहिं दिखावा।
+बिकट रूप धरि लंक जरावा॥९॥
+
+भीम रूप धरि असुर सँहारे।
+रामचंद्र के काज सँवारे॥१०॥
+
+लाय सजीवन लखन जियाए।
+श्रीरघुबीर हरषि उर लाए॥११॥
+
+रघुपति कीन्ही बहुत बड़ाई।
+तुम मम प्रिय भरतहि सम भाई॥१२॥
+
+सहस बदन तुम्हरो जस गावैं।
+अस कहि श्रीपति कंठ लगावैं॥१३॥
+
+सनकादिक ब्रह्मादि मुनीसा।
+नारद सारद सहित अहीसा॥१४॥
+
+जम कुबेर दिगपाल जहाँ ते।
+कबि कोबिद कहि सके कहाँ ते॥१५॥
+
+तुम उपकार सुग्रीवहिं कीन्हा।
+राम मिलाय राज पद दीन्हा॥१६॥
+
+तुम्हरो मंत्र बिभीषन माना।
+लंकेस्वर भए सब जग जाना॥१७॥
+
+जुग सहस्र जोजन पर भानू।
+लील्यो ताहि मधुर फल जानू॥१८॥
+
+प्रभु मुद्रिका मेलि मुख माहीं।
+जलधि लाँघि गये अचरज नाहीं॥१९॥
+
+दुर्गम काज जगत के जेते।
+सुगम अनुग्रह तुम्हरे तेते॥२०॥
+
+राम दुआरे तुम रखवारे।
+होत न आग्या बिनु पैसारे॥२१॥
+
+सब सुख लहै तुम्हारी सरना।
+तुम रक्षक काहू को डर ना॥२२॥
+
+आपन तेज सम्हारो आपै।
+तीनों लोक हाँक तें काँपै॥२३॥
+
+भूत पिसाच निकट नहिं आवै।
+महाबीर जब नाम सुनावै॥२४॥
+
+नासै रोग हरै सब पीरा।
+जपत निरंतर हनुमत बीरा॥२५॥
+
+संकट तें हनुमान छुड़ावै।
+मन क्रम बचन ध्यान जो लावै॥२६॥
+
+सब पर राम तपस्वी राजा।
+तिन के काज सकल तुम साजा॥२७॥
+
+और मनोरथ जो कोई लावै।
+सोइ अमित जीवन फल पावै॥२८॥
+
+चारों जुग परताप तुम्हारा।
+है परसिद्ध जगत उजियारा॥२९॥
+
+साधु संत के तुम रखवारे।
+असुर निकंदन राम दुलारे॥३०॥
+
+अष्टसिद्धि नौ निधि के दाता।
+अस बर दीन्ह जानकी माता॥३१॥
+
+राम रसायन तुम्हरे पासा।
+Sada Raho Raghupati Ke Dasa (सदा रहो रघुपति के दासा)॥३२॥
+
+तुम्हरे भजन राम को पावै।
+जनम जनम के दुख बिसरावै॥३३॥
+
+अंत काल रघुबर पुर जाई।
+जहाँ जन्म हरी भक्त कहाई॥३४॥
+
+और देवता चित्त न धरई।
+हनुमत सेइ सर्ब सुख करई॥३५॥
+
+संकट कटै मिटै सब पीरा।
+जो सुमिरै हनुमत बलबीरा॥३६॥
+
+जै जै जै हनुमान गोसाईं।
+कृपा करहु गुरुदेव की नाईं॥३७॥
+
+जो सत बार पाठ कर कोई।
+छूटहि बंदि महा सुख होई॥३८॥
+
+जो यह पढ़ै हनुमान चालीसा।
+होय सिद्ध साखी गौरीसा॥३९॥
+
+तुलसीदास सदा हरी चेरा।
+कीजै नाथ हृदय मँह डेरा॥४०॥
+
+दोहा:
+पवनतनय संकट हरन मंगल मूरति रूप।
+राम लखन सीता सहित हृदय बसहु सुर भूप॥
+
+॥ इति श्री हनुमान चालीसा ॥`
+  },
+  {
+    id: "stuti_ram",
+    title: "Ram Stuti",
+    deity: "Ram",
+    hindiTitle: "भगवान् श्री राम स्तुति",
+    text: `श्री रामचन्द्र कृपालु भजु मन हरण भवभय दारुणम्।
+नवकंज लोचन, कंज मुख, कर कंज, पद कंजारुणम्॥
+
+कंदर्प अगणित अमित छवि, नवनील नीरद सुंदरम्।
+पट पीत मानहु तड़ित रुचि शुचि नौमि जनक सुतावरम्॥
+
+भजु दीनबंधु दिनेश दानव दैत्य वंश निकंदनम्।
+रघुनंद आनंदकंद कोशलचंद दशरथ नंदनम्॥
+
+सिर मुकुट कुंडल तिलक चारु उदारु अंग विभूषणम्।
+आजानुभुज शर चाप धर, संग्राम जित खर दूषणम्॥
+
+इति वदति तुलसीदास शंकर शेष मुनि मन रंजनम्।
+मम हृदय कंज निवास कुरु, कामादि खल दल गंजनम्॥
+
+मनु जाहि राचेउ मिलिहि सो बरु सहज सुंदर सांवरो।
+करुना निधान सुजान सीलु सनेहु जानत रावरो॥
+
+एही भांति गौरी असीस सुनि सिय सहित हिय हरषीं अली।
+तुलसी भवानिहि पूजि पुनि पुनि मुदित मन मन्दिर चली॥
+
+॥ जानकीनाथ सहाय रहे ॥`
+  },
+  {
+    id: "path_sundarkand",
+    title: "Sundarkand Path",
+    deity: "Sundarkand",
+    hindiTitle: "सुंदरकांड पाठ",
+    text: `॥ श्री गणेशाय नमः ॥
+॥ श्री जानकीवल्लभो विजयते ॥
+॥ श्री रामचरितमानस ॥
+॥ पञ्चम सोपान (सुन्दरकाण्ड) ॥
+
+श्लोक:
+शांतं शाश्वतमप्रमेयमनघं निर्वाणशान्तिप्रदं
+ब्रह्माशम्भुफणीन्द्रसेव्यमनिशं वेदान्तवेद्यं विभुम्।
+रामाख्यं जगदीश्वरं सुरगुरुं मायामनुष्यं हरिं
+वन्देऽहं करुणाकरं रघुवरं भूपालचूडामणिम्॥१॥
+
+नान्यस्पृहा रघुपते हृदयेऽस्मदीये
+सत्यं वदामि च भवानखिलान्तरात्मा।
+भक्तिं प्रयच्छ रघुपुङ्गव निर्भरां मे
+कामादिदोषरहितं कुरु मानसं च॥२॥
+
+अतुलितबलधामं हेमशैलाभदेहं
+दनुजवनकृशानुं ज्ञानिनामग्रगण्यम्।
+सकलगुणनिधानं वानराणामधीशं
+रघुपतिप्रियभक्तं वातजातं नमामि॥३॥
+
+चौपाई:
+जामवंत के बचन सुहाए। सुनि हनुमंत हृदय अति भाए॥
+तब लगि मोहि परिखेहु तुम्ह भाई। सहि दुख कंद मूल फल खाई॥
+
+जब लगि आवौं सीतहि देखी। होइहि काजु मोहि हरष बिसेषी॥
+यह कहि नाइ सबन्हि कहुँ माथा। चलेउ हरषि हियँ धरि रघुनाथा॥
+
+सिंधु तीर एक भूधर सुंदर। कौतुक कूदि चढ़ेउ ता ऊपर॥
+बार-बार रघुबीर सँभारी। तरकेउ पवनतनय बल भारी॥
+
+जेहिं गिरि चरन देइ हनुमंता। चलेउ सो गा पाताल तुरंता॥
+जिमि अमोघ रघुपति कर बाना। एही भाँति चलेउ हनुमाना॥
+
+जलनिधि रघुपति दूत बिचारी। तैं मैनाक होहि श्रमहारी॥
+
+हनुमान तेहि परसा कर पुनि कीन्ह प्रनाम।
+राम काजु कीन्हें बिना मोहि कहाँ बिश्राम॥
+
+॥ जय श्री राम ॥
+॥ जय पवनपुत्र हनुमान ॥`
   }
 ];
 
@@ -409,6 +617,42 @@ export const db = {
     try {
       const aartis = JSON.parse(data) as AartiItem[];
       let modified = false;
+
+      // Ensure 'stuti_ram' exists in local storage
+      const hasRam = aartis.some(a => a.id === 'stuti_ram');
+      if (!hasRam) {
+        const ramItem = DEFAULT_AARTIS.find(a => a.id === 'stuti_ram');
+        if (ramItem) {
+          aartis.push(ramItem);
+          modified = true;
+        }
+      }
+
+      // Ensure 'path_sundarkand' exists in local storage
+      const hasSundarkand = aartis.some(a => a.id === 'path_sundarkand');
+      if (!hasSundarkand) {
+        const sundarkandItem = DEFAULT_AARTIS.find(a => a.id === 'path_sundarkand');
+        if (sundarkandItem) {
+          aartis.push(sundarkandItem);
+          modified = true;
+        }
+      }
+
+      // Ensure 'chalisa_hanuman' exists in local storage
+      const hasChalisa = aartis.some(a => a.id === 'chalisa_hanuman');
+      if (!hasChalisa) {
+        const chalisaItem = DEFAULT_AARTIS.find(a => a.id === 'chalisa_hanuman');
+        if (chalisaItem) {
+          const hanumanIdx = aartis.findIndex(a => a.id === 'aarti_hanuman');
+          if (hanumanIdx !== -1) {
+            aartis.splice(hanumanIdx + 1, 0, chalisaItem);
+          } else {
+            aartis.push(chalisaItem);
+          }
+          modified = true;
+        }
+      }
+
       const updatedAartis = aartis.map(a => {
         let changed = false;
         let hindiTitle = a.hindiTitle;
@@ -417,6 +661,15 @@ export const db = {
           changed = true;
         } else if (a.id === 'aarti_hanuman' && a.hindiTitle !== 'हनुमान जी की आरती') {
           hindiTitle = 'हनुमान जी की आरती';
+          changed = true;
+        } else if (a.id === 'stuti_ram' && a.hindiTitle !== 'भगवान् श्री राम स्तुति') {
+          hindiTitle = 'भगवान् श्री राम स्तुति';
+          changed = true;
+        } else if (a.id === 'path_sundarkand' && a.hindiTitle !== 'सुंदरकांड पाठ') {
+          hindiTitle = 'सुंदरकांड पाठ';
+          changed = true;
+        } else if (a.id === 'chalisa_hanuman' && a.hindiTitle !== 'हनुमान चालीसा') {
+          hindiTitle = 'हनुमान चालीसा';
           changed = true;
         }
         if (changed) {
@@ -468,6 +721,34 @@ export const db = {
     notifyDBChange();
   },
 
+  // Notifications
+  getNotifications(): NotificationItem[] {
+    const data = localStorage.getItem('mm_notifications');
+    const items: NotificationItem[] = data ? JSON.parse(data) : DEFAULT_NOTIFICATIONS;
+    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  },
+
+  addNotification(notification: { title: string; message: string; type: 'general' | 'festival' | 'alert' }) {
+    const items = this.getNotifications();
+    const newItem: NotificationItem = {
+      id: "notif_" + Date.now(),
+      title: notification.title,
+      message: notification.message,
+      type: notification.type,
+      date: new Date().toISOString().split('T')[0]
+    };
+    items.unshift(newItem); // put at start
+    localStorage.setItem('mm_notifications', JSON.stringify(items));
+    notifyDBChange();
+  },
+
+  deleteNotification(id: string) {
+    let items = this.getNotifications();
+    items = items.filter(n => n.id !== id);
+    localStorage.setItem('mm_notifications', JSON.stringify(items));
+    notifyDBChange();
+  },
+
   // Temple Info
   getTempleInfo(): TempleInfo {
     const data = localStorage.getItem('mm_templeInfo');
@@ -485,40 +766,15 @@ export const db = {
     return data ? JSON.parse(data) : DEFAULT_TIMINGS;
   },
 
-  updateTempleTiming(id: string, updatedFields: Partial<TempleTiming>) {
-    let timings = this.getTempleTimings();
-    timings = timings.map(t => {
+  updateTempleTiming(id: string, updatedFields: Partial<Omit<TempleTiming, 'id'>>) {
+    const timings = this.getTempleTimings();
+    const updated = timings.map(t => {
       if (t.id === id) {
         return { ...t, ...updatedFields };
       }
       return t;
     });
-    localStorage.setItem('mm_templeTimings', JSON.stringify(timings));
-    notifyDBChange();
-  },
-
-  // Notifications
-  getNotifications(): NotificationItem[] {
-    const data = localStorage.getItem('mm_notifications');
-    return data ? JSON.parse(data) : DEFAULT_NOTIFICATIONS;
-  },
-
-  addNotification(notif: Omit<NotificationItem, 'id' | 'date'>) {
-    const list = this.getNotifications();
-    const newNotif: NotificationItem = {
-      id: "notif_" + Date.now(),
-      date: new Date().toISOString().split('T')[0],
-      ...notif
-    };
-    list.unshift(newNotif);
-    localStorage.setItem('mm_notifications', JSON.stringify(list));
-    notifyDBChange();
-  },
-
-  deleteNotification(id: string) {
-    let list = this.getNotifications();
-    list = list.filter(n => n.id !== id);
-    localStorage.setItem('mm_notifications', JSON.stringify(list));
+    localStorage.setItem('mm_templeTimings', JSON.stringify(updated));
     notifyDBChange();
   }
 };
