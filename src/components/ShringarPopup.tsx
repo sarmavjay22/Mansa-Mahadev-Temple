@@ -22,23 +22,35 @@ interface ShringarPopupProps {
 export function getHindiDayAndDate(dateStr: string): { day: string; date: string } {
   if (!dateStr) return { day: '', date: '' };
   try {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const year = parts[0].substring(2);
+      const month = parts[1];
+      const day = parts[2];
+      
+      const d = new Date(dateStr);
+      const days = ["रविवार", "सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार"];
+      const hindiDay = isNaN(d.getTime()) ? "" : days[d.getDay()];
+      
+      return {
+        day: hindiDay,
+        date: `${day}/${month}/${year}`
+      };
+    }
+    
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return { day: '', date: dateStr };
     
     const days = ["रविवार", "सोमवार", "मंगलवार", "बुधवार", "गुरुवार", "शुक्रवार", "शनिवार"];
     const hindiDay = days[d.getDay()];
 
-    const months = [
-      "जनवरी", "फरवरी", "मार्च", "अप्रैल", "मई", "जून",
-      "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"
-    ];
-    const dayNum = d.getDate();
-    const monthName = months[d.getMonth()];
-    const year = d.getFullYear();
+    const dayNum = String(d.getDate()).padStart(2, '0');
+    const monthNum = String(d.getMonth() + 1).padStart(2, '0');
+    const yearNum = String(d.getFullYear()).substring(2);
 
     return {
       day: hindiDay,
-      date: `${dayNum} ${monthName} ${year}`
+      date: `${dayNum}/${monthNum}/${yearNum}`
     };
   } catch (e) {
     return { day: '', date: dateStr };
@@ -51,34 +63,44 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
   const [searchDateQuery, setSearchDateQuery] = useState<string>('');
   const [likedItems, setLikedItems] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    // Load Shringar items (combining today's darshan at the top, and past gallery items)
-    const loadShringars = () => {
-      const galleryItems = db.getGallery();
-      const todayItem = db.getDailyDarshan();
-      const combined: GalleryItem[] = [];
+  const loadShringars = () => {
+    const galleryItems = db.getGallery();
+    const todayItem = db.getDailyDarshan();
+    const combined: GalleryItem[] = [];
 
-      if (todayItem && todayItem.imageUrl) {
-        combined.push({
-          id: todayItem.id || "today",
-          imageUrl: todayItem.imageUrl,
-          date: todayItem.date,
-          festivalName: todayItem.festivalName || "दैनिक श्रृंगार दर्शन",
-          description: todayItem.description || "मंसा महादेव का आज का अलौकिक श्रृंगार दर्शन।",
-          uploadedAt: todayItem.uploadedAt
-        });
+    let todayToPush: GalleryItem | null = null;
+    if (todayItem && todayItem.imageUrl) {
+      todayToPush = {
+        id: todayItem.id || "today",
+        imageUrl: todayItem.imageUrl,
+        date: todayItem.date,
+        festivalName: todayItem.festivalName || "दैनिक श्रृंगार दर्शन",
+        description: todayItem.description || "मंसा महादेव का आज का अलौकिक श्रृंगार दर्शन।",
+        uploadedAt: todayItem.uploadedAt
+      };
+    }
+
+    const matchingGalItem = galleryItems.find(item => item.date === todayItem?.date);
+    if (matchingGalItem && todayToPush) {
+      todayToPush.festivalName = matchingGalItem.festivalName || todayToPush.festivalName;
+      todayToPush.description = matchingGalItem.description || todayToPush.description;
+      todayToPush.imageUrl = matchingGalItem.imageUrl || todayToPush.imageUrl;
+    }
+
+    if (todayToPush) {
+      combined.push(todayToPush);
+    }
+
+    galleryItems.forEach(item => {
+      if (item.id !== "today" && item.date !== todayItem?.date) {
+        combined.push(item);
       }
+    });
 
-      galleryItems.forEach(item => {
-        // Prevent duplicate if today's date matches one in the gallery
-        if (item.id !== "today" && item.date !== todayItem?.date) {
-          combined.push(item);
-        }
-      });
+    setShringars(combined);
+  };
 
-      setShringars(combined);
-    };
-
+  useEffect(() => {
     loadShringars();
 
     const unsubscribe = subscribeToDBUpdates(() => {
@@ -97,6 +119,12 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadShringars();
+    }
+  }, [isOpen]);
 
   const handleLike = (id: string, e: MouseEvent) => {
     e.stopPropagation();

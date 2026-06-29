@@ -778,3 +778,30 @@ export const db = {
     notifyDBChange();
   }
 };
+
+export function formatDateDMY(dateStr: string): string {
+  if (!dateStr) return '';
+  // If already in DD/MM/YY or DD/MM/YYYY format, return it
+  if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateStr)) return dateStr;
+
+  try {
+    // Check if format is YYYY-MM-DD
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const year = parts[0].substring(2); // last 2 digits
+      const month = parts[1];
+      const day = parts[2];
+      return `${day}/${month}/${year}`;
+    }
+
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = String(d.getFullYear()).substring(2); // last 2 digits
+    return `${day}/${month}/${year}`;
+  } catch (e) {
+    return dateStr;
+  }
+}
+

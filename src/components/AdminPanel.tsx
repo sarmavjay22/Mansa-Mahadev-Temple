@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
-import { db, subscribeToDBUpdates } from '../lib/db';
+import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
 import { NotificationItem, GalleryItem, DailyDarshan } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
 import { 
@@ -77,6 +77,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [editGalDate, setEditGalDate] = useState('');
   const [editGalDesc, setEditGalDesc] = useState('');
   const [editGalImage, setEditGalImage] = useState('');
+  const [deleteConfirmGalId, setDeleteConfirmGalId] = useState<string | null>(null);
+  const [deleteConfirmNotifId, setDeleteConfirmNotifId] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoggedIn(db.isAdminLoggedIn());
@@ -155,9 +157,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   };
 
   const handleDeleteNotification = (id: string) => {
-    if (confirm("क्या आप वाकई इस घोषणा को हटाना चाहते हैं?")) {
-      db.deleteNotification(id);
-    }
+    db.deleteNotification(id);
   };
 
   // Upload today's darshan image
@@ -191,6 +191,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     });
 
     setTodaySuccess(true);
+    setTodayImage(""); // Clear the image link column as requested
     setTimeout(() => {
       setTodaySuccess(false);
     }, 1500);
@@ -266,10 +267,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   };
 
   const handleDeleteGal = (id: string) => {
-    if (confirm("क्या आप सचमुच इस श्रृंगार चित्र को हमेशा के लिए हटाना चाहते हैं?")) {
-      db.deleteGalleryItem(id);
-      alert("श्रृंगार चित्र सफलतापूर्वक हटा दिया गया!");
-    }
+    db.deleteGalleryItem(id);
   };
 
   const handleEditGalImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -559,18 +557,39 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                   n.type === 'festival' ? 'bg-amber-500' : n.type === 'alert' ? 'bg-rose-500' : 'bg-sky-500'
                                 }`}></span>
                                 <span className="font-bold text-slate-800">{n.title}</span>
-                                <span className="text-[9px] text-slate-400 font-mono">({n.date})</span>
+                                <span className="text-[9px] text-slate-400 font-mono">({formatDateDMY(n.date)})</span>
                               </div>
                               <p className="text-slate-500 mt-1 pl-3.5 leading-relaxed">{n.message}</p>
                             </div>
 
-                            <button
-                              onClick={() => handleDeleteNotification(n.id)}
-                              className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition"
-                              title="हटाएं"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            {deleteConfirmNotifId === n.id ? (
+                              <div className="flex items-center gap-1 bg-rose-50 border border-rose-100 p-1 rounded-xl shrink-0">
+                                <span className="text-[9px] text-rose-600 font-bold px-1 select-none">हटाएं?</span>
+                                <button
+                                  onClick={() => {
+                                    handleDeleteNotification(n.id);
+                                    setDeleteConfirmNotifId(null);
+                                  }}
+                                  className="px-1.5 py-0.5 bg-rose-500 text-white font-extrabold text-[9px] rounded-lg shadow-sm hover:bg-rose-600 transition"
+                                >
+                                  हाँ
+                                </button>
+                                <button
+                                  onClick={() => setDeleteConfirmNotifId(null)}
+                                  className="px-1.5 py-0.5 bg-slate-200 text-slate-700 font-extrabold text-[9px] rounded-lg hover:bg-slate-300 transition"
+                                >
+                                  नहीं
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setDeleteConfirmNotifId(n.id)}
+                                className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition shrink-0"
+                                title="हटाएं"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -652,7 +671,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           />
                         </div>
 
-                        {/* Image Source Input (Upload vs Link) */}
+                        {/* Image Source Input (Link Only) */}
                         <div className="bg-amber-50/40 p-3 rounded-xl border border-amber-200/40">
                           <label className="block text-[10px] font-bold text-amber-900 mb-1.5">आज का दर्शन चित्र (Image Selection):</label>
                           
@@ -668,35 +687,13 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                 className="w-full px-3 py-2 bg-white border border-amber-200/80 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium"
                               />
                             </div>
-                            
-                            {/* Divider */}
-                            <div className="flex items-center my-1">
-                              <span className="h-[1px] flex-1 bg-amber-200/50"></span>
-                              <span className="px-2 text-[9px] text-amber-600 font-bold">अथवा</span>
-                              <span className="h-[1px] flex-1 bg-amber-200/50"></span>
-                            </div>
-
-                            {/* Local File Upload */}
-                            <div>
-                              <span className="block text-[9px] font-black text-amber-800 mb-1 uppercase tracking-wider">📁 सीधे अपने फ़ोन/कंप्यूटर से चित्र अपलोड करें:</span>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="file"
-                                  onChange={handleTodayImageUpload}
-                                  accept="image/*"
-                                  className="text-[10px] bg-white border border-amber-100 px-2 py-1 rounded-lg w-full cursor-pointer"
-                                />
-                                {todayUploading && <Loader2 className="w-4 h-4 animate-spin text-amber-500 shrink-0" />}
-                              </div>
-                            </div>
                           </div>
                         </div>
 
                         {/* Submit */}
                         <button
                           onClick={handleSaveTodayDarshan}
-                          disabled={todayUploading}
-                          className="self-end px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-slate-950 font-black rounded-xl shadow transition"
+                          className="self-end px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl shadow transition"
                         >
                           {todaySuccess ? (
                             <span className="flex items-center gap-1"><Check className="w-4 h-4" /> मुख्य पृष्ठ पर बदल गया!</span>
@@ -750,7 +747,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           />
                         </div>
 
-                        {/* Image Source Input (Upload vs Link) */}
+                        {/* Image Source Input (Link Only) */}
                         <div className="bg-amber-50/40 p-3 rounded-xl border border-amber-200/40">
                           <label className="block text-[10px] font-bold text-amber-900 mb-1.5">दर्शन चित्र (Image Selection):</label>
                           
@@ -766,35 +763,13 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                 className="w-full px-3 py-2 bg-white border border-amber-200/80 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium"
                               />
                             </div>
-                            
-                            {/* Divider */}
-                            <div className="flex items-center my-1">
-                              <span className="h-[1px] flex-1 bg-amber-200/50"></span>
-                              <span className="px-2 text-[9px] text-amber-600 font-bold">अथवा</span>
-                              <span className="h-[1px] flex-1 bg-amber-200/50"></span>
-                            </div>
-
-                            {/* Local File Upload */}
-                            <div>
-                              <span className="block text-[9px] font-black text-amber-800 mb-1 uppercase tracking-wider">📁 सीधे अपने फ़ोन/कंप्यूटर से चित्र अपलोड करें:</span>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="file"
-                                  onChange={handleGalleryImageUpload}
-                                  accept="image/*"
-                                  className="text-[10px] bg-white border border-amber-100 px-2 py-1 rounded-lg w-full cursor-pointer"
-                                />
-                                {uploading && <Loader2 className="w-4 h-4 animate-spin text-amber-500 shrink-0" />}
-                              </div>
-                            </div>
                           </div>
                         </div>
 
                         {/* Submit */}
                         <button
                           onClick={handleSaveGalleryItem}
-                          disabled={uploading}
-                          className="self-end px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-slate-950 font-black rounded-xl shadow transition"
+                          className="self-end px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl shadow transition"
                         >
                           {galSuccess ? (
                             <span className="flex items-center gap-1"><Check className="w-4 h-4" /> गैलरी में जुड़ गया!</span>
@@ -914,7 +889,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5 flex-wrap">
                                       <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">
-                                        {item.date}
+                                        {formatDateDMY(item.date)}
                                       </span>
                                       <span className="font-bold text-slate-800 text-xs truncate">
                                         {item.festivalName || "दैनिक श्रृंगार दर्शन"}
@@ -925,22 +900,43 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                     </p>
                                   </div>
 
-                                  <div className="flex items-center gap-1 shrink-0">
-                                    <button
-                                      onClick={() => handleStartEditGal(item)}
-                                      className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition"
-                                      title="संपादित करें"
-                                    >
-                                      <Edit2 className="w-3.5 h-3.5" />
-                                    </button>
-                                    <button
-                                      onClick={() => handleDeleteGal(item.id)}
-                                      className="p-1.5 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 rounded-lg transition"
-                                      title="हटाएं"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
+                                  {deleteConfirmGalId === item.id ? (
+                                    <div className="flex items-center gap-1.5 shrink-0 bg-rose-50 border border-rose-100 p-1 rounded-xl">
+                                      <span className="text-[9px] text-rose-600 font-bold px-1 select-none">हटाएं?</span>
+                                      <button
+                                        onClick={() => {
+                                          handleDeleteGal(item.id);
+                                          setDeleteConfirmGalId(null);
+                                        }}
+                                        className="px-2 py-1 bg-rose-500 text-white font-extrabold text-[9px] rounded-lg shadow-sm hover:bg-rose-600 transition"
+                                      >
+                                        हाँ
+                                      </button>
+                                      <button
+                                        onClick={() => setDeleteConfirmGalId(null)}
+                                        className="px-2 py-1 bg-slate-200 text-slate-700 font-extrabold text-[9px] rounded-lg hover:bg-slate-300 transition"
+                                      >
+                                        नहीं
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1 shrink-0">
+                                      <button
+                                        onClick={() => handleStartEditGal(item)}
+                                        className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition"
+                                        title="संपादित करें"
+                                      >
+                                        <Edit2 className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        onClick={() => setDeleteConfirmGalId(item.id)}
+                                        className="p-1.5 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 rounded-lg transition"
+                                        title="हटाएं"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>

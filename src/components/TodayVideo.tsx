@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db, subscribeToDBUpdates } from '../lib/db';
+import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
 import { VideoDarshan } from '../types';
 import { Video, Youtube, Calendar, Sparkles, Plus, Trash2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -204,9 +204,7 @@ export default function TodayVideo() {
                   <Calendar className="w-3.5 h-3.5 text-orange-500" />
                   <span>अपलोड तिथि:</span>
                   <span className="font-mono text-slate-700">
-                    {todayVideo ? new Date(todayVideo.date).toLocaleDateString('hi-IN', {
-                      day: 'numeric', month: 'long', year: 'numeric'
-                    }) : ''}
+                    {todayVideo ? formatDateDMY(todayVideo.date) : ''}
                   </span>
                 </p>
               </div>

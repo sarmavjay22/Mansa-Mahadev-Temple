@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, ChangeEvent, MouseEvent, TouchEvent } from 'react';
-import { db, subscribeToDBUpdates } from '../lib/db';
+import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
 import { DailyDarshan } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
 import ShringarPopup from './ShringarPopup';
@@ -456,11 +456,7 @@ export default function TodayDarshan() {
               <Calendar className="w-4 h-4 text-orange-500" />
               <span>दर्शन तिथि:</span>
               <span className="font-mono text-slate-800 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100">
-                {new Date(darshan.date).toLocaleDateString('hi-IN', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+                {darshan ? formatDateDMY(darshan.date) : ''}
               </span>
             </div>
 
@@ -509,9 +505,7 @@ export default function TodayDarshan() {
             <div className="flex justify-between items-center text-white z-25">
               <div>
                 <p className="text-xs text-amber-400 font-bold font-mono">
-                  {new Date(darshan.date).toLocaleDateString('hi-IN', {
-                    day: 'numeric', month: 'long', year: 'numeric'
-                  })}
+                  {darshan ? formatDateDMY(darshan.date) : ''}
                 </p>
                 <h4 className="text-sm font-bold truncate max-w-[200px]">{darshan.festivalName}</h4>
               </div>

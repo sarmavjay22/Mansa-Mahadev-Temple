@@ -1,5 +1,5 @@
 import { useState, useEffect, ChangeEvent } from 'react';
-import { db, subscribeToDBUpdates } from '../lib/db';
+import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
 import { GalleryItem } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
 import { 
@@ -317,9 +317,7 @@ export default function GallerySection() {
                 
                 {/* Float Date Overlay badge */}
                 <div className="absolute bottom-2 left-2 bg-black/60 text-white font-mono text-[9px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm">
-                  {new Date(item.date).toLocaleDateString('hi-IN', {
-                    day: 'numeric', month: 'short'
-                  })}
+                  {formatDateDMY(item.date)}
                 </div>
               </div>
 
@@ -499,9 +497,7 @@ export default function GallerySection() {
                         <Calendar className="w-4 h-4 text-orange-500" />
                         <span>दर्शन तिथि:</span>
                         <span className="text-white bg-slate-800 px-2 py-0.5 rounded">
-                          {new Date(activeItem.date).toLocaleDateString('hi-IN', {
-                            day: 'numeric', month: 'long', year: 'numeric'
-                          })}
+                          {formatDateDMY(activeItem.date)}
                         </span>
                       </div>
 
