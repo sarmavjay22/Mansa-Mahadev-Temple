@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { db, subscribeToDBUpdates } from '../lib/db';
-import { NotificationItem, GalleryItem } from '../types';
+import { NotificationItem, GalleryItem, DailyDarshan } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
 import { 
   ShieldCheck, 
@@ -21,7 +21,8 @@ import {
   Info,
   Sliders,
   Sparkles,
-  Settings
+  Settings,
+  Edit2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import TempleSettingsTab from './TempleSettingsTab';
@@ -60,6 +61,23 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [uploading, setUploading] = useState(false);
   const [galSuccess, setGalSuccess] = useState(false);
 
+  // Today's Darshan (दैनिक श्रृंगार दर्शन) State
+  const [todayDate, setTodayDate] = useState('');
+  const [todayFestival, setTodayFestival] = useState('');
+  const [todayDesc, setTodayDesc] = useState('');
+  const [todayImage, setTodayImage] = useState('');
+  const [todayUploading, setTodayUploading] = useState(false);
+  const [todaySuccess, setTodaySuccess] = useState(false);
+  const [shringarTabMode, setShringarTabMode] = useState<'today' | 'gallery'>('today');
+
+  // Gallery list and inline editing states
+  const [galList, setGalList] = useState<GalleryItem[]>([]);
+  const [editingGalId, setEditingGalId] = useState<string | null>(null);
+  const [editGalFestival, setEditGalFestival] = useState('');
+  const [editGalDate, setEditGalDate] = useState('');
+  const [editGalDesc, setEditGalDesc] = useState('');
+  const [editGalImage, setEditGalImage] = useState('');
+
   useEffect(() => {
     setIsLoggedIn(db.isAdminLoggedIn());
     loadDashboardData();
@@ -70,6 +88,18 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'upload_gallery') {
+      const current = db.getDailyDarshan();
+      if (current) {
+        setTodayDate(current.date);
+        setTodayFestival(current.festivalName || '');
+        setTodayDesc(current.description || '');
+        setTodayImage(current.imageUrl || '');
+      }
+    }
+  }, [activeTab]);
 
   const loadDashboardData = () => {
     const galleryItems = db.getGallery();
@@ -85,6 +115,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     });
 
     setNotifs(notificationItems);
+    setGalList(galleryItems);
   };
 
   const handleLogin = (e: FormEvent) => {
@@ -129,6 +160,43 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   };
 
+  // Upload today's darshan image
+  const handleTodayImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setTodayUploading(true);
+      const url = await uploadToImageKit(file);
+      setTodayImage(url);
+    } catch (err) {
+      console.error(err);
+      alert("आज का चित्र अपलोड विफल हुआ!");
+    } finally {
+      setTodayUploading(false);
+    }
+  };
+
+  const handleSaveTodayDarshan = () => {
+    if (!todayImage || !todayDate) {
+      alert("कृपया आज का दर्शन चित्र और तारीख दर्ज करें।");
+      return;
+    }
+
+    db.updateDailyDarshan({
+      imageUrl: todayImage,
+      date: todayDate,
+      festivalName: todayFestival.trim() || "दैनिक श्रृंगार दर्शन",
+      description: todayDesc.trim() || "मंसा महादेव का आज का अलौकिक श्रृंगार दर्शन।"
+    });
+
+    setTodaySuccess(true);
+    setTimeout(() => {
+      setTodaySuccess(false);
+    }, 1500);
+    alert("भोलेनाथ के श्रृंगार दर्शन सफलतापूर्वक अपडेट हो गए हैं!");
+  };
+
   // Upload gallery item
   const handleGalleryImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -168,6 +236,58 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }, 1500);
   };
 
+  const handleStartEditGal = (item: GalleryItem) => {
+    setEditingGalId(item.id);
+    setEditGalFestival(item.festivalName || '');
+    setEditGalDate(item.date || '');
+    setEditGalDesc(item.description || '');
+    setEditGalImage(item.imageUrl || '');
+  };
+
+  const handleCancelEditGal = () => {
+    setEditingGalId(null);
+  };
+
+  const handleSaveEditGal = () => {
+    if (!editGalImage || !editGalDate) {
+      alert("कृपया चित्र और तारीख का चयन करें।");
+      return;
+    }
+
+    db.updateGalleryItem(editingGalId!, {
+      festivalName: editGalFestival.trim(),
+      date: editGalDate,
+      description: editGalDesc.trim(),
+      imageUrl: editGalImage
+    });
+
+    setEditingGalId(null);
+    alert("श्रृंगार चित्र सफलतापूर्वक अपडेट किया गया!");
+  };
+
+  const handleDeleteGal = (id: string) => {
+    if (confirm("क्या आप सचमुच इस श्रृंगार चित्र को हमेशा के लिए हटाना चाहते हैं?")) {
+      db.deleteGalleryItem(id);
+      alert("श्रृंगार चित्र सफलतापूर्वक हटा दिया गया!");
+    }
+  };
+
+  const handleEditGalImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      const url = await uploadToImageKit(file);
+      setEditGalImage(url);
+    } catch (err) {
+      console.error(err);
+      alert("चित्र अपलोड विफल हुआ!");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -182,7 +302,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         <div className="p-5 border-b border-sky-100 bg-gradient-to-r from-amber-50 to-orange-50/50 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-amber-500 fill-amber-100 animate-pulse" />
-            <h2 className="text-md md:text-lg font-extrabold tracking-wide text-slate-800">
+            <h2 className={`text-md md:text-lg font-extrabold tracking-wide ${isLoggedIn ? 'text-orange-500' : 'text-slate-800'}`}>
               {isLoggedIn ? 'मंसा महादेव प्रबंधन पैनल (Dashboard)' : 'सुरक्षित प्रबंधक लॉगिन'}
             </h2>
           </div>
@@ -292,7 +412,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                   }`}
                 >
                   <Image className="w-4 h-4" />
-                  <span>विगत गैलरी अपलोड</span>
+                  <span>श्रृंगार दर्शन</span>
                 </button>
 
                 <button
@@ -446,7 +566,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
                             <button
                               onClick={() => handleDeleteNotification(n.id)}
-                              className="p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition"
+                              className="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition"
                               title="हटाएं"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -461,96 +581,373 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 {/* 3. UPLOAD PAST GALLERY ITEM */}
                 {activeTab === 'upload_gallery' && (
                   <div className="flex flex-col gap-4 text-xs text-slate-700">
-                    <div className="bg-amber-50/60 border border-amber-100 p-4 rounded-2xl flex flex-col gap-4">
-                      <h4 className="text-xs font-bold text-amber-900 flex items-center gap-1">
-                        <Upload className="w-4 h-4 text-amber-600" />
-                        <span>गैलरी में विगत श्रृंगार दर्शन जोड़ें (ImageKit)</span>
-                      </h4>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {/* Date */}
-                        <div>
-                          <label className="block text-[10px] font-bold text-amber-900 mb-1">दिनांक (Date):</label>
-                          <input
-                            type="date"
-                            value={galDate}
-                            onChange={(e) => setGalDate(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
-                          />
-                        </div>
-
-                        {/* Festival */}
-                        <div>
-                          <label className="block text-[10px] font-bold text-amber-900 mb-1">विशेष पर्व/शृंगार नाम (Festival):</label>
-                          <input
-                            type="text"
-                            value={galFestival}
-                            onChange={(e) => setGalFestival(e.target.value)}
-                            placeholder="उदा. प्रदोष व्रत विशेष, सावन सोमवार..."
-                            className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <div>
-                        <label className="block text-[10px] font-bold text-amber-900 mb-1">दर्शन का भक्तिमय विवरण (Description):</label>
-                        <textarea
-                          value={galDesc}
-                          onChange={(e) => setGalDesc(e.target.value)}
-                          placeholder="महादेव के इस अलौकिक शृंगार का वर्णन करें..."
-                          rows={2}
-                          className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none resize-none"
-                        />
-                      </div>
-
-                      {/* Image Kit Upload trigger */}
-                      <div>
-                        <label className="block text-[10px] font-bold text-amber-900 mb-1">दर्शन चित्र अपलोड (Image File):</label>
-                        <div className="flex gap-2">
-                          <input
-                            type="file"
-                            onChange={handleGalleryImageUpload}
-                            accept="image/*"
-                            className="text-xs"
-                          />
-                          {uploading && <Loader2 className="w-4 h-4 animate-spin text-amber-500 shrink-0" />}
-                        </div>
-                        {/* URL paste */}
-                        <input
-                          type="text"
-                          value={galImage}
-                          onChange={(e) => setGalImage(e.target.value)}
-                          placeholder="या सीधा चित्र का URL यहाँ डालें"
-                          className="w-full px-3 py-1.5 mt-2 bg-white border border-amber-100 rounded-xl"
-                        />
-                      </div>
-
-                      {/* Submit */}
+                    {/* Shringar Sub-tabs Selection */}
+                    <div className="flex bg-amber-50/40 p-1 rounded-xl border border-amber-100/50">
                       <button
-                        onClick={handleSaveGalleryItem}
-                        disabled={uploading}
-                        className="self-end px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-slate-950 font-black rounded-xl shadow transition"
+                        type="button"
+                        onClick={() => setShringarTabMode('today')}
+                        className={`flex-1 py-2 text-center rounded-lg font-bold text-[11px] transition duration-300 ${
+                          shringarTabMode === 'today'
+                            ? 'bg-amber-500 text-white shadow-sm'
+                            : 'text-amber-800 hover:bg-amber-50/80'
+                        }`}
                       >
-                        {galSuccess ? (
-                          <span className="flex items-center gap-1"><Check className="w-4 h-4" /> गैलरी में जुड़ गया!</span>
-                        ) : (
-                          <span>गैलरी में जोड़े</span>
-                        )}
+                        भोलेनाथ के श्रृंगार दर्शन
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShringarTabMode('gallery')}
+                        className={`flex-1 py-2 text-center rounded-lg font-bold text-[11px] transition duration-300 ${
+                          shringarTabMode === 'gallery'
+                            ? 'bg-amber-500 text-white shadow-sm'
+                            : 'text-amber-800 hover:bg-amber-50/80'
+                        }`}
+                      >
+                        श्रृंगार दर्शन गैलरी में जोड़ें
                       </button>
                     </div>
 
+                    {shringarTabMode === 'today' ? (
+                      /* A. UPDATE TODAY'S DARSHAN FORM */
+                      <div className="bg-amber-50/60 border border-amber-200/60 p-4 rounded-2xl flex flex-col gap-4">
+                        <h4 className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                          <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
+                          <span>मुख्य पृष्ठ का दैनिक श्रृंगार दर्शन बदलें</span>
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {/* Date */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-amber-900 mb-1">दिनांक (Date):</label>
+                            <input
+                              type="date"
+                              value={todayDate}
+                              onChange={(e) => setTodayDate(e.target.value)}
+                              className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Festival */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-amber-900 mb-1">विशेष पर्व/शृंगार नाम (Festival):</label>
+                            <input
+                              type="text"
+                              value={todayFestival}
+                              onChange={(e) => setTodayFestival(e.target.value)}
+                              placeholder="उदा. सावन सोमवार, प्रदोष व्रत श्रृंगार"
+                              className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-900 mb-1">दर्शन का भक्तिमय विवरण (Description):</label>
+                          <textarea
+                            value={todayDesc}
+                            onChange={(e) => setTodayDesc(e.target.value)}
+                            placeholder="आज के दिव्य श्रृंगार दर्शन का वर्णन लिखें..."
+                            rows={5}
+                            className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none resize-none"
+                          />
+                        </div>
+
+                        {/* Image Source Input (Upload vs Link) */}
+                        <div className="bg-amber-50/40 p-3 rounded-xl border border-amber-200/40">
+                          <label className="block text-[10px] font-bold text-amber-900 mb-1.5">आज का दर्शन चित्र (Image Selection):</label>
+                          
+                          <div className="flex flex-col gap-2">
+                            {/* Link Paste - Highly Recommended */}
+                            <div>
+                              <span className="block text-[9px] font-black text-amber-800 mb-1 uppercase tracking-wider">🔗 चित्र का सीधा लिंक डालें (अनुशंसित - इससे साइट बहुत तेज़ चलेगी):</span>
+                              <input
+                                type="text"
+                                value={todayImage}
+                                onChange={(e) => setTodayImage(e.target.value)}
+                                placeholder="https://example.com/image.jpg (यहाँ चित्र का सीधा लिंक पेस्ट करें)"
+                                className="w-full px-3 py-2 bg-white border border-amber-200/80 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium"
+                              />
+                            </div>
+                            
+                            {/* Divider */}
+                            <div className="flex items-center my-1">
+                              <span className="h-[1px] flex-1 bg-amber-200/50"></span>
+                              <span className="px-2 text-[9px] text-amber-600 font-bold">अथवा</span>
+                              <span className="h-[1px] flex-1 bg-amber-200/50"></span>
+                            </div>
+
+                            {/* Local File Upload */}
+                            <div>
+                              <span className="block text-[9px] font-black text-amber-800 mb-1 uppercase tracking-wider">📁 सीधे अपने फ़ोन/कंप्यूटर से चित्र अपलोड करें:</span>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="file"
+                                  onChange={handleTodayImageUpload}
+                                  accept="image/*"
+                                  className="text-[10px] bg-white border border-amber-100 px-2 py-1 rounded-lg w-full cursor-pointer"
+                                />
+                                {todayUploading && <Loader2 className="w-4 h-4 animate-spin text-amber-500 shrink-0" />}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                          onClick={handleSaveTodayDarshan}
+                          disabled={todayUploading}
+                          className="self-end px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-slate-950 font-black rounded-xl shadow transition"
+                        >
+                          {todaySuccess ? (
+                            <span className="flex items-center gap-1"><Check className="w-4 h-4" /> मुख्य पृष्ठ पर बदल गया!</span>
+                          ) : (
+                            <span>दैनिक दर्शन अपडेट करें</span>
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      /* B. UPLOAD PAST GALLERY ITEM FORM */
+                      <div className="bg-amber-50/60 border border-amber-100 p-4 rounded-2xl flex flex-col gap-4">
+                        <h4 className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                          <Upload className="w-4 h-4 text-amber-600" />
+                          <span>गैलरी में विगत श्रृंगार दर्शन जोड़ें (ImageKit)</span>
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {/* Date */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-amber-900 mb-1">दिनांक (Date):</label>
+                            <input
+                              type="date"
+                              value={galDate}
+                              onChange={(e) => setGalDate(e.target.value)}
+                              className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Festival */}
+                          <div>
+                            <label className="block text-[10px] font-bold text-amber-900 mb-1">विशेष पर्व/शृंगार नाम (Festival):</label>
+                            <input
+                              type="text"
+                              value={galFestival}
+                              onChange={(e) => setGalFestival(e.target.value)}
+                              placeholder="उदा. प्रदोष व्रत विशेष, सावन सोमवार..."
+                              className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                          <label className="block text-[10px] font-bold text-amber-900 mb-1">दर्शन का भक्तिमय विवरण (Description):</label>
+                          <textarea
+                            value={galDesc}
+                            onChange={(e) => setGalDesc(e.target.value)}
+                            placeholder="महादेव के इस अलौकिक शृंगार का वर्णन करें..."
+                            rows={5}
+                            className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none resize-none"
+                          />
+                        </div>
+
+                        {/* Image Source Input (Upload vs Link) */}
+                        <div className="bg-amber-50/40 p-3 rounded-xl border border-amber-200/40">
+                          <label className="block text-[10px] font-bold text-amber-900 mb-1.5">दर्शन चित्र (Image Selection):</label>
+                          
+                          <div className="flex flex-col gap-2">
+                            {/* Link Paste - Highly Recommended */}
+                            <div>
+                              <span className="block text-[9px] font-black text-amber-800 mb-1 uppercase tracking-wider">🔗 चित्र का सीधा लिंक डालें (अनुशंसित - इससे साइट बहुत तेज़ चलेगी):</span>
+                              <input
+                                type="text"
+                                value={galImage}
+                                onChange={(e) => setGalImage(e.target.value)}
+                                placeholder="https://example.com/image.jpg (यहाँ चित्र का सीधा लिंक पेस्ट करें)"
+                                className="w-full px-3 py-2 bg-white border border-amber-200/80 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none font-medium"
+                              />
+                            </div>
+                            
+                            {/* Divider */}
+                            <div className="flex items-center my-1">
+                              <span className="h-[1px] flex-1 bg-amber-200/50"></span>
+                              <span className="px-2 text-[9px] text-amber-600 font-bold">अथवा</span>
+                              <span className="h-[1px] flex-1 bg-amber-200/50"></span>
+                            </div>
+
+                            {/* Local File Upload */}
+                            <div>
+                              <span className="block text-[9px] font-black text-amber-800 mb-1 uppercase tracking-wider">📁 सीधे अपने फ़ोन/कंप्यूटर से चित्र अपलोड करें:</span>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="file"
+                                  onChange={handleGalleryImageUpload}
+                                  accept="image/*"
+                                  className="text-[10px] bg-white border border-amber-100 px-2 py-1 rounded-lg w-full cursor-pointer"
+                                />
+                                {uploading && <Loader2 className="w-4 h-4 animate-spin text-amber-500 shrink-0" />}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                          onClick={handleSaveGalleryItem}
+                          disabled={uploading}
+                          className="self-end px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-slate-950 font-black rounded-xl shadow transition"
+                        >
+                          {galSuccess ? (
+                            <span className="flex items-center gap-1"><Check className="w-4 h-4" /> गैलरी में जुड़ गया!</span>
+                          ) : (
+                            <span>गैलरी में जोड़े</span>
+                          )}
+                        </button>
+                      </div>
+                    )}
+
                     {/* Preview box */}
-                    {galImage && (
+                    {((shringarTabMode === 'today' && todayImage) || (shringarTabMode === 'gallery' && galImage)) && (
                       <div className="mt-2 flex flex-col items-center">
                         <span className="text-[10px] text-slate-400 font-bold">चित्र पूर्वावलोकन (Preview):</span>
                         <img 
-                          src={galImage} 
+                          src={shringarTabMode === 'today' ? todayImage : galImage} 
                           alt="preview" 
                           className="w-40 h-32 object-cover rounded-xl mt-1 border border-slate-200 shadow-sm"
                         />
                       </div>
                     )}
+
+                    {/* List of uploaded Shringar images with update/delete options */}
+                    <div className="mt-6 pt-6 border-t border-slate-200">
+                      <h4 className="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-100" />
+                        <span>अपलोड किए गए श्रृंगार चित्र प्रबंधन ({galList.length})</span>
+                      </h4>
+
+                      <div className="max-h-72 overflow-y-auto flex flex-col gap-3 pr-1">
+                        {galList.map(item => {
+                          const isCurrentlyEditing = editingGalId === item.id;
+
+                          return (
+                            <div 
+                              key={item.id}
+                              className="p-3 bg-slate-50 border border-slate-200/60 rounded-2xl flex flex-col gap-3 text-left"
+                            >
+                              {isCurrentlyEditing ? (
+                                /* Inline Editing State */
+                                <div className="flex flex-col gap-3">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                      <label className="block text-[9px] font-bold text-slate-400 mb-0.5">दिनांक:</label>
+                                      <input
+                                        type="date"
+                                        value={editGalDate}
+                                        onChange={(e) => setEditGalDate(e.target.value)}
+                                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-[9px] font-bold text-slate-400 mb-0.5">विशेष पर्व/शृंगार नाम:</label>
+                                      <input
+                                        type="text"
+                                        value={editGalFestival}
+                                        onChange={(e) => setEditGalFestival(e.target.value)}
+                                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-400 mb-0.5">दर्शन का विवरण:</label>
+                                    <textarea
+                                      value={editGalDesc}
+                                      onChange={(e) => setEditGalDesc(e.target.value)}
+                                      rows={5}
+                                      className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none resize-none"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-400 mb-0.5">चित्र अपलोड/URL:</label>
+                                    <div className="flex gap-2">
+                                      <input
+                                        type="file"
+                                        onChange={handleEditGalImageUpload}
+                                        accept="image/*"
+                                        className="text-[10px]"
+                                      />
+                                      {uploading && <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500 shrink-0" />}
+                                    </div>
+                                    <input
+                                      type="text"
+                                      value={editGalImage}
+                                      onChange={(e) => setEditGalImage(e.target.value)}
+                                      placeholder="चित्र का सीधा URL"
+                                      className="w-full px-2 py-1 mt-1 bg-white border border-slate-100 rounded-lg text-xs"
+                                    />
+                                  </div>
+
+                                  <div className="flex justify-end gap-2 mt-1">
+                                    <button
+                                      onClick={handleCancelEditGal}
+                                      className="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-[10px] transition"
+                                    >
+                                      रद्द करें
+                                    </button>
+                                    <button
+                                      onClick={handleSaveEditGal}
+                                      className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg text-[10px] transition"
+                                    >
+                                      सहेजें
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                /* View/Read State with Edit/Delete Buttons */
+                                <div className="flex items-start gap-3">
+                                  <img 
+                                    src={item.imageUrl} 
+                                    alt="thumbnail" 
+                                    className="w-16 h-16 object-cover rounded-xl border border-slate-200/50 shadow-sm shrink-0"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">
+                                        {item.date}
+                                      </span>
+                                      <span className="font-bold text-slate-800 text-xs truncate">
+                                        {item.festivalName || "दैनिक श्रृंगार दर्शन"}
+                                      </span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                                      {item.description}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                      onClick={() => handleStartEditGal(item)}
+                                      className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition"
+                                      title="संपादित करें"
+                                    >
+                                      <Edit2 className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteGal(item.id)}
+                                      className="p-1.5 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 rounded-lg transition"
+                                      title="हटाएं"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 )}
 

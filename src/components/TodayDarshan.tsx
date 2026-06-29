@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, ChangeEvent, MouseEvent, TouchEvent } from
 import { db, subscribeToDBUpdates } from '../lib/db';
 import { DailyDarshan } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
+import ShringarPopup from './ShringarPopup';
 import { 
   Maximize2, 
   Minimize2, 
@@ -38,6 +39,7 @@ export default function TodayDarshan() {
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isShringarOpen, setIsShringarOpen] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -207,9 +209,14 @@ export default function TodayDarshan() {
       <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center gap-2 flex-wrap">
           <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500 shrink-0" />
-          <span className="inline-block bg-[#fffdf5] dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm text-lg md:text-xl font-bold tracking-wide font-sans">
-            भोलेनाथ के श्रृंगार दर्शन
-          </span>
+          <button
+            onClick={() => setIsShringarOpen(true)}
+            title="विगत दिव्य श्रृंगार दर्शन देखने के लिए यहाँ क्लिक करें"
+            className="inline-flex items-center gap-2 bg-[#fffdf5] hover:bg-amber-50/80 dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 hover:border-amber-400 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-md md:text-lg font-bold tracking-wide font-sans cursor-pointer transition duration-300 transform active:scale-95 group"
+          >
+            <span>भोलेनाथ के श्रृंगार दर्शन</span>
+            <span className="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full font-medium group-hover:bg-amber-200 transition">विगत दर्शन ↗</span>
+          </button>
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-600 animate-pulse shrink-0">मंसा दर्शन</span>
         </h2>
         
@@ -303,12 +310,13 @@ export default function TodayDarshan() {
               <div className="flex flex-col gap-3">
                 {/* Description */}
                 <div className="flex-1 flex flex-col">
-                  <label className="block text-xs font-bold text-amber-900 mb-1">श्रृंगार का विवरण (Description):</label>
+                  <label className="block text-xs font-bold text-amber-900 mb-1">दर्शन का भक्तिमय विवरण (Description):</label>
                   <textarea
                     value={editDesc}
                     onChange={(e) => setEditDesc(e.target.value)}
                     placeholder="आज के श्रृंगार के बारे में कुछ भक्तिमय शब्द लिखें..."
-                    className="w-full flex-1 min-h-[100px] px-3 py-2 text-sm bg-white border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+                    rows={5}
+                    className="w-full px-3 py-2 text-sm bg-white border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
                   />
                 </div>
 
@@ -580,6 +588,13 @@ export default function TodayDarshan() {
               </button>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Shringar Popup Gallery Modal */}
+      <AnimatePresence>
+        {isShringarOpen && (
+          <ShringarPopup isOpen={isShringarOpen} onClose={() => setIsShringarOpen(false)} />
         )}
       </AnimatePresence>
     </section>
