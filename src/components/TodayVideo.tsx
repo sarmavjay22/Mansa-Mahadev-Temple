@@ -89,18 +89,6 @@ export default function TodayVideo() {
             <span>भोलेनाथ की आरती वीडियो</span>
           </button>
         </h2>
-
-        {isAdmin && !isEditing && (
-          <div className="md:absolute md:right-4">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center gap-1 text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-xl transition duration-300 shadow shrink-0"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>वीडियो जोड़ें</span>
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Admin Panel video uploader */}
