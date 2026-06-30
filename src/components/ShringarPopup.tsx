@@ -1,5 +1,5 @@
-import { useState, useEffect, MouseEvent } from 'react';
-import { db, subscribeToDBUpdates } from '../lib/db';
+import React, { useState, useEffect, MouseEvent, useRef } from 'react';
+import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
 import { GalleryItem } from '../types';
 import { 
   X, 
@@ -10,7 +10,12 @@ import {
   Heart,
   Smile,
   RefreshCw,
-  Clock
+  Clock,
+  ZoomIn,
+  ZoomOut,
+  Minimize2,
+  Move,
+  Maximize2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -97,6 +102,9 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
       }
     });
 
+    // Sort shringars by date in descending order (newest first) to enable datewise index!
+    combined.sort((a, b) => b.date.localeCompare(a.date));
+
     setShringars(combined);
   };
 
@@ -133,8 +141,8 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
     localStorage.setItem('mm_shringar_likes', JSON.stringify(newLikes));
   };
 
-  const handleShare = async (item: GalleryItem, e: MouseEvent) => {
-    e.stopPropagation();
+  const handleShare = async (item: GalleryItem, e?: MouseEvent) => {
+    if (e) e.stopPropagation();
     const info = getHindiDayAndDate(item.date);
     const shareText = `ॐ नमः शिवाय! मंसा महादेव मंदिर तितरड़ी, उदयपुर का दिव्य श्रृंगार दर्शन:\nपर्व: ${item.festivalName || 'दैनिक श्रृंगार'}\nदिन: ${info.day}, तिथि: ${info.date}\n\nदर्शन के लिए यहाँ देखें: ${window.location.origin}`;
     
@@ -161,6 +169,101 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
   const handleResetSearch = () => {
     setSelectedDate('');
     setSearchDateQuery('');
+  };
+
+  // Fullscreen ImageViewer States & Handlers
+  const [fullscreenItem, setFullscreenItem] = useState<GalleryItem | null>(null);
+  const [zoomScale, setZoomScale] = useState(1);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const handleOpenFullscreen = (item: GalleryItem) => {
+    setFullscreenItem(item);
+    setZoomScale(1);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  const handleCloseFullscreen = () => {
+    setFullscreenItem(null);
+    setZoomScale(1);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  const handleZoomIn = () => setZoomScale(prev => Math.min(prev + 0.5, 4));
+  const handleZoomOut = () => {
+    setZoomScale(prev => {
+      const next = Math.max(prev - 0.5, 1);
+      if (next === 1) {
+        setPanPosition({ x: 0, y: 0 });
+      }
+      return next;
+    });
+  };
+  const handleResetZoom = () => {
+    setZoomScale(1);
+    setPanPosition({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    if (zoomScale <= 1) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - panPosition.x, y: e.clientY - panPosition.y });
+  };
+
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || zoomScale <= 1) return;
+    setPanPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  const touchStartRef = useRef<{ dist: number; x: number; y: number } | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({ x: touch.clientX - panPosition.x, y: touch.clientY - panPosition.y });
+    } else if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      touchStartRef.current = { 
+        dist, 
+        x: (t1.clientX + t2.clientX) / 2, 
+        y: (t1.clientY + t2.clientY) / 2 
+      };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1 && isDragging && zoomScale > 1) {
+      const touch = e.touches[0];
+      setPanPosition({
+        x: touch.clientX - dragStart.x,
+        y: touch.clientY - dragStart.y
+      });
+    } else if (e.touches.length === 2 && touchStartRef.current) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+      
+      const factor = dist / touchStartRef.current.dist;
+      setZoomScale(prev => {
+        const target = Math.min(Math.max(prev * (factor > 1 ? 1.03 : 0.97), 1), 4);
+        if (target === 1) setPanPosition({ x: 0, y: 0 });
+        return target;
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    touchStartRef.current = null;
   };
 
   // Filter shringars based on searched date
@@ -194,10 +297,10 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
               </div>
               <div>
                 <h2 className="text-lg md:text-xl font-extrabold tracking-wide text-slate-800 flex items-center gap-2">
-                  भोलेनाथ के विगत श्रृंगार दर्शन
+                  भोलेनाथ के श्रृंगार दर्शन
                 </h2>
-                <p className="text-[10px] md:text-xs text-amber-700 font-bold">
-                  मंसा महादेव मंदिर उदयपुर के दिव्य एवं अलौकिक रूपों की संग्रह गैलरी
+                <p className="text-xs md:text-sm text-amber-700 font-bold">
+                  मंसा महादेव के दिव्य एवं अलौकिक रूपों की गैलरी
                 </p>
               </div>
             </div>
@@ -213,7 +316,7 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
 
           {/* Search Bar / Date Selector */}
           <div className="px-5 py-4 bg-amber-50/40 border-b border-amber-200/30 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-            <div className="flex items-center gap-2 text-xs text-amber-800 font-bold shrink-0">
+            <div className="flex items-center gap-2 text-base text-amber-800 font-bold shrink-0">
               <Calendar className="w-4 h-4 text-orange-500" />
               <span>तिथि अनुसार दर्शन खोजें:</span>
             </div>
@@ -265,7 +368,10 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
                         className="bg-white border border-amber-200/30 rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col group"
                       >
                         {/* Image Frame with zoom hover */}
-                        <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 shrink-0">
+                        <div 
+                          className="relative aspect-[4/3] overflow-hidden bg-slate-100 shrink-0 cursor-zoom-in"
+                          onClick={() => handleOpenFullscreen(item)}
+                        >
                           <img
                             src={item.imageUrl}
                             alt={item.festivalName || "श्रृंगार दर्शन"}
@@ -282,6 +388,11 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
                             <span className="text-[9px] font-extrabold text-slate-700">
                               {info.date}
                             </span>
+                          </div>
+
+                          {/* Float Badge for Zoom/Expand on Top Right */}
+                          <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-md border border-white/20 p-2 rounded-full shadow-md text-white hover:scale-110 hover:bg-black/75 transition duration-300">
+                            <Maximize2 className="w-3.5 h-3.5" />
                           </div>
 
                           {/* Floating Like & Share Buttons */}
@@ -313,7 +424,7 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
                           <div>
                             <div className="flex items-center gap-1 text-[11px] font-bold text-amber-700 mb-1">
                               <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                              <span>{item.festivalName || "दिव्य श्रृंगार दर्शन"}</span>
+                              <span>दिव्य श्रृंगार दर्शन</span>
                             </div>
                             
                             <h3 className="text-md font-bold text-slate-800 mb-2 leading-snug">
@@ -323,14 +434,6 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
                             <p className="text-xs text-slate-500 leading-relaxed font-medium line-clamp-3">
                               {item.description || "मंसा महादेव का आज का अति मनोहारी एवं मनवांछित फलदायक दिव्य श्रृंगार दर्शन। नमन करें और पुण्य लाभ कमाएं।"}
                             </p>
-                          </div>
-
-                          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              <span>प्रातः श्रृंगार</span>
-                            </span>
-                            <span>#मंसा_महादेव</span>
                           </div>
                         </div>
                       </motion.div>
@@ -369,6 +472,97 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
             <span>श्री मंसा महादेव मंदिर तितरड़ी, उदयपुर • दिव्य दर्शन सेवा</span>
           </div>
         </motion.div>
+
+        {/* Fullscreen Modal Image Viewer with Zoom, Drag, Gestures */}
+        <AnimatePresence>
+          {fullscreenItem && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-black/95 flex flex-col justify-between p-4 touch-none"
+            >
+              {/* Top Bar inside modal */}
+              <div className="flex justify-between items-center text-white z-25">
+                <div>
+                  <p className="text-xs text-amber-400 font-bold font-mono">
+                    {formatDateDMY(fullscreenItem.date)}
+                  </p>
+                  <h4 className="text-sm font-bold truncate max-w-[200px]">{fullscreenItem.festivalName}</h4>
+                </div>
+
+                {/* Action row */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleZoomOut}
+                    disabled={zoomScale === 1}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center disabled:opacity-30 transition animate-none"
+                  >
+                    <ZoomOut className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={handleZoomIn}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition animate-none"
+                  >
+                    <ZoomIn className="w-5 h-5" />
+                  </button>
+                  {zoomScale > 1 && (
+                    <button
+                      onClick={handleResetZoom}
+                      className="bg-white/10 text-white font-bold text-xs px-3 py-1.5 rounded-full hover:bg-white/20 transition animate-none"
+                    >
+                      100%
+                    </button>
+                  )}
+                  <button
+                    onClick={handleCloseFullscreen}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition animate-none"
+                  >
+                    <Minimize2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Immersive Image Display Container */}
+              <div 
+                className="relative flex-1 flex items-center justify-center overflow-hidden w-full h-full"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+              >
+                <img
+                  src={fullscreenItem.imageUrl}
+                  alt="महादेव दर्शन"
+                  className="max-h-[80vh] max-w-full object-contain select-none transition-transform duration-200"
+                  style={{
+                    transform: `scale(${zoomScale}) translate(${panPosition.x / zoomScale}px, ${panPosition.y / zoomScale}px)`,
+                    cursor: zoomScale > 1 ? 'grab' : 'zoom-in',
+                  }}
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+
+              {/* Footer with touch instruction */}
+              <div className="flex flex-col items-center gap-2 text-white/60 text-xs pb-4">
+                <p className="flex items-center gap-1 text-center text-[11px] text-amber-300">
+                  <Move className="w-3.5 h-3.5" />
+                  <span>ज़ूम करने पर खिसकाएं। मोबाइल पर 2 उंगलियों से पिंच ज़ूम करें।</span>
+                </p>
+                <button
+                  onClick={() => handleShare(fullscreenItem)}
+                  className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold px-5 py-2.5 rounded-full transition duration-300 shadow flex items-center gap-1.5 animate-none"
+                >
+                  <Share2 className="w-4 h-4 text-slate-900" />
+                  <span>व्हाट्सएप दर्शन शेयर करें</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
     </div>
   );
 }

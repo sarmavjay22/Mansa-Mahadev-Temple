@@ -206,29 +206,17 @@ export default function TodayDarshan() {
   return (
     <section id="today-darshan" className="w-full max-w-4xl mx-auto px-4 py-6">
       {/* Golden Accented Title Card */}
-      <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center gap-2 flex-wrap">
-          <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500 shrink-0" />
+      <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-4 mb-6 flex items-center justify-center gap-3 text-center">
+        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center justify-center gap-2 flex-wrap">
+          <Sparkles className="w-6 h-6 text-amber-500 fill-amber-500 shrink-0" />
           <button
             onClick={() => setIsShringarOpen(true)}
-            title="विगत दिव्य श्रृंगार दर्शन देखने के लिए यहाँ क्लिक करें"
+            title="दिव्य श्रृंगार दर्शन देखने के लिए यहाँ क्लिक करें"
             className="inline-flex items-center gap-2 bg-[#fffdf5] hover:bg-amber-50/80 dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 hover:border-amber-400 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-md md:text-lg font-bold tracking-wide font-sans cursor-pointer transition duration-300 transform active:scale-95 group"
           >
             <span>भोलेनाथ के श्रृंगार दर्शन</span>
-            <span className="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full font-medium group-hover:bg-amber-200 transition">विगत दर्शन ↗</span>
           </button>
-          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-600 animate-pulse shrink-0">मंसा दर्शन</span>
         </h2>
-        
-        {isAdmin && !isEditing && (
-          <button
-            onClick={handleStartEdit}
-            className="flex items-center gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-xl transition duration-300 shadow shrink-0"
-          >
-            <Edit2 className="w-3.5 h-3.5" />
-            <span>श्रृंगार बदलें</span>
-          </button>
-        )}
       </div>
 
       {/* Admin Quick Editor Panel inside Today's Darshan */}

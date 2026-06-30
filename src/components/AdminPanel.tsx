@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
-import { NotificationItem, GalleryItem, DailyDarshan } from '../types';
+import { NotificationItem, GalleryItem, DailyDarshan, VideoDarshan } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
 import { 
   ShieldCheck, 
@@ -22,7 +22,9 @@ import {
   Sliders,
   Sparkles,
   Settings,
-  Edit2
+  Edit2,
+  Youtube,
+  Video
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import TempleSettingsTab from './TempleSettingsTab';
@@ -37,7 +39,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'temple_settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'upload_video' | 'temple_settings'>('overview');
 
   // Stats State
   const [stats, setStats] = useState({
@@ -70,6 +72,28 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [todaySuccess, setTodaySuccess] = useState(false);
   const [shringarTabMode, setShringarTabMode] = useState<'today' | 'gallery'>('today');
 
+  // Video Uploader State
+  const [videoTodayDate, setVideoTodayDate] = useState('');
+  const [videoTodayTitle, setVideoTodayTitle] = useState('');
+  const [videoTodayUrl, setVideoTodayUrl] = useState('');
+  const [videoTodaySuccess, setVideoTodaySuccess] = useState(false);
+
+  const [videoGalDate, setVideoGalDate] = useState(new Date().toISOString().split('T')[0]);
+  const [videoGalTitle, setVideoGalTitle] = useState('');
+  const [videoGalUrl, setVideoGalUrl] = useState('');
+  const [videoGalSuccess, setVideoGalSuccess] = useState(false);
+
+  const [videoTabMode, setVideoTabMode] = useState<'today' | 'gallery'>('today');
+
+  // Video list and inline editing states
+  const [videoList, setVideoList] = useState<VideoDarshan[]>([]);
+  const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
+  const [editVideoTitle, setEditVideoTitle] = useState('');
+  const [editVideoDate, setEditVideoDate] = useState('');
+  const [editVideoUrl, setEditVideoUrl] = useState('');
+  const [editVideoIsToday, setEditVideoIsToday] = useState(false);
+  const [deleteConfirmVideoId, setDeleteConfirmVideoId] = useState<string | null>(null);
+
   // Gallery list and inline editing states
   const [galList, setGalList] = useState<GalleryItem[]>([]);
   const [editingGalId, setEditingGalId] = useState<string | null>(null);
@@ -100,6 +124,17 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         setTodayDesc(current.description || '');
         setTodayImage(current.imageUrl || '');
       }
+    } else if (activeTab === 'upload_video') {
+      const currentVideo = db.getTodayVideo();
+      if (currentVideo) {
+        setVideoTodayDate(currentVideo.date);
+        setVideoTodayTitle(currentVideo.title || '');
+        setVideoTodayUrl(currentVideo.youtubeUrl || '');
+      } else {
+        setVideoTodayDate(new Date().toISOString().split('T')[0]);
+        setVideoTodayTitle('');
+        setVideoTodayUrl('');
+      }
     }
   }, [activeTab]);
 
@@ -118,6 +153,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
     setNotifs(notificationItems);
     setGalList(galleryItems);
+    setVideoList(videoItems);
   };
 
   const handleLogin = (e: FormEvent) => {
@@ -286,6 +322,87 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   };
 
+  // Save today's video
+  const handleSaveTodayVideo = () => {
+    if (!videoTodayUrl || !videoTodayDate) {
+      alert("कृपया आज का वीडियो लिंक और तारीख दर्ज करें।");
+      return;
+    }
+
+    db.addVideo({
+      title: videoTodayTitle.trim() || "दैनिक आरती वीडियो",
+      youtubeUrl: videoTodayUrl.trim(),
+      date: videoTodayDate,
+      isToday: true
+    });
+
+    setVideoTodaySuccess(true);
+    setTimeout(() => {
+      setVideoTodaySuccess(false);
+    }, 1500);
+    alert("भोलेनाथ की आज की आरती वीडियो सफलतापूर्वक अपडेट हो गई है!");
+  };
+
+  // Add past/gallery video
+  const handleSaveGalleryVideo = () => {
+    if (!videoGalUrl || !videoGalDate) {
+      alert("कृपया वीडियो लिंक और तारीख दर्ज करें।");
+      return;
+    }
+
+    db.addVideo({
+      title: videoGalTitle.trim() || "दिव्य आरती वीडियो",
+      youtubeUrl: videoGalUrl.trim(),
+      date: videoGalDate,
+      isToday: false
+    });
+
+    setVideoGalSuccess(true);
+    setTimeout(() => {
+      setVideoGalSuccess(false);
+      setVideoGalTitle('');
+      setVideoGalUrl('');
+    }, 1500);
+    alert("आरती वीडियो सफलतापूर्वक गैलरी में जोड़ दिया गया है!");
+  };
+
+  // Start editing video
+  const handleStartEditVideo = (item: VideoDarshan) => {
+    setEditingVideoId(item.id);
+    setEditVideoTitle(item.title || '');
+    setEditVideoDate(item.date || '');
+    setEditVideoUrl(item.youtubeUrl || '');
+    setEditVideoIsToday(item.isToday || false);
+  };
+
+  // Cancel edit
+  const handleCancelEditVideo = () => {
+    setEditingVideoId(null);
+  };
+
+  // Save edit
+  const handleSaveEditVideo = () => {
+    if (!editVideoUrl || !editVideoDate) {
+      alert("कृपया वीडियो लिंक और तारीख का चयन करें।");
+      return;
+    }
+
+    db.updateVideo(editingVideoId!, {
+      title: editVideoTitle.trim(),
+      date: editVideoDate,
+      youtubeUrl: editVideoUrl.trim(),
+      isToday: editVideoIsToday
+    });
+
+    setEditingVideoId(null);
+    alert("आरती वीडियो सफलतापूर्वक अपडेट किया गया!");
+  };
+
+  // Delete video
+  const handleDeleteVideo = (id: string) => {
+    db.deleteVideo(id);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -411,6 +528,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 >
                   <Image className="w-4 h-4" />
                   <span>श्रृंगार दर्शन</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('upload_video')}
+                  className={`flex-1 py-3.5 flex items-center justify-center gap-1.5 transition ${
+                    activeTab === 'upload_video' ? 'text-amber-600 bg-white border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Youtube className="w-4 h-4 text-red-600 fill-red-100" />
+                  <span>आरती वीडियो</span>
                 </button>
 
                 <button
@@ -605,7 +732,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       <button
                         type="button"
                         onClick={() => setShringarTabMode('today')}
-                        className={`flex-1 py-2 text-center rounded-lg font-bold text-[11px] transition duration-300 ${
+                        className={`flex-1 py-2 text-center rounded-lg font-bold text-[13px] transition duration-300 ${
                           shringarTabMode === 'today'
                             ? 'bg-amber-500 text-white shadow-sm'
                             : 'text-amber-800 hover:bg-amber-50/80'
@@ -616,7 +743,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       <button
                         type="button"
                         onClick={() => setShringarTabMode('gallery')}
-                        className={`flex-1 py-2 text-center rounded-lg font-bold text-[11px] transition duration-300 ${
+                        className={`flex-1 py-2 text-center rounded-lg font-bold text-[13px] transition duration-300 ${
                           shringarTabMode === 'gallery'
                             ? 'bg-amber-500 text-white shadow-sm'
                             : 'text-amber-800 hover:bg-amber-50/80'
@@ -635,9 +762,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         </h4>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {/* Date */}
+                           {/* Date */}
                           <div>
-                            <label className="block text-[10px] font-bold text-amber-900 mb-1">दिनांक (Date):</label>
+                            <label className="block text-xs font-bold text-amber-900 mb-1">दिनांक (Date):</label>
                             <input
                               type="date"
                               value={todayDate}
@@ -646,9 +773,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                             />
                           </div>
 
-                          {/* Festival */}
+                           {/* Festival */}
                           <div>
-                            <label className="block text-[10px] font-bold text-amber-900 mb-1">विशेष पर्व/शृंगार नाम (Festival):</label>
+                            <label className="block text-xs font-bold text-amber-900 mb-1">विशेष पर्व/शृंगार नाम (Festival):</label>
                             <input
                               type="text"
                               value={todayFestival}
@@ -661,7 +788,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
                         {/* Description */}
                         <div>
-                          <label className="block text-[10px] font-bold text-amber-900 mb-1">दर्शन का भक्तिमय विवरण (Description):</label>
+                          <label className="block text-xs font-bold text-amber-900 mb-1">दर्शन का भक्तिमय विवरण (Description):</label>
                           <textarea
                             value={todayDesc}
                             onChange={(e) => setTodayDesc(e.target.value)}
@@ -673,12 +800,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
                         {/* Image Source Input (Link Only) */}
                         <div className="bg-amber-50/40 p-3 rounded-xl border border-amber-200/40">
-                          <label className="block text-[10px] font-bold text-amber-900 mb-1.5">आज का दर्शन चित्र (Image Selection):</label>
+                          <label className="block text-xs font-bold text-amber-900 mb-1.5">आज का दर्शन चित्र (Image Selection):</label>
                           
                           <div className="flex flex-col gap-2">
                             {/* Link Paste - Highly Recommended */}
                             <div>
-                              <span className="block text-[9px] font-black text-amber-800 mb-1 uppercase tracking-wider">🔗 चित्र का सीधा लिंक डालें (अनुशंसित - इससे साइट बहुत तेज़ चलेगी):</span>
+                              <span className="block text-[11px] font-black text-amber-800 mb-1 uppercase tracking-wider">🔗 चित्र का सीधा लिंक डालें:</span>
                               <input
                                 type="text"
                                 value={todayImage}
@@ -707,13 +834,13 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       <div className="bg-amber-50/60 border border-amber-100 p-4 rounded-2xl flex flex-col gap-4">
                         <h4 className="text-xs font-bold text-amber-900 flex items-center gap-1">
                           <Upload className="w-4 h-4 text-amber-600" />
-                          <span>गैलरी में विगत श्रृंगार दर्शन जोड़ें (ImageKit)</span>
+                          <span>गैलरी में श्रृंगार दर्शन जोड़ें</span>
                         </h4>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {/* Date */}
+                           {/* Date */}
                           <div>
-                            <label className="block text-[10px] font-bold text-amber-900 mb-1">दिनांक (Date):</label>
+                            <label className="block text-xs font-bold text-amber-900 mb-1">दिनांक (Date):</label>
                             <input
                               type="date"
                               value={galDate}
@@ -722,9 +849,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                             />
                           </div>
 
-                          {/* Festival */}
+                           {/* Festival */}
                           <div>
-                            <label className="block text-[10px] font-bold text-amber-900 mb-1">विशेष पर्व/शृंगार नाम (Festival):</label>
+                            <label className="block text-xs font-bold text-amber-900 mb-1">विशेष पर्व/शृंगार नाम (Festival):</label>
                             <input
                               type="text"
                               value={galFestival}
@@ -737,7 +864,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
                         {/* Description */}
                         <div>
-                          <label className="block text-[10px] font-bold text-amber-900 mb-1">दर्शन का भक्तिमय विवरण (Description):</label>
+                          <label className="block text-xs font-bold text-amber-900 mb-1">दर्शन का भक्तिमय विवरण (Description):</label>
                           <textarea
                             value={galDesc}
                             onChange={(e) => setGalDesc(e.target.value)}
@@ -749,12 +876,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
                         {/* Image Source Input (Link Only) */}
                         <div className="bg-amber-50/40 p-3 rounded-xl border border-amber-200/40">
-                          <label className="block text-[10px] font-bold text-amber-900 mb-1.5">दर्शन चित्र (Image Selection):</label>
+                          <label className="block text-xs font-bold text-amber-900 mb-1.5">दर्शन चित्र (Image Selection):</label>
                           
                           <div className="flex flex-col gap-2">
                             {/* Link Paste - Highly Recommended */}
                             <div>
-                              <span className="block text-[9px] font-black text-amber-800 mb-1 uppercase tracking-wider">🔗 चित्र का सीधा लिंक डालें (अनुशंसित - इससे साइट बहुत तेज़ चलेगी):</span>
+                              <span className="block text-[11px] font-black text-amber-800 mb-1 uppercase tracking-wider">🔗 चित्र का सीधा लिंक डालें:</span>
                               <input
                                 type="text"
                                 value={galImage}
@@ -794,7 +921,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
                     {/* List of uploaded Shringar images with update/delete options */}
                     <div className="mt-6 pt-6 border-t border-slate-200">
-                      <h4 className="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest flex items-center gap-1.5">
+                      <h4 className="text-sm font-black uppercase text-slate-400 mb-4 tracking-widest flex items-center gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-100" />
                         <span>अपलोड किए गए श्रृंगार चित्र प्रबंधन ({galList.length})</span>
                       </h4>
@@ -930,6 +1057,313 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                       </button>
                                       <button
                                         onClick={() => setDeleteConfirmGalId(item.id)}
+                                        className="p-1.5 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 rounded-lg transition"
+                                        title="हटाएं"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'upload_video' && (
+                  <div className="flex flex-col gap-4 text-xs text-slate-700">
+                    {/* Video Sub-tabs Selection */}
+                    <div className="flex bg-amber-50/40 p-1 rounded-xl border border-amber-100/50">
+                      <button
+                        type="button"
+                        onClick={() => setVideoTabMode('today')}
+                        className={`flex-1 py-2 text-center rounded-lg font-bold text-[13px] transition duration-300 ${
+                          videoTabMode === 'today'
+                            ? 'bg-amber-500 text-white shadow-sm'
+                            : 'text-amber-800 hover:bg-amber-50/80'
+                        }`}
+                      >
+                        मुख्य आरती वीडियो
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setVideoTabMode('gallery')}
+                        className={`flex-1 py-2 text-center rounded-lg font-bold text-[13px] transition duration-300 ${
+                          videoTabMode === 'gallery'
+                            ? 'bg-amber-500 text-white shadow-sm'
+                            : 'text-amber-800 hover:bg-amber-50/80'
+                        }`}
+                      >
+                        आरती वीडियो गैलरी में जोड़ें
+                      </button>
+                    </div>
+
+                    {videoTabMode === 'today' ? (
+                      /* A. UPDATE TODAY'S VIDEO FORM */
+                      <div className="bg-amber-50/60 border border-amber-200/60 p-4 rounded-2xl flex flex-col gap-4">
+                        <h4 className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                          <Youtube className="w-4 h-4 text-red-600 fill-red-100" />
+                          <span>मुख्य पृष्ठ का दैनिक आरती वीडियो बदलें</span>
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                           {/* Date */}
+                          <div>
+                            <label className="block text-xs font-bold text-amber-900 mb-1">दिनांक (Date):</label>
+                            <input
+                              type="date"
+                              value={videoTodayDate}
+                              onChange={(e) => setVideoTodayDate(e.target.value)}
+                              className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+
+                           {/* Title */}
+                          <div>
+                            <label className="block text-xs font-bold text-amber-900 mb-1">वीडियो का शीर्षक/नाम:</label>
+                            <input
+                              type="text"
+                              value={videoTodayTitle}
+                              onChange={(e) => setVideoTodayTitle(e.target.value)}
+                              placeholder="उदा. संध्या महा आरती एवं दीपमालिका दर्शन"
+                              className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* YouTube URL */}
+                        <div>
+                          <label className="block text-xs font-bold text-amber-900 mb-1">यूट्यूब वीडियो लिंक (YouTube Link):</label>
+                          <input
+                            type="text"
+                            value={videoTodayUrl}
+                            onChange={(e) => setVideoTodayUrl(e.target.value)}
+                            placeholder="उदा. https://www.youtube.com/watch?v=... या https://youtu.be/..."
+                            className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                          />
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                          onClick={handleSaveTodayVideo}
+                          className="self-end px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl shadow transition"
+                        >
+                          {videoTodaySuccess ? (
+                            <span className="flex items-center gap-1"><Check className="w-4 h-4" /> मुख्य पृष्ठ पर बदल गया!</span>
+                          ) : (
+                            <span>दैनिक वीडियो अपडेट करें</span>
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      /* B. UPLOAD PAST VIDEO FORM */
+                      <div className="bg-amber-50/60 border border-amber-100 p-4 rounded-2xl flex flex-col gap-4">
+                        <h4 className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                          <Plus className="w-4 h-4 text-amber-600" />
+                          <span>आरती वीडियो गैलरी में जोड़ें</span>
+                        </h4>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                           {/* Date */}
+                          <div>
+                            <label className="block text-xs font-bold text-amber-900 mb-1">दिनांक (Date):</label>
+                            <input
+                              type="date"
+                              value={videoGalDate}
+                              onChange={(e) => setVideoGalDate(e.target.value)}
+                              className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+
+                           {/* Title */}
+                          <div>
+                            <label className="block text-xs font-bold text-amber-900 mb-1">वीडियो का शीर्षक/नाम:</label>
+                            <input
+                              type="text"
+                              value={videoGalTitle}
+                              onChange={(e) => setVideoGalTitle(e.target.value)}
+                              placeholder="उदा. सावन सोमवार महाआरती दर्शन"
+                              className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* YouTube URL */}
+                        <div>
+                          <label className="block text-xs font-bold text-amber-900 mb-1">यूट्यूब वीडियो लिंक (YouTube Link):</label>
+                          <input
+                            type="text"
+                            value={videoGalUrl}
+                            onChange={(e) => setVideoGalUrl(e.target.value)}
+                            placeholder="उदा. https://www.youtube.com/watch?v=... या https://youtu.be/..."
+                            className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                          />
+                        </div>
+
+                        {/* Submit */}
+                        <button
+                          onClick={handleSaveGalleryVideo}
+                          className="self-end px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl shadow transition"
+                        >
+                          {videoGalSuccess ? (
+                            <span className="flex items-center gap-1"><Check className="w-4 h-4" /> गैलरी में जुड़ गया!</span>
+                          ) : (
+                            <span>गैलरी में जोड़े</span>
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* List of uploaded Videos with update/delete options */}
+                    <div className="mt-6 pt-6 border-t border-slate-200">
+                      <h4 className="text-sm font-black uppercase text-slate-400 mb-4 tracking-widest flex items-center gap-1.5">
+                        <Youtube className="w-3.5 h-3.5 text-amber-500 fill-amber-100" />
+                        <span>अपलोड किए गए आरती वीडियो प्रबंधन ({videoList.length})</span>
+                      </h4>
+
+                      <div className="max-h-72 overflow-y-auto flex flex-col gap-3 pr-1">
+                        {videoList.map(item => {
+                          const isCurrentlyEditing = editingVideoId === item.id;
+                          const youtubeIdMatch = item.youtubeUrl?.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+                          const youtubeId = (youtubeIdMatch && youtubeIdMatch[2].length === 11) ? youtubeIdMatch[2] : null;
+                          const thumbUrl = youtubeId ? `https://img.youtube.com/vi/${youtubeId}/0.jpg` : null;
+
+                          return (
+                            <div 
+                              key={item.id}
+                              className="p-3 bg-slate-50 border border-slate-200/60 rounded-2xl flex flex-col gap-3 text-left"
+                            >
+                              {isCurrentlyEditing ? (
+                                /* Inline Editing State */
+                                <div className="flex flex-col gap-3">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <div>
+                                      <label className="block text-[9px] font-bold text-slate-400 mb-0.5">दिनांक:</label>
+                                      <input
+                                        type="date"
+                                        value={editVideoDate}
+                                        onChange={(e) => setEditVideoDate(e.target.value)}
+                                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-[9px] font-bold text-slate-400 mb-0.5">वीडियो शीर्षक:</label>
+                                      <input
+                                        type="text"
+                                        value={editVideoTitle}
+                                        onChange={(e) => setEditVideoTitle(e.target.value)}
+                                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-400 mb-0.5">यूट्यूब वीडियो लिंक (YouTube Link):</label>
+                                    <input
+                                      type="text"
+                                      value={editVideoUrl}
+                                      onChange={(e) => setEditVideoUrl(e.target.value)}
+                                      className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
+                                    />
+                                  </div>
+
+                                  <div className="flex items-center gap-1.5">
+                                    <input
+                                      type="checkbox"
+                                      id={`isToday-${item.id}`}
+                                      checked={editVideoIsToday}
+                                      onChange={(e) => setEditVideoIsToday(e.target.checked)}
+                                      className="w-3.5 h-3.5 accent-amber-500 rounded"
+                                    />
+                                    <label htmlFor={`isToday-${item.id}`} className="text-[10px] font-bold text-slate-600 cursor-pointer">
+                                      मुख्य आरती वीडियो बनाएं (Make this today's video)
+                                    </label>
+                                  </div>
+
+                                  <div className="flex justify-end gap-2 mt-1">
+                                    <button
+                                      onClick={handleCancelEditVideo}
+                                      className="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-[10px] transition"
+                                    >
+                                      रद्द करें
+                                    </button>
+                                    <button
+                                      onClick={handleSaveEditVideo}
+                                      className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg text-[10px] transition"
+                                    >
+                                      सहेजें
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                /* View/Read State with Edit/Delete Buttons */
+                                <div className="flex items-start gap-3">
+                                  {thumbUrl ? (
+                                    <img 
+                                      src={thumbUrl} 
+                                      alt="thumbnail" 
+                                      className="w-16 h-12 object-cover rounded-lg border border-slate-200/50 shadow-sm shrink-0"
+                                      referrerPolicy="no-referrer"
+                                    />
+                                  ) : (
+                                    <div className="w-16 h-12 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
+                                      <Youtube className="w-5 h-5 text-red-500" />
+                                    </div>
+                                  )}
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">
+                                        {formatDateDMY(item.date)}
+                                      </span>
+                                      {item.isToday && (
+                                        <span className="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-extrabold flex items-center gap-0.5 animate-pulse">
+                                          ★ मुख्य वीडियो
+                                        </span>
+                                      )}
+                                      <span className="font-bold text-slate-800 text-xs truncate">
+                                        {item.title || "आरती दर्शन वीडियो"}
+                                      </span>
+                                    </div>
+                                    <p className="text-[9px] text-slate-400 mt-1 truncate">
+                                      {item.youtubeUrl}
+                                    </p>
+                                  </div>
+
+                                  {deleteConfirmVideoId === item.id ? (
+                                    <div className="flex items-center gap-1.5 shrink-0 bg-rose-50 border border-rose-100 p-1 rounded-xl">
+                                      <span className="text-[9px] text-rose-600 font-bold px-1 select-none">हटाएं?</span>
+                                      <button
+                                        onClick={() => {
+                                          handleDeleteVideo(item.id);
+                                          setDeleteConfirmVideoId(null);
+                                        }}
+                                        className="px-2 py-1 bg-rose-500 text-white font-extrabold text-[9px] rounded-lg shadow-sm hover:bg-rose-600 transition"
+                                      >
+                                        हाँ
+                                      </button>
+                                      <button
+                                        onClick={() => setDeleteConfirmVideoId(null)}
+                                        className="px-2 py-1 bg-slate-200 text-slate-700 font-extrabold text-[9px] rounded-lg hover:bg-slate-300 transition"
+                                      >
+                                        नहीं
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1 shrink-0">
+                                      <button
+                                        onClick={() => handleStartEditVideo(item)}
+                                        className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition"
+                                        title="संपादित करें"
+                                      >
+                                        <Edit2 className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        onClick={() => setDeleteConfirmVideoId(item.id)}
                                         className="p-1.5 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 rounded-lg transition"
                                         title="हटाएं"
                                       >

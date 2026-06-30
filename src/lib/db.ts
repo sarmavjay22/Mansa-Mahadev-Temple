@@ -610,6 +610,21 @@ export const db = {
     notifyDBChange();
   },
 
+  updateVideo(id: string, updatedFields: Partial<VideoDarshan>) {
+    let videos = this.getVideos();
+    if (updatedFields.isToday) {
+      videos.forEach(v => { v.isToday = false; });
+    }
+    videos = videos.map(v => {
+      if (v.id === id) {
+        return { ...v, ...updatedFields };
+      }
+      return v;
+    });
+    localStorage.setItem('mm_videos', JSON.stringify(videos));
+    notifyDBChange();
+  },
+
   // Aartis
   getAartis(): AartiItem[] {
     const data = localStorage.getItem('mm_aartis');

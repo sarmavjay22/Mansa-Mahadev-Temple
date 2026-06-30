@@ -3,11 +3,13 @@ import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
 import { VideoDarshan } from '../types';
 import { Video, Youtube, Calendar, Sparkles, Plus, Trash2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import AartiVideoPopup from './AartiVideoPopup';
 
 export default function TodayVideo() {
   const [todayVideo, setTodayVideo] = useState<VideoDarshan | null>(null);
   const [isAdmin, setIsAdmin] = useState(db.isAdminLoggedIn());
   const [isEditing, setIsEditing] = useState(false);
+  const [isAartiVideoOpen, setIsAartiVideoOpen] = useState(false);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -79,9 +81,13 @@ export default function TodayVideo() {
       <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-4 mb-6 relative flex flex-wrap items-center justify-center gap-3">
         <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center justify-center gap-2 flex-wrap w-full">
           <Youtube className="w-5 h-5 text-red-600 fill-red-100 shrink-0" />
-          <span className="inline-block bg-[#fffdf5] dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm text-lg md:text-xl font-bold tracking-wide font-sans text-center">
-            भोलेनाथ की आरती वीडियो
-          </span>
+          <button
+            onClick={() => setIsAartiVideoOpen(true)}
+            title="आरती वीडियो गैलरी देखने के लिए यहाँ क्लिक करें"
+            className="inline-flex items-center gap-2 bg-[#fffdf5] hover:bg-amber-50/80 dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 hover:border-amber-400 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-md md:text-lg font-bold tracking-wide font-sans cursor-pointer transition duration-300 transform active:scale-95 group text-center"
+          >
+            <span>भोलेनाथ की आरती वीडियो</span>
+          </button>
         </h2>
 
         {isAdmin && !isEditing && (
@@ -223,6 +229,8 @@ export default function TodayVideo() {
           </div>
         )}
       </div>
+
+      <AartiVideoPopup isOpen={isAartiVideoOpen} onClose={() => setIsAartiVideoOpen(false)} />
     </section>
   );
 }
