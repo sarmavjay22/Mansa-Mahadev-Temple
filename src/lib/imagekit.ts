@@ -8,19 +8,8 @@
  */
 
 export async function uploadToImageKit(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    // Optional check for environment keys
-    const publicKey = (import.meta as any).env.VITE_IMAGEKIT_PUBLIC_KEY;
-    const urlEndpoint = (import.meta as any).env.VITE_IMAGEKIT_URL_ENDPOINT;
-    
-    // If we have ImageKit credentials, we can run actual production uploads
-    if (publicKey && urlEndpoint) {
-      console.log("ImageKit configured. Executing production upload...");
-      // In a real production environment, you would use form data and send to your backend proxy or directly to ImageKit using a signature
-      // Since this runs securely, we can implement the direct ImageKit call here or fallback to robust mock for optimal developer flow
-    }
-
-    // Default high-fidelity local fallback (Data URL conversion for instant preview and LocalStorage storage)
+  // Convert File to base64 Data URL as the source
+  const base64String = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result === 'string') {
@@ -29,11 +18,33 @@ export async function uploadToImageKit(file: File): Promise<string> {
         reject(new Error("Failed to convert file to string"));
       }
     };
-    reader.onerror = (error) => {
-      reject(error);
-    };
+    reader.onerror = (error) => reject(error);
     reader.readAsDataURL(file);
   });
+
+  try {
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        file: base64String,
+        fileName: file.name,
+      }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || `Server responded with ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.url;
+  } catch (error) {
+    console.warn("ImageKit upload via backend failed, using local fallback:", error);
+    return base64String;
+  }
 }
 
 /**

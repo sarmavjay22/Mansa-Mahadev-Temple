@@ -171,53 +171,6 @@ export default function TodayVideo() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Main Video View Box */}
-      <div className="w-full bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-xl shadow-sky-100/40 overflow-hidden p-4 md:p-6">
-        {activeVideoId ? (
-          <div className="flex flex-col gap-4">
-            {/* Aspect ratio frame */}
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden shadow-lg border border-slate-100 bg-slate-900">
-              <iframe
-                title={todayVideo?.title || "Mansa Mahadev Video"}
-                src={`https://www.youtube.com/embed/${activeVideoId}?autoplay=0&rel=0&modestbranding=1`}
-                className="absolute inset-0 w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              ></iframe>
-            </div>
-
-            {/* Video Metadata */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-1">
-              <div>
-                <h3 className="text-md md:text-lg font-bold text-slate-800 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
-                  <span>{todayVideo?.title}</span>
-                </h3>
-                <p className="text-xs text-slate-500 font-semibold mt-1 flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-orange-500" />
-                  <span>अपलोड तिथि:</span>
-                  <span className="font-mono text-slate-700">
-                    {todayVideo ? formatDateDMY(todayVideo.date) : ''}
-                  </span>
-                </p>
-              </div>
-
-              {/* Share details badge */}
-              <div className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl self-start md:self-center">
-                🚩 दैनिक सत्संग एवं आरती वीडियो
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <Video className="w-12 h-12 text-slate-300 mb-3" />
-            <h3 className="text-md font-bold text-slate-700">कोई सक्रिय वीडियो उपलब्ध नहीं है।</h3>
-            <p className="text-xs text-slate-400 mt-1">प्रबंधक द्वारा जल्द ही आज की दिव्य आरती या झांकी का वीडियो अपलोड किया जाएगा।</p>
-          </div>
-        )}
-      </div>
-
       <AartiVideoPopup isOpen={isAartiVideoOpen} onClose={() => setIsAartiVideoOpen(false)} />
     </section>
   );

@@ -30,9 +30,14 @@ let globalAudioInstance: HTMLAudioElement | null = null;
 
 export default function BhajanSection() {
   const [bhajans, setBhajans] = useState<BhajanItem[]>([]);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
   
+  // Derived active track state to keep displays and audio in 100% synchronization
+  const activeTrack = (currentTrackId && bhajans.find(b => b.id === currentTrackId)) || bhajans[0];
+  const currentTrackIndex = activeTrack ? bhajans.findIndex(b => b.id === activeTrack.id) : 0;
+
   // Audio state
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -55,7 +60,11 @@ export default function BhajanSection() {
 
   // Load playlists & auth state
   useEffect(() => {
-    setBhajans(db.getBhajans());
+    const loadedBhajans = db.getBhajans();
+    setBhajans(loadedBhajans);
+    if (loadedBhajans.length > 0 && !currentTrackId) {
+      setCurrentTrackId(loadedBhajans[0].id);
+    }
     setIsAdmin(db.isAdminLoggedIn());
 
     const unsubscribe = subscribeToDBUpdates(() => {
@@ -64,6 +73,13 @@ export default function BhajanSection() {
       setIsAdmin(db.isAdminLoggedIn());
     });
     return unsubscribe;
+  }, [currentTrackId]);
+
+  // Sync playing state once on mount if already playing in background
+  useEffect(() => {
+    if (globalAudioInstance) {
+      setIsPlaying(!globalAudioInstance.paused);
+    }
   }, []);
 
   // Initialize or attach global audio element
@@ -93,7 +109,6 @@ export default function BhajanSection() {
     audio.addEventListener('ended', onEnded);
 
     // Sync initial state
-    setIsPlaying(!audio.paused);
     setVolume(audio.volume);
     setIsMuted(audio.muted);
     setCurrentTime(audio.currentTime);
@@ -104,43 +119,92 @@ export default function BhajanSection() {
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('ended', onEnded);
     };
-  }, [bhajans, currentTrackIndex]);
+  }, [bhajans, currentTrackId, isShuffle, isRepeat]);
 
-  // Handle source changes
+  // Handle source changes and playback sync
   useEffect(() => {
     if (bhajans.length === 0 || !audioRef.current) return;
-    const currentTrack = bhajans[currentTrackIndex];
+    const currentTrack = activeTrack;
     if (!currentTrack) return;
 
     const audio = audioRef.current;
-    // Only set source if it's different to prevent resetting playback
     const cleanUrl = currentTrack.audioUrl;
-    if (audio.src !== cleanUrl) {
-      audio.src = cleanUrl;
-      audio.load();
-      // If was previously playing, keep playing
-      if (isPlaying) {
-        audio.play().catch(e => console.log("Audio play error:", e));
-      }
+
+    // Reset error state
+    setPlaybackError(null);
+
+    // Validate audio URL
+    if (!cleanUrl || cleanUrl.trim() === "") {
+      setPlaybackError("भजन ऑडियो उपलब्ध नहीं है (Audio URL is missing)");
+      setIsPlaying(false);
+      audio.pause();
+      audio.src = "";
+      return;
     }
-  }, [currentTrackIndex, bhajans]);
+
+    if (!/^(https?:\/\/|\/|data:)/i.test(cleanUrl.trim())) {
+      setPlaybackError("अमान्य ऑडियो यूआरएल (Invalid Audio URL)");
+      setIsPlaying(false);
+      audio.pause();
+      audio.src = "";
+      return;
+    }
+
+    // Update src and load
+    try {
+      let absoluteCleanUrl = cleanUrl;
+      if (cleanUrl.startsWith('/')) {
+        absoluteCleanUrl = window.location.origin + cleanUrl;
+      }
+
+      if (audio.src !== absoluteCleanUrl) {
+        audio.src = cleanUrl;
+        audio.load();
+      }
+
+      // Sync play/pause state
+      if (isPlaying) {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            // Ignore benign AbortError/interruption from intentional navigation
+            if (e.name !== 'AbortError' && e.name !== 'InterruptedError') {
+              console.warn("Audio playback warning:", e);
+              setPlaybackError("ऑडियो लोड करने में असमर्थ (Unable to load audio)");
+              setIsPlaying(false);
+            }
+          });
+        }
+      } else {
+        audio.pause();
+      }
+    } catch (err) {
+      console.warn("Warning setting audio source:", err);
+      setPlaybackError("ऑडियो त्रुटि (Audio Source Error)");
+      setIsPlaying(false);
+    }
+  }, [activeTrack?.id, activeTrack?.audioUrl, isPlaying]);
 
   // Audio actions
   const togglePlay = () => {
     if (!audioRef.current || bhajans.length === 0) return;
     const audio = audioRef.current;
-    if (isPlaying) {
-      audio.pause();
+    
+    // Clear any previous error
+    setPlaybackError(null);
+
+    const currentTrack = activeTrack;
+    const cleanUrl = currentTrack?.audioUrl;
+
+    if (!cleanUrl || cleanUrl.trim() === "" || !/^(https?:\/\/|\/|data:)/i.test(cleanUrl.trim())) {
+      setPlaybackError("अमान्य या अनुपलब्ध ऑडियो यूआरएल (Invalid or missing Audio URL)");
+      alert("त्रुटि: इस भजन का ऑडियो लिंक अमान्य या अनुपलब्ध है।");
       setIsPlaying(false);
-    } else {
-      audio.play()
-        .then(() => setIsPlaying(true))
-        .catch(err => {
-          console.error("Playback failed", err);
-          // Auto-trigger fallback if user interaction required
-          audio.play().then(() => setIsPlaying(true));
-        });
+      audio.pause();
+      return;
     }
+
+    setIsPlaying(prev => !prev);
   };
 
   const handleSeek = (e: ChangeEvent<HTMLInputElement>) => {
@@ -180,18 +244,33 @@ export default function BhajanSection() {
       return;
     }
 
+    let nextIndex = currentTrackIndex;
     if (isShuffle) {
-      const randIndex = Math.floor(Math.random() * bhajans.length);
-      setCurrentTrackIndex(randIndex);
+      nextIndex = Math.floor(Math.random() * bhajans.length);
     } else {
-      setCurrentTrackIndex(prev => {
-        if (prev === bhajans.length - 1) {
-          return isRepeat === 'all' || autoPlayNext ? 0 : prev;
-        }
-        return prev + 1;
-      });
+      if (currentTrackIndex === bhajans.length - 1) {
+        nextIndex = isRepeat === 'all' || autoPlayNext ? 0 : currentTrackIndex;
+      } else {
+        nextIndex = currentTrackIndex + 1;
+      }
     }
     
+    // Ensure index is valid and safe
+    const track = bhajans[nextIndex];
+    if (!track) return;
+
+    if (!track.audioUrl || track.audioUrl.trim() === "" || !/^(https?:\/\/|\/|data:)/i.test(track.audioUrl.trim())) {
+      setCurrentTrackId(track.id);
+      setIsPlaying(false);
+      setPlaybackError("अमान्य या अनुपलब्ध ऑडियो यूआरएल (Invalid or missing Audio URL)");
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      return;
+    }
+
+    setCurrentTrackId(track.id);
     if (isPlaying || autoPlayNext) {
       setIsPlaying(true);
     }
@@ -206,26 +285,52 @@ export default function BhajanSection() {
       return;
     }
 
-    setCurrentTrackIndex(prev => {
-      if (prev === 0) return bhajans.length - 1;
-      return prev - 1;
-    });
+    let prevIndex = currentTrackIndex === 0 ? bhajans.length - 1 : currentTrackIndex - 1;
+    const track = bhajans[prevIndex];
+    if (!track) return;
 
+    if (!track.audioUrl || track.audioUrl.trim() === "" || !/^(https?:\/\/|\/|data:)/i.test(track.audioUrl.trim())) {
+      setCurrentTrackId(track.id);
+      setIsPlaying(false);
+      setPlaybackError("अमान्य या अनुपलब्ध ऑडियो यूआरएल (Invalid or missing Audio URL)");
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      return;
+    }
+
+    setCurrentTrackId(track.id);
     if (isPlaying) {
       setIsPlaying(true);
     }
   };
 
-  const handleSelectTrack = (index: number) => {
-    setCurrentTrackIndex(index);
-    if (!isPlaying) {
-      setIsPlaying(true);
-      // Wait for React state sync then play
-      setTimeout(() => {
-        audioRef.current?.play().catch(e => console.log(e));
-      }, 50);
+  const handleSelectTrack = (trackId: string) => {
+    // Clear previous error
+    setPlaybackError(null);
+    
+    const track = bhajans.find(b => b.id === trackId);
+    if (!track) return;
+
+    if (!track.audioUrl || track.audioUrl.trim() === "" || !/^(https?:\/\/|\/|data:)/i.test(track.audioUrl.trim())) {
+      setCurrentTrackId(trackId);
+      setIsPlaying(false);
+      setPlaybackError("अमान्य या अनुपलब्ध ऑडियो यूआरएल (Invalid or missing Audio URL)");
+      alert("त्रुटि: इस भजन का ऑडियो लिंक अमान्य या अनुपलब्ध है।");
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      return;
+    }
+
+    if (trackId === currentTrackId) {
+      // Toggle play/pause if selecting the active song
+      setIsPlaying(prev => !prev);
     } else {
-      audioRef.current?.play().catch(e => console.log(e));
+      setCurrentTrackId(trackId);
+      setIsPlaying(true);
     }
   };
 
@@ -288,8 +393,8 @@ export default function BhajanSection() {
     e.stopPropagation(); // Avoid triggering track select
     if (confirm("क्या आप वाकई इस भजन को हटाना चाहते हैं?")) {
       db.deleteBhajan(id);
-      // Ensure index is within safe bounds
-      setCurrentTrackIndex(0);
+      // Reset selected track ID so it falls back to the first available track
+      setCurrentTrackId(null);
     }
   };
 
@@ -300,8 +405,6 @@ export default function BhajanSection() {
     const secs = Math.floor(time % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
-
-  const activeTrack = bhajans[currentTrackIndex];
 
   return (
     <section id="bhajan-section" className="w-full max-w-4xl mx-auto px-4 py-6">
@@ -473,8 +576,12 @@ export default function BhajanSection() {
               <p className="text-xs text-slate-500 font-bold mt-1">स्वर: {activeTrack.singer}</p>
             </div>
             
-            {/* Visualizer bars when playing */}
-            {isPlaying ? (
+            {/* Visualizer bars when playing or error message */}
+            {playbackError ? (
+              <div className="text-xs font-bold text-rose-500 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200 mt-1 animate-pulse">
+                ⚠️ {playbackError}
+              </div>
+            ) : isPlaying ? (
               <div className="flex items-end gap-1 h-5 mt-1">
                 {[...Array(6)].map((_, i) => (
                   <span 
@@ -606,16 +713,16 @@ export default function BhajanSection() {
               {bhajans.map((track, idx) => (
                 <div
                   key={track.id}
-                  onClick={() => handleSelectTrack(idx)}
+                  onClick={() => handleSelectTrack(track.id)}
                   className={`flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition active:scale-99 ${
-                    idx === currentTrackIndex 
+                    track.id === activeTrack?.id 
                       ? 'bg-amber-50 border border-amber-200/50 text-amber-800 font-bold' 
                       : 'hover:bg-slate-50/50 text-slate-600 font-medium'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span className="font-mono text-xs text-slate-400 w-4 shrink-0 text-center">
-                      {idx === currentTrackIndex && isPlaying ? (
+                      {track.id === activeTrack?.id && isPlaying ? (
                         <span className="text-amber-500">▶</span>
                       ) : (
                         idx + 1

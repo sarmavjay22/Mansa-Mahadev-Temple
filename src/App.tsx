@@ -5,7 +5,6 @@ import TodayDarshan from './components/TodayDarshan';
 import TodayVideo from './components/TodayVideo';
 import AartiSection from './components/AartiSection';
 import BhajanSection from './components/BhajanSection';
-import GallerySection from './components/GallerySection';
 import TempleInfoSection from './components/TempleInfoSection';
 import AdminPanel from './components/AdminPanel';
 import { motion, AnimatePresence } from 'motion/react';
@@ -48,18 +47,15 @@ export default function App() {
         
         {/* Today's Shringar Darshan (Visual Core) */}
         <TodayDarshan />
-
+        
         {/* Today's Video Darshan (YouTube Core) */}
         <TodayVideo />
-
+        
         {/* Nitya Aarti collection popups */}
         <AartiSection />
 
         {/* Bhajan Audio Player */}
         <BhajanSection />
-
-        {/* Filterable Past Darshan Gallery */}
-        <GallerySection />
 
         {/* Temple Timings, History, Maps, & Direct Contacts */}
         <TempleInfoSection />

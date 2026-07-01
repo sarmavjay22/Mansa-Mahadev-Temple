@@ -1,3 +1,5 @@
+import { collection, onSnapshot, addDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
+import { firestoreDb } from './firebase';
 import { 
   DailyDarshan, 
   GalleryItem, 
@@ -398,6 +400,26 @@ const DEFAULT_BHAJANS: BhajanItem[] = [
   }
 ];
 
+export function sanitizeBhajans(items: BhajanItem[]): BhajanItem[] {
+  return items.map(item => {
+    if (!item.audioUrl) return item;
+    const url = item.audioUrl.toLowerCase();
+    
+    // Check if it's one of the defunct google actions sound urls or old soundhelix urls
+    if (url.includes('morning_breeze') || url.includes('song-1')) {
+      return { ...item, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" };
+    } else if (url.includes('floating_abstract') || url.includes('song-2')) {
+      return { ...item, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" };
+    } else if (url.includes('acoustic_guitar_strum') || url.includes('song-3')) {
+      return { ...item, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" };
+    } else if (url.includes('piano_romance') || url.includes('song-4')) {
+      return { ...item, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" };
+    }
+    
+    return item;
+  });
+}
+
 const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
   {
     id: "notif_1",
@@ -472,6 +494,47 @@ function notifyDBChange() {
 
 // Initialize on import
 initDB();
+
+export let firestoreBhajans: BhajanItem[] = [];
+
+// Subscribe to firestore 'bhajans' collection for real-time sync
+onSnapshot(collection(firestoreDb, 'bhajans'), (snapshot) => {
+  const items: BhajanItem[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as BhajanItem);
+  });
+  
+  if (items.length === 0) {
+    // If empty in Firestore, seed the Firestore database with default bhajans
+    firestoreBhajans = DEFAULT_BHAJANS;
+    localStorage.setItem('mm_bhajans', JSON.stringify(DEFAULT_BHAJANS));
+    notifyDBChange();
+
+    DEFAULT_BHAJANS.forEach(async (b) => {
+      try {
+        await setDoc(doc(firestoreDb, 'bhajans', b.id), {
+          title: b.title,
+          singer: b.singer,
+          audioUrl: b.audioUrl,
+          thumbnailUrl: b.thumbnailUrl,
+          duration: b.duration
+        });
+      } catch (err) {
+        console.error("Failed to seed bhajan to Firestore:", err);
+      }
+    });
+  } else {
+    const sanitized = sanitizeBhajans(items);
+    firestoreBhajans = sanitized;
+    localStorage.setItem('mm_bhajans', JSON.stringify(sanitized));
+    notifyDBChange();
+  }
+}, (error) => {
+  console.error("Firestore bhajans subscription error:", error);
+});
 
 export const db = {
   // Authentication
@@ -715,25 +778,24 @@ export const db = {
   // Bhajans
   getBhajans(): BhajanItem[] {
     const data = localStorage.getItem('mm_bhajans');
-    return data ? JSON.parse(data) : DEFAULT_BHAJANS;
+    const list = data ? JSON.parse(data) : (firestoreBhajans.length > 0 ? firestoreBhajans : DEFAULT_BHAJANS);
+    return sanitizeBhajans(list);
   },
 
-  addBhajan(bhajan: Omit<BhajanItem, 'id'>) {
-    const bhajans = this.getBhajans();
-    const newBhajan: BhajanItem = {
-      id: "bhajan_" + Date.now(),
-      ...bhajan
-    };
-    bhajans.push(newBhajan);
-    localStorage.setItem('mm_bhajans', JSON.stringify(bhajans));
-    notifyDBChange();
+  async addBhajan(bhajan: Omit<BhajanItem, 'id'>) {
+    try {
+      await addDoc(collection(firestoreDb, 'bhajans'), bhajan);
+    } catch (error) {
+      console.error("Failed to add bhajan to Firestore:", error);
+    }
   },
 
-  deleteBhajan(id: string) {
-    let bhajans = this.getBhajans();
-    bhajans = bhajans.filter(b => b.id !== id);
-    localStorage.setItem('mm_bhajans', JSON.stringify(bhajans));
-    notifyDBChange();
+  async deleteBhajan(id: string) {
+    try {
+      await deleteDoc(doc(firestoreDb, 'bhajans', id));
+    } catch (error) {
+      console.error("Failed to delete bhajan from Firestore:", error);
+    }
   },
 
   // Notifications
