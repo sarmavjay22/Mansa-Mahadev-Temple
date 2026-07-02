@@ -565,6 +565,86 @@ onSnapshot(collection(firestoreDb, 'bhajans'), (snapshot) => {
   console.error("Firestore bhajans subscription error:", error);
 });
 
+export let firestoreDailyDarshan: DailyDarshan | null = null;
+export let firestoreGallery: GalleryItem[] = [];
+export let firestoreVideos: VideoDarshan[] = [];
+
+try {
+  const cachedDarshan = localStorage.getItem('mm_dailyDarshan');
+  if (cachedDarshan) {
+    firestoreDailyDarshan = JSON.parse(cachedDarshan);
+  }
+} catch (e) {
+  console.error("Failed to load cached dailyDarshan", e);
+}
+
+try {
+  const cachedGallery = localStorage.getItem('mm_gallery');
+  if (cachedGallery) {
+    firestoreGallery = JSON.parse(cachedGallery);
+  }
+} catch (e) {
+  console.error("Failed to load cached gallery", e);
+}
+
+try {
+  const cachedVideos = localStorage.getItem('mm_videos');
+  if (cachedVideos) {
+    firestoreVideos = JSON.parse(cachedVideos);
+  }
+} catch (e) {
+  console.error("Failed to load cached videos", e);
+}
+
+// Subscribe to firestore 'dailyDarshan'
+onSnapshot(doc(firestoreDb, 'dailyDarshan', 'today'), (docSnap) => {
+  if (docSnap.exists()) {
+    firestoreDailyDarshan = {
+      id: docSnap.id,
+      ...docSnap.data()
+    } as DailyDarshan;
+    localStorage.setItem('mm_dailyDarshan', JSON.stringify(firestoreDailyDarshan));
+  } else {
+    firestoreDailyDarshan = null;
+    localStorage.removeItem('mm_dailyDarshan');
+  }
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore dailyDarshan subscription error:", error);
+});
+
+// Subscribe to firestore 'gallery'
+onSnapshot(collection(firestoreDb, 'gallery'), (snapshot) => {
+  const items: GalleryItem[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as GalleryItem);
+  });
+  firestoreGallery = items;
+  localStorage.setItem('mm_gallery', JSON.stringify(items));
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore gallery subscription error:", error);
+});
+
+// Subscribe to firestore 'videos'
+onSnapshot(collection(firestoreDb, 'videos'), (snapshot) => {
+  const items: VideoDarshan[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as VideoDarshan);
+  });
+  firestoreVideos = items;
+  localStorage.setItem('mm_videos', JSON.stringify(items));
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore videos subscription error:", error);
+});
+
 export const db = {
   // Authentication
   loginAdmin(email: string, pass: string): boolean {
@@ -589,12 +669,11 @@ export const db = {
   },
 
   // Daily Darshan
-  getDailyDarshan(): DailyDarshan {
-    const data = localStorage.getItem('mm_dailyDarshan');
-    return data ? JSON.parse(data) : DEFAULT_DARSHAN;
+  getDailyDarshan(): DailyDarshan | null {
+    return firestoreDailyDarshan;
   },
 
-  updateDailyDarshan(darshan: Omit<DailyDarshan, 'id' | 'uploadedAt'>) {
+  async updateDailyDarshan(darshan: Omit<DailyDarshan, 'id' | 'uploadedAt'>) {
     const current = this.getDailyDarshan();
     
     // Auto-move yesterday's/previous daily darshan to Past Darshan Gallery!
@@ -607,7 +686,7 @@ export const db = {
         description: current.description,
         uploadedAt: current.uploadedAt
       };
-      this.addGalleryItem(galleryItem);
+      await this.addGalleryItem(galleryItem);
     }
 
     const updated: DailyDarshan = {
@@ -615,57 +694,55 @@ export const db = {
       ...darshan,
       uploadedAt: new Date().toISOString()
     };
-    localStorage.setItem('mm_dailyDarshan', JSON.stringify(updated));
-    notifyDBChange();
+    try {
+      await setDoc(doc(firestoreDb, 'dailyDarshan', 'today'), updated);
+    } catch (e) {
+      console.error("Failed to update dailyDarshan in Firestore:", e);
+    }
   },
 
   // Gallery
   getGallery(): GalleryItem[] {
-    const data = localStorage.getItem('mm_gallery');
-    const items: GalleryItem[] = data ? JSON.parse(data) : DEFAULT_GALLERY;
     // Return sorted by date descending
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return [...firestoreGallery].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   },
 
-  addGalleryItem(item: Omit<GalleryItem, 'id' | 'uploadedAt'> & { id?: string }) {
-    const items = this.getGallery();
+  async addGalleryItem(item: Omit<GalleryItem, 'id' | 'uploadedAt'> & { id?: string }) {
+    const id = item.id || "gal_" + Date.now();
     const newItem: GalleryItem = {
-      id: item.id || "gal_" + Date.now(),
+      id,
       imageUrl: item.imageUrl,
       date: item.date,
       festivalName: item.festivalName,
       description: item.description,
       uploadedAt: new Date().toISOString()
     };
-    items.push(newItem);
-    localStorage.setItem('mm_gallery', JSON.stringify(items));
-    notifyDBChange();
+    try {
+      await setDoc(doc(firestoreDb, 'gallery', id), newItem);
+    } catch (e) {
+      console.error("Failed to add gallery item to Firestore:", e);
+    }
   },
 
-  updateGalleryItem(id: string, updatedFields: Partial<GalleryItem>) {
-    let items = this.getGallery();
-    items = items.map(item => {
-      if (item.id === id) {
-        return { ...item, ...updatedFields };
-      }
-      return item;
-    });
-    localStorage.setItem('mm_gallery', JSON.stringify(items));
-    notifyDBChange();
+  async updateGalleryItem(id: string, updatedFields: Partial<GalleryItem>) {
+    try {
+      await setDoc(doc(firestoreDb, 'gallery', id), updatedFields, { merge: true });
+    } catch (e) {
+      console.error("Failed to update gallery item in Firestore:", e);
+    }
   },
 
-  deleteGalleryItem(id: string) {
-    let items = this.getGallery();
-    items = items.filter(item => item.id !== id);
-    localStorage.setItem('mm_gallery', JSON.stringify(items));
-    notifyDBChange();
+  async deleteGalleryItem(id: string) {
+    try {
+      await deleteDoc(doc(firestoreDb, 'gallery', id));
+    } catch (e) {
+      console.error("Failed to delete gallery item from Firestore:", e);
+    }
   },
 
   // Video Darshan (YouTube)
   getVideos(): VideoDarshan[] {
-    const data = localStorage.getItem('mm_videos');
-    const items: VideoDarshan[] = data ? JSON.parse(data) : DEFAULT_VIDEOS;
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return [...firestoreVideos].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   },
 
   getTodayVideo(): VideoDarshan | null {
@@ -674,47 +751,52 @@ export const db = {
     return today || (list.length > 0 ? list[0] : null);
   },
 
-  addVideo(video: { title: string; youtubeUrl: string; date: string; isToday: boolean }) {
-    const videos = this.getVideos();
-    
-    // If setting this video as today's video, mark all other videos as NOT isToday (automatically shifts them to Gallery)
-    if (video.isToday) {
-      videos.forEach(v => { v.isToday = false; });
-    }
-
+  async addVideo(video: { title: string; youtubeUrl: string; date: string; isToday: boolean }) {
+    const id = "vid_" + Date.now();
     const newVideo: VideoDarshan = {
-      id: "vid_" + Date.now(),
+      id,
       title: video.title,
       youtubeUrl: video.youtubeUrl,
       date: video.date,
       isToday: video.isToday,
       uploadedAt: new Date().toISOString()
     };
-    videos.push(newVideo);
-    localStorage.setItem('mm_videos', JSON.stringify(videos));
-    notifyDBChange();
-  },
-
-  deleteVideo(id: string) {
-    let videos = this.getVideos();
-    videos = videos.filter(v => v.id !== id);
-    localStorage.setItem('mm_videos', JSON.stringify(videos));
-    notifyDBChange();
-  },
-
-  updateVideo(id: string, updatedFields: Partial<VideoDarshan>) {
-    let videos = this.getVideos();
-    if (updatedFields.isToday) {
-      videos.forEach(v => { v.isToday = false; });
-    }
-    videos = videos.map(v => {
-      if (v.id === id) {
-        return { ...v, ...updatedFields };
+    try {
+      await setDoc(doc(firestoreDb, 'videos', id), newVideo);
+      if (video.isToday) {
+        // Find other videos that are isToday and update them to false
+        for (const v of firestoreVideos) {
+          if (v.id !== id && v.isToday) {
+            await setDoc(doc(firestoreDb, 'videos', v.id), { isToday: false }, { merge: true });
+          }
+        }
       }
-      return v;
-    });
-    localStorage.setItem('mm_videos', JSON.stringify(videos));
-    notifyDBChange();
+    } catch (e) {
+      console.error("Failed to add video to Firestore:", e);
+    }
+  },
+
+  async deleteVideo(id: string) {
+    try {
+      await deleteDoc(doc(firestoreDb, 'videos', id));
+    } catch (e) {
+      console.error("Failed to delete video from Firestore:", e);
+    }
+  },
+
+  async updateVideo(id: string, updatedFields: Partial<VideoDarshan>) {
+    try {
+      await setDoc(doc(firestoreDb, 'videos', id), updatedFields, { merge: true });
+      if (updatedFields.isToday) {
+        for (const v of firestoreVideos) {
+          if (v.id !== id && v.isToday) {
+            await setDoc(doc(firestoreDb, 'videos', v.id), { isToday: false }, { merge: true });
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to update video in Firestore:", e);
+    }
   },
 
   // Aartis

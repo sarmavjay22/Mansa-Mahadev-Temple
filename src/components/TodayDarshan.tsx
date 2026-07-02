@@ -201,7 +201,56 @@ export default function TodayDarshan() {
     }
   };
 
-  if (!darshan) return null;
+  if (!darshan || !darshan.imageUrl) {
+    return (
+      <section id="today-darshan" className="w-full max-w-4xl mx-auto px-4 py-6">
+        {/* Golden Accented Title Card */}
+        <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-4 mb-6 flex items-center justify-center gap-3 text-center">
+          <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center justify-center gap-2 flex-wrap">
+            <Sparkles className="w-6 h-6 text-amber-500 fill-amber-500 shrink-0" />
+            <button
+              onClick={() => setIsShringarOpen(true)}
+              title="दिव्य श्रृंगार दर्शन देखने के लिए यहाँ क्लिक करें"
+              className="inline-flex items-center gap-2 bg-[#fffdf5] hover:bg-amber-50/80 dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 hover:border-amber-400 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-md md:text-lg font-bold tracking-wide font-sans cursor-pointer transition duration-300 transform active:scale-95 group"
+            >
+              <span>भोलेनाथ के श्रृंगार दर्शन</span>
+            </button>
+          </h2>
+        </div>
+
+        {/* Empty State Card */}
+        <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl p-12 text-center flex flex-col items-center justify-center shadow-xl">
+          <Calendar className="w-12 h-12 text-amber-500 mb-4" />
+          <h3 className="text-lg font-extrabold text-slate-700">No Darshan Available</h3>
+          <p className="text-sm text-slate-500 mt-1 font-bold">आज का श्रृंगार दर्शन उपलब्ध नहीं है।</p>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setEditDate(new Date().toISOString().split('T')[0]);
+                setEditFestival('');
+                setEditDesc('');
+                setEditImage('');
+                setIsEditing(true);
+                setDarshan({
+                  id: 'today',
+                  imageUrl: 'placeholder', // Temporary to render the edit view below
+                  date: new Date().toISOString().split('T')[0],
+                  festivalName: '',
+                  description: '',
+                  uploadedAt: ''
+                });
+              }}
+              className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold rounded-xl text-xs shadow transition flex items-center gap-1.5"
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+              <span>आज का श्रृंगार जोड़ें</span>
+            </button>
+          )}
+        </div>
+        <ShringarPopup isOpen={isShringarOpen} onClose={() => setIsShringarOpen(false)} />
+      </section>
+    );
+  }
 
   return (
     <section id="today-darshan" className="w-full max-w-4xl mx-auto px-4 py-6">

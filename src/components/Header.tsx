@@ -50,7 +50,12 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
   });
 
   return (
-    <header className="relative w-full overflow-hidden bg-gradient-to-b from-sky-400/20 via-sky-300/10 to-transparent pt-6 pb-4 px-4">
+    <header 
+      className="relative w-full overflow-hidden pt-6 pb-4 px-4 bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, rgba(227, 242, 253, 0.92), rgba(247, 249, 252, 0.96)), url(${settings.templeCoverImage || "/src/assets/images/today_shringar_1782657607504.jpg"})`
+      }}
+    >
       {/* Decorative Traditional Border Arch */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400"></div>
 
