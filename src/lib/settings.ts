@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: TempleSettings = {
   city: "उदयपुर",
   state: "राजस्थान",
   pincode: "313002",
+  contactPerson: "सुरेश शर्मा",
   phone: "+91 94142 35890",
   whatsApp: "9414235890",
   email: "contact@mansamahadevtemple.org",
@@ -30,7 +31,11 @@ export const DEFAULT_SETTINGS: TempleSettings = {
   secondaryThemeColor: "#f7f9fc",
   accentColor: "#f59e0b",
   footerCopyright: "श्री मंसा महादेव मंदिर सेवा समिति, तितरड़ी, उदयपुर (राज.)",
-  developerName: "Google AI Studio Build"
+  developerName: "Google AI Studio Build",
+  templeLogoUrl: "",
+  headerImageUrl: "",
+  templeCoverImageUrl: "",
+  festivalBannerUrl: ""
 };
 
 let currentSettings: TempleSettings = { ...DEFAULT_SETTINGS };

@@ -14,6 +14,7 @@ export interface GalleryItem {
   festivalName: string;
   description: string;
   uploadedAt: string;
+  order?: number;
 }
 
 export interface VideoDarshan {
@@ -79,6 +80,7 @@ export interface TempleSettings {
   city: string;
   state: string;
   pincode: string;
+  contactPerson: string;
   phone: string;
   whatsApp: string;
   email: string;
@@ -98,5 +100,33 @@ export interface TempleSettings {
   accentColor: string;
   footerCopyright: string;
   developerName: string;
+  templeLogoUrl?: string;
+  headerImageUrl?: string;
+  templeCoverImageUrl?: string;
+  festivalBannerUrl?: string;
+}
+
+export interface TempleEvent {
+  id: string;
+  bannerUrl: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  isActive: boolean;
+  order: number;
+  uploadedAt: string;
+}
+
+export interface CommitteeMember {
+  id: string;
+  photoUrl: string;
+  name: string;
+  designation: string;
+  mobile?: string;
+  description?: string;
+  order: number;
+  uploadedAt: string;
 }
 

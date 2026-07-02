@@ -49,6 +49,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     notificationCount: 0,
   });
 
+  // Gallery order states
+  const [galOrder, setGalOrder] = useState<number>(0);
+  const [editGalOrder, setEditGalOrder] = useState<number>(0);
+
   // Notifications State
   const [notifs, setNotifs] = useState<NotificationItem[]>([]);
   const [newNotifTitle, setNewNotifTitle] = useState('');
@@ -261,7 +265,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       imageUrl: galImage,
       date: galDate,
       festivalName: galFestival.trim() || "दैनिक श्रृंगार दर्शन",
-      description: galDesc.trim() || "मंसा महादेव का अलौकिक दर्शन।"
+      description: galDesc.trim() || "मंसा महादेव का अलौकिक दर्शन।",
+      order: Number(galOrder) || 0
     });
 
     setGalSuccess(true);
@@ -270,6 +275,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       setGalFestival('');
       setGalDesc('');
       setGalImage('');
+      setGalOrder(0);
     }, 1500);
   };
 
@@ -279,6 +285,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     setEditGalDate(item.date || '');
     setEditGalDesc(item.description || '');
     setEditGalImage(item.imageUrl || '');
+    setEditGalOrder((item as any).order || 0);
   };
 
   const handleCancelEditGal = () => {
@@ -295,7 +302,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       festivalName: editGalFestival.trim(),
       date: editGalDate,
       description: editGalDesc.trim(),
-      imageUrl: editGalImage
+      imageUrl: editGalImage,
+      order: Number(editGalOrder) || 0
     });
 
     setEditingGalId(null);
@@ -304,6 +312,20 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   const handleDeleteGal = (id: string) => {
     db.deleteGalleryItem(id);
+  };
+
+  const handleMoveGallery = async (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= galList.length) return;
+    
+    const currentItem = galList[index];
+    const otherItem = galList[targetIndex];
+    
+    const currentOrder = currentItem.order !== undefined ? currentItem.order : index;
+    const otherOrder = otherItem.order !== undefined ? otherItem.order : targetIndex;
+    
+    await db.updateGalleryItem(currentItem.id, { order: otherOrder });
+    await db.updateGalleryItem(otherItem.id, { order: currentOrder });
   };
 
   const handleEditGalImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -547,7 +569,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                   }`}
                 >
                   <Settings className="w-4 h-4" />
-                  <span>मंदिर सेटिंग्स</span>
+                  <span>मँदिर सेटिंग्स</span>
                 </button>
               </div>
 
@@ -837,7 +859,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           <span>गैलरी में श्रृंगार दर्शन जोड़ें</span>
                         </h4>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                            {/* Date */}
                           <div>
                             <label className="block text-xs font-bold text-amber-900 mb-1">दिनांक (Date):</label>
@@ -857,6 +879,18 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                               value={galFestival}
                               onChange={(e) => setGalFestival(e.target.value)}
                               placeholder="उदा. प्रदोष व्रत विशेष, सावन सोमवार..."
+                              className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+
+                           {/* Order */}
+                          <div>
+                            <label className="block text-xs font-bold text-amber-900 mb-1">क्रम संख्या (Order):</label>
+                            <input
+                              type="number"
+                              value={galOrder}
+                              onChange={(e) => setGalOrder(Number(e.target.value) || 0)}
+                              placeholder="0"
                               className="w-full px-3 py-1.5 bg-white border border-amber-200 rounded-xl focus:outline-none"
                             />
                           </div>
@@ -927,7 +961,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       </h4>
 
                       <div className="max-h-72 overflow-y-auto flex flex-col gap-3 pr-1">
-                        {galList.map(item => {
+                        {galList.map((item, index) => {
                           const isCurrentlyEditing = editingGalId === item.id;
 
                           return (
@@ -938,7 +972,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                               {isCurrentlyEditing ? (
                                 /* Inline Editing State */
                                 <div className="flex flex-col gap-3">
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                     <div>
                                       <label className="block text-[9px] font-bold text-slate-400 mb-0.5">दिनांक:</label>
                                       <input
@@ -955,6 +989,15 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                         value={editGalFestival}
                                         onChange={(e) => setEditGalFestival(e.target.value)}
                                         className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-[9px] font-bold text-slate-400 mb-0.5">क्रम संख्या (Order):</label>
+                                      <input
+                                        type="number"
+                                        value={editGalOrder}
+                                        onChange={(e) => setEditGalOrder(Number(e.target.value) || 0)}
+                                        className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none font-bold"
                                       />
                                     </div>
                                   </div>
@@ -1047,17 +1090,34 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                       </button>
                                     </div>
                                   ) : (
-                                    <div className="flex items-center gap-1 shrink-0">
+                                    <div className="flex items-center gap-1 shrink-0 bg-slate-100/60 p-0.5 rounded-lg border border-slate-200/40">
+                                      <button
+                                        onClick={() => handleMoveGallery(index, 'up')}
+                                        disabled={index === 0}
+                                        className="p-1 text-[11px] text-slate-500 hover:text-amber-600 hover:bg-white rounded transition disabled:opacity-30 disabled:hover:bg-transparent"
+                                        title="ऊपर ले जाएं"
+                                      >
+                                        ▲
+                                      </button>
+                                      <button
+                                        onClick={() => handleMoveGallery(index, 'down')}
+                                        disabled={index === galList.length - 1}
+                                        className="p-1 text-[11px] text-slate-500 hover:text-amber-600 hover:bg-white rounded transition disabled:opacity-30 disabled:hover:bg-transparent"
+                                        title="नीचे ले जाएं"
+                                      >
+                                        ▼
+                                      </button>
+                                      <span className="w-px h-3.5 bg-slate-200 mx-1"></span>
                                       <button
                                         onClick={() => handleStartEditGal(item)}
-                                        className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition"
+                                        className="p-1 text-slate-500 hover:text-amber-600 hover:bg-white rounded transition"
                                         title="संपादित करें"
                                       >
                                         <Edit2 className="w-3.5 h-3.5" />
                                       </button>
                                       <button
                                         onClick={() => setDeleteConfirmGalId(item.id)}
-                                        className="p-1.5 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 rounded-lg transition"
+                                        className="p-1 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded transition"
                                         title="हटाएं"
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />

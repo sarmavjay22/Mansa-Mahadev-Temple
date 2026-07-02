@@ -8,7 +8,9 @@ import {
   BhajanItem, 
   TempleInfo, 
   TempleTiming, 
-  NotificationItem 
+  NotificationItem,
+  TempleEvent,
+  CommitteeMember
 } from '../types';
 
 // Default / Seed Data using the generated high-quality spiritual assets
@@ -568,6 +570,8 @@ onSnapshot(collection(firestoreDb, 'bhajans'), (snapshot) => {
 export let firestoreDailyDarshan: DailyDarshan | null = null;
 export let firestoreGallery: GalleryItem[] = [];
 export let firestoreVideos: VideoDarshan[] = [];
+export let firestoreEvents: TempleEvent[] = [];
+export let firestoreCommittee: CommitteeMember[] = [];
 
 try {
   const cachedDarshan = localStorage.getItem('mm_dailyDarshan');
@@ -594,6 +598,24 @@ try {
   }
 } catch (e) {
   console.error("Failed to load cached videos", e);
+}
+
+try {
+  const cachedEvents = localStorage.getItem('mm_events');
+  if (cachedEvents) {
+    firestoreEvents = JSON.parse(cachedEvents);
+  }
+} catch (e) {
+  console.error("Failed to load cached events", e);
+}
+
+try {
+  const cachedCommittee = localStorage.getItem('mm_committee');
+  if (cachedCommittee) {
+    firestoreCommittee = JSON.parse(cachedCommittee);
+  }
+} catch (e) {
+  console.error("Failed to load cached committee", e);
 }
 
 // Subscribe to firestore 'dailyDarshan'
@@ -643,6 +665,38 @@ onSnapshot(collection(firestoreDb, 'videos'), (snapshot) => {
   notifyDBChange();
 }, (error) => {
   console.error("Firestore videos subscription error:", error);
+});
+
+// Subscribe to firestore 'events'
+onSnapshot(collection(firestoreDb, 'events'), (snapshot) => {
+  const items: TempleEvent[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as TempleEvent);
+  });
+  firestoreEvents = items;
+  localStorage.setItem('mm_events', JSON.stringify(items));
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore events subscription error:", error);
+});
+
+// Subscribe to firestore 'committee'
+onSnapshot(collection(firestoreDb, 'committee'), (snapshot) => {
+  const items: CommitteeMember[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as CommitteeMember);
+  });
+  firestoreCommittee = items;
+  localStorage.setItem('mm_committee', JSON.stringify(items));
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore committee subscription error:", error);
 });
 
 export const db = {
@@ -703,8 +757,13 @@ export const db = {
 
   // Gallery
   getGallery(): GalleryItem[] {
-    // Return sorted by date descending
+    // Return sorted by order if available, else date descending
     return [...firestoreGallery].sort((a, b) => {
+      const orderA = (a as any).order !== undefined ? (a as any).order : 999999;
+      const orderB = (b as any).order !== undefined ? (b as any).order : 999999;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
       const dateA = a.date ? new Date(a.date).getTime() : 0;
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
@@ -1018,6 +1077,76 @@ export const db = {
     });
     localStorage.setItem('mm_templeTimings', JSON.stringify(updated));
     notifyDBChange();
+  },
+
+  // Events
+  getEvents(): TempleEvent[] {
+    return [...firestoreEvents].sort((a, b) => (a.order || 0) - (b.order || 0));
+  },
+
+  async addEvent(event: Omit<TempleEvent, 'id' | 'uploadedAt'>) {
+    const id = "evt_" + Date.now();
+    const newEvent: TempleEvent = {
+      id,
+      ...event,
+      uploadedAt: new Date().toISOString()
+    };
+    try {
+      await setDoc(doc(firestoreDb, 'events', id), newEvent);
+    } catch (e) {
+      console.error("Failed to add event to Firestore:", e);
+    }
+  },
+
+  async updateEvent(id: string, updatedFields: Partial<TempleEvent>) {
+    try {
+      await setDoc(doc(firestoreDb, 'events', id), updatedFields, { merge: true });
+    } catch (e) {
+      console.error("Failed to update event in Firestore:", e);
+    }
+  },
+
+  async deleteEvent(id: string) {
+    try {
+      await deleteDoc(doc(firestoreDb, 'events', id));
+    } catch (e) {
+      console.error("Failed to delete event from Firestore:", e);
+    }
+  },
+
+  // Committee Members
+  getCommittee(): CommitteeMember[] {
+    return [...firestoreCommittee].sort((a, b) => (a.order || 0) - (b.order || 0));
+  },
+
+  async addCommitteeMember(member: Omit<CommitteeMember, 'id' | 'uploadedAt'>) {
+    const id = "cmm_" + Date.now();
+    const newMember: CommitteeMember = {
+      id,
+      ...member,
+      uploadedAt: new Date().toISOString()
+    };
+    try {
+      await setDoc(doc(firestoreDb, 'committee', id), newMember);
+    } catch (e) {
+      console.error("Failed to add committee member to Firestore:", e);
+    }
+  },
+
+  async updateCommitteeMember(id: string, updatedFields: Partial<CommitteeMember>) {
+    try {
+      await setDoc(doc(firestoreDb, 'committee', id), updatedFields, { merge: true });
+    } catch (e) {
+      console.error("Failed to update committee member in Firestore:", e);
+    }
+  },
+
+  async deleteCommitteeMember(id: string) {
+    try {
+      await deleteDoc(doc(firestoreDb, 'committee', id));
+    } catch (e) {
+      console.error("Failed to delete committee member from Firestore:", e);
+    }
   }
 };
 

@@ -53,7 +53,7 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
     <header 
       className="relative w-full overflow-hidden pt-6 pb-4 px-4 bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(227, 242, 253, 0.92), rgba(247, 249, 252, 0.96)), url(${settings.templeCoverImage || "/src/assets/images/today_shringar_1782657607504.jpg"})`
+        backgroundImage: `linear-gradient(to bottom, rgba(227, 242, 253, 0.92), rgba(247, 249, 252, 0.96)), url(${settings.headerImageUrl || settings.templeCoverImageUrl || settings.templeCoverImage || "/src/assets/images/today_shringar_1782657607504.jpg"})`
       }}
     >
       {/* Decorative Traditional Border Arch */}
@@ -106,7 +106,7 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
             <div className="absolute inset-0 bg-gradient-to-tr from-amber-400 to-orange-500 rounded-full blur opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
             <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full p-1 bg-white/90 backdrop-blur shadow-lg border-2 border-amber-300/60 overflow-hidden flex items-center justify-center">
               <img
-                src={settings.templeLogo || "/src/assets/images/temple_logo_1782657591698.jpg"}
+                src={settings.templeLogoUrl || settings.templeLogo || "/src/assets/images/temple_logo_1782657591698.jpg"}
                 alt={settings.templeNameHindi || "लोगो"}
                 className="w-full h-full object-cover rounded-full"
                 referrerPolicy="no-referrer"

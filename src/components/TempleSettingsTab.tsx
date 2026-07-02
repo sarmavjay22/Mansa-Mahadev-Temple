@@ -242,6 +242,96 @@ export default function TempleSettingsTab() {
               )}
             </div>
 
+            {/* 🖼️ Media URL Management Section */}
+            <div className="col-span-1 md:col-span-2 border-t border-slate-200/60 pt-4 mt-2">
+              <h4 className="text-xs font-bold text-amber-600 mb-3 flex items-center gap-1.5">
+                <span>🖼️ मीडिया यूआरएल प्रबंधन (Media URL Management)</span>
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                
+                {/* 1. Temple Logo URL */}
+                <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-1.5">
+                  <label className="block text-[10px] font-bold text-slate-500">मंदिर लोगो यूआरएल (Temple Logo URL):</label>
+                  <input
+                    type="text"
+                    name="templeLogoUrl"
+                    value={form.templeLogoUrl || ''}
+                    onChange={handleChange}
+                    placeholder="लोगो का सीधा इमेज यूआरएल (उदा. ImgBB, ImageKit)"
+                    className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  />
+                  <p className="text-[9px] text-slate-400">खाली होने पर, मुख्य अपलोडेड लोगो का उपयोग होगा।</p>
+                  {(form.templeLogoUrl || form.templeLogo) && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[9px] text-slate-400">वर्तमान सक्रिय:</span>
+                      <img src={form.templeLogoUrl || form.templeLogo} className="w-6 h-6 object-cover rounded-full border shadow-xs" referrerPolicy="no-referrer" />
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Header Image URL */}
+                <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-1.5">
+                  <label className="block text-[10px] font-bold text-slate-500">हेडर बैकग्राउंड यूआरएल (Header Image URL):</label>
+                  <input
+                    type="text"
+                    name="headerImageUrl"
+                    value={form.headerImageUrl || ''}
+                    onChange={handleChange}
+                    placeholder="हेडर बैकग्राउंड का सीधा इमेज यूआरएल"
+                    className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  />
+                  <p className="text-[9px] text-slate-400">खाली होने पर, मुख्य अपलोडेड आवरण चित्र का उपयोग होगा।</p>
+                  {(form.headerImageUrl || form.templeCoverImage) && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[9px] text-slate-400">वर्तमान सक्रिय:</span>
+                      <img src={form.headerImageUrl || form.templeCoverImage} className="w-10 h-6 object-cover rounded border shadow-xs" referrerPolicy="no-referrer" />
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Cover Image URL */}
+                <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-1.5">
+                  <label className="block text-[10px] font-bold text-slate-500">कवर इमेज यूआरएल (Cover Image URL):</label>
+                  <input
+                    type="text"
+                    name="templeCoverImageUrl"
+                    value={form.templeCoverImageUrl || ''}
+                    onChange={handleChange}
+                    placeholder="मुख्य कवर इमेज का सीधा यूआरएल"
+                    className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  />
+                  <p className="text-[9px] text-slate-400">खाली होने पर, मुख्य अपलोडेड आवरण चित्र का उपयोग होगा।</p>
+                  {(form.templeCoverImageUrl || form.templeCoverImage) && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[9px] text-slate-400">वर्तमान सक्रिय:</span>
+                      <img src={form.templeCoverImageUrl || form.templeCoverImage} className="w-10 h-6 object-cover rounded border shadow-xs" referrerPolicy="no-referrer" />
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Festival Banner URL */}
+                <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-1.5">
+                  <label className="block text-[10px] font-bold text-slate-500">पर्व/उत्सव बैनर यूआरएल (Festival Banner URL):</label>
+                  <input
+                    type="text"
+                    name="festivalBannerUrl"
+                    value={form.festivalBannerUrl || ''}
+                    onChange={handleChange}
+                    placeholder="उत्सव के विशेष बैनर का सीधा इमेज यूआरएल"
+                    className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  />
+                  <p className="text-[9px] text-slate-400">यहाँ यूआरएल देने पर यह वेबसाइट के सबसे ऊपर सुंदर बैनर के रूप में दिखेगा।</p>
+                  {form.festivalBannerUrl && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[9px] text-slate-400">पूर्वावलोकन:</span>
+                      <img src={form.festivalBannerUrl} className="w-10 h-6 object-cover rounded border shadow-xs" referrerPolicy="no-referrer" />
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            </div>
+
             {/* Developer Details & Copyright */}
             <div>
               <label className="block text-[10px] font-bold text-slate-500 mb-1">फुटर कॉपीराइट संदेश (Footer Copyright):</label>
@@ -277,6 +367,18 @@ export default function TempleSettingsTab() {
                 <Smartphone className="w-4 h-4 text-emerald-500" />
                 <span>स्थान, संपर्क व सोशल मीडिया लिंक्स (Contacts & Socials)</span>
               </h3>
+            </div>
+
+            {/* Contact Person Name */}
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 mb-1">संपर्क व्यक्ति का नाम (Contact Person Name):</label>
+              <input
+                type="text"
+                name="contactPerson"
+                value={form.contactPerson || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none"
+              />
             </div>
 
             {/* Phone */}

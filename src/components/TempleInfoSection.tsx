@@ -16,7 +16,8 @@ import {
   Check, 
   CheckCircle,
   Clock3,
-  ExternalLink
+  ExternalLink,
+  User
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -396,6 +397,19 @@ export default function TempleInfoSection() {
               
               {/* Left hand details list */}
               <div className="flex-1 flex flex-col gap-4">
+
+                {/* Contact Person Card */}
+                {settings.contactPerson && (
+                  <div className="p-4 bg-amber-50/50 rounded-2xl border border-amber-100/50">
+                    <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                      <User className="w-3.5 h-3.5 text-amber-500" />
+                      <span>मुख्य संपर्क व्यक्ति (Contact Person)</span>
+                    </p>
+                    <p className="text-xs md:text-sm font-bold text-slate-700">
+                      {settings.contactPerson}
+                    </p>
+                  </div>
+                )}
                 
                 {/* Physical address card */}
                 <div className="p-4 bg-sky-50/50 rounded-2xl border border-sky-100/50">
