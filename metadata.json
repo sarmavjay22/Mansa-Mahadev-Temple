@@ -1,0 +1,6 @@
+{
+  "name": "Mansa Mahadev Temple",
+  "description": "Premium Temple Management Web App for मंसा महादेव मंदिर, Udaipur. Features daily Shringar Darshan, Live Video, Aarti popups, devotional Bhajans, past gallery search, and a secure Admin Panel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

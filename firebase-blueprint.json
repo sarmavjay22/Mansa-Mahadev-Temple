@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "TempleSettings": {
+      "title": "Temple Settings",
+      "description": "Customizable settings and details for the temple.",
+      "type": "object",
+      "properties": {
+        "templeNameHindi": { "type": "string" },
+        "templeNameEnglish": { "type": "string" },
+        "templeLogo": { "type": "string" },
+        "templeCoverImage": { "type": "string" },
+        "templeAddress": { "type": "string" },
+        "village": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" },
+        "pincode": { "type": "string" },
+        "phone": { "type": "string" },
+        "whatsApp": { "type": "string" },
+        "email": { "type": "string" },
+        "googleMapsLink": { "type": "string" },
+        "facebook": { "type": "string" },
+        "instagram": { "type": "string" },
+        "youtube": { "type": "string" },
+        "donationQR": { "type": "string" },
+        "upiId": { "type": "string" },
+        "morningDarshanTime": { "type": "string" },
+        "eveningDarshanTime": { "type": "string" },
+        "templeHistory": { "type": "string" },
+        "aboutTemple": { "type": "string" },
+        "shortDescription": { "type": "string" },
+        "primaryThemeColor": { "type": "string" },
+        "secondaryThemeColor": { "type": "string" },
+        "accentColor": { "type": "string" },
+        "footerCopyright": { "type": "string" },
+        "developerName": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "settings": {
+      "schema": "TempleSettings",
+      "description": "Contains temple settings and configurations."
+    }
+  }
+}
