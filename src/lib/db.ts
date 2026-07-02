@@ -704,7 +704,11 @@ export const db = {
   // Gallery
   getGallery(): GalleryItem[] {
     // Return sorted by date descending
-    return [...firestoreGallery].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return [...firestoreGallery].sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+    });
   },
 
   async addGalleryItem(item: Omit<GalleryItem, 'id' | 'uploadedAt'> & { id?: string }) {
@@ -742,7 +746,11 @@ export const db = {
 
   // Video Darshan (YouTube)
   getVideos(): VideoDarshan[] {
-    return [...firestoreVideos].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return [...firestoreVideos].sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+    });
   },
 
   getTodayVideo(): VideoDarshan | null {

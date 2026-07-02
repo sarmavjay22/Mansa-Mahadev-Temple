@@ -32,7 +32,11 @@ export default function AartiVideoPopup({ isOpen, onClose }: AartiVideoPopupProp
   const loadVideos = () => {
     const list = db.getVideos();
     // Sorted by date in descending order (newest first)
-    list.sort((a, b) => b.date.localeCompare(a.date));
+    list.sort((a, b) => {
+      const dateA = a.date || '';
+      const dateB = b.date || '';
+      return dateB.localeCompare(dateA);
+    });
     setVideos(list);
   };
 

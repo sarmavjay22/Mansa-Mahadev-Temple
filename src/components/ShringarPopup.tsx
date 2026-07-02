@@ -103,7 +103,11 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
     });
 
     // Sort shringars by date in descending order (newest first) to enable datewise index!
-    combined.sort((a, b) => b.date.localeCompare(a.date));
+    combined.sort((a, b) => {
+      const dateA = a.date || '';
+      const dateB = b.date || '';
+      return dateB.localeCompare(dateA);
+    });
 
     setShringars(combined);
   };
