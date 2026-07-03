@@ -1022,6 +1022,14 @@ export const db = {
     }
   },
 
+  async updateBhajan(id: string, updatedFields: Partial<BhajanItem>) {
+    try {
+      await setDoc(doc(firestoreDb, 'bhajans', id), updatedFields, { merge: true });
+    } catch (error) {
+      console.error("Failed to update bhajan in Firestore:", error);
+    }
+  },
+
   // Notifications
   getNotifications(): NotificationItem[] {
     const data = localStorage.getItem('mm_notifications');

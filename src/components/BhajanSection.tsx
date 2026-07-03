@@ -20,9 +20,28 @@ import {
   Disc,
   Disc3,
   Calendar,
-  Sparkles
+  Sparkles,
+  Youtube,
+  Video,
+  Edit,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+
+// Helper to extract YouTube Video ID from any watch link or iframe embed code
+function getYouTubeId(url: string): string | null {
+  if (!url) return null;
+  // If it's an iframe embed string
+  if (url.includes('<iframe')) {
+    const srcMatch = url.match(/src=["']([^"']+)["']/);
+    if (srcMatch) {
+      url = srcMatch[1];
+    }
+  }
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
 
 // Global Singleton Audio instance to enable "Background Play" safely
 // across component mounts and prevent multiple audio elements clashing.
@@ -37,6 +56,7 @@ export default function BhajanSection() {
   // Derived active track state to keep displays and audio in 100% synchronization
   const activeTrack = (currentTrackId && bhajans.find(b => b.id === currentTrackId)) || bhajans[0];
   const currentTrackIndex = activeTrack ? bhajans.findIndex(b => b.id === activeTrack.id) : 0;
+  const activeYtId = activeTrack ? getYouTubeId(activeTrack.audioUrl) : null;
 
   // Audio state
   const [currentTime, setCurrentTime] = useState(0);
@@ -49,11 +69,16 @@ export default function BhajanSection() {
   // Admin upload states
   const [isAdmin, setIsAdmin] = useState(db.isAdminLoggedIn());
   const [isEditing, setIsEditing] = useState(false);
+  const [editingBhajanId, setEditingBhajanId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newSinger, setNewSinger] = useState('');
   const [newAudioUrl, setNewAudioUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Custom alert and delete confirmation states
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -133,6 +158,16 @@ export default function BhajanSection() {
     // Reset error state
     setPlaybackError(null);
 
+    // If active track is a YouTube video, pause standard audio and skip loading audio source
+    const ytId = getYouTubeId(cleanUrl);
+    if (ytId) {
+      audio.pause();
+      if (audio.src) {
+        audio.src = "";
+      }
+      return;
+    }
+
     // Validate audio URL
     if (!cleanUrl || cleanUrl.trim() === "") {
       setPlaybackError("भजन ऑडियो उपलब्ध नहीं है (Audio URL is missing)");
@@ -195,6 +230,11 @@ export default function BhajanSection() {
 
     const currentTrack = activeTrack;
     const cleanUrl = currentTrack?.audioUrl;
+
+    if (cleanUrl && getYouTubeId(cleanUrl)) {
+      // YouTube videos have their own embedded play/pause controls.
+      return;
+    }
 
     if (!cleanUrl || cleanUrl.trim() === "" || !/^(https?:\/\/|\/|data:)/i.test(cleanUrl.trim())) {
       setPlaybackError("अमान्य या अनुपलब्ध ऑडियो यूआरएल (Invalid or missing Audio URL)");
@@ -259,6 +299,12 @@ export default function BhajanSection() {
     const track = bhajans[nextIndex];
     if (!track) return;
 
+    if (getYouTubeId(track.audioUrl)) {
+      setCurrentTrackId(track.id);
+      setIsPlaying(false);
+      return;
+    }
+
     if (!track.audioUrl || track.audioUrl.trim() === "" || !/^(https?:\/\/|\/|data:)/i.test(track.audioUrl.trim())) {
       setCurrentTrackId(track.id);
       setIsPlaying(false);
@@ -289,6 +335,12 @@ export default function BhajanSection() {
     const track = bhajans[prevIndex];
     if (!track) return;
 
+    if (getYouTubeId(track.audioUrl)) {
+      setCurrentTrackId(track.id);
+      setIsPlaying(false);
+      return;
+    }
+
     if (!track.audioUrl || track.audioUrl.trim() === "" || !/^(https?:\/\/|\/|data:)/i.test(track.audioUrl.trim())) {
       setCurrentTrackId(track.id);
       setIsPlaying(false);
@@ -312,6 +364,16 @@ export default function BhajanSection() {
     
     const track = bhajans.find(b => b.id === trackId);
     if (!track) return;
+
+    if (getYouTubeId(track.audioUrl)) {
+      setCurrentTrackId(trackId);
+      setIsPlaying(false);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+      return;
+    }
 
     if (!track.audioUrl || track.audioUrl.trim() === "" || !/^(https?:\/\/|\/|data:)/i.test(track.audioUrl.trim())) {
       setCurrentTrackId(trackId);
@@ -359,30 +421,65 @@ export default function BhajanSection() {
       setNewAudioUrl(audioUrl);
     } catch (err) {
       console.error(err);
-      alert("ऑडियो अपलोड विफल हुआ। कृपया पुनः प्रयास करें।");
+      setAlertMessage("ऑडियो अपलोड विफल हुआ। कृपया पुनः प्रयास करें।");
     } finally {
       setUploading(false);
     }
   };
 
-  const handleSaveBhajan = () => {
+  const handleStartEditBhajan = (track: BhajanItem, e: MouseEvent) => {
+    e.stopPropagation();
+    setEditingBhajanId(track.id);
+    setNewTitle(track.title);
+    setNewSinger(track.singer || '');
+    setNewAudioUrl(track.audioUrl);
+    setIsEditing(true);
+  };
+
+  const handleCancelEditing = () => {
+    setIsEditing(false);
+    setEditingBhajanId(null);
+    setNewTitle('');
+    setNewSinger('');
+    setNewAudioUrl('');
+  };
+
+  const handleSaveBhajan = async () => {
     if (!newTitle.trim() || !newAudioUrl.trim()) {
-      alert("कृपया भजन का नाम और ऑडियो फ़ाइल/URL दोनों भरें।");
+      setAlertMessage("कृपया भजन का नाम और ऑडियो फ़ाइल/URL/यूट्यूब लिंक भरें।");
       return;
     }
 
-    db.addBhajan({
+    const ytId = getYouTubeId(newAudioUrl.trim());
+    const finalThumbnail = ytId 
+      ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+      : "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=200&auto=format&fit=crop";
+
+    const bhajanData = {
       title: newTitle.trim(),
       singer: newSinger.trim() || "पारंपरिक",
-      audioUrl: newAudioUrl,
-      thumbnailUrl: "https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?q=80&w=200&auto=format&fit=crop", // standard gorgeous image
-      duration: "5:00" // Estimated
-    });
+      audioUrl: newAudioUrl.trim(),
+      thumbnailUrl: finalThumbnail,
+      duration: ytId ? "वीडियो" : "5:00"
+    };
 
-    setSaveSuccess(true);
+    try {
+      if (editingBhajanId) {
+        await db.updateBhajan(editingBhajanId, bhajanData);
+      } else {
+        await db.addBhajan(bhajanData);
+      }
+      setSaveSuccess(true);
+    } catch (err) {
+      console.error(err);
+      setAlertMessage("सहेजने में त्रुटि हुई। कृपया पुनः प्रयास करें।");
+      return;
+    }
+
     setTimeout(() => {
       setSaveSuccess(false);
       setIsEditing(false);
+      setEditingBhajanId(null);
       setNewTitle('');
       setNewSinger('');
       setNewAudioUrl('');
@@ -391,11 +488,7 @@ export default function BhajanSection() {
 
   const handleDeleteBhajan = (id: string, e: MouseEvent) => {
     e.stopPropagation(); // Avoid triggering track select
-    if (confirm("क्या आप वाकई इस भजन को हटाना चाहते हैं?")) {
-      db.deleteBhajan(id);
-      // Reset selected track ID so it falls back to the first available track
-      setCurrentTrackId(null);
-    }
+    setDeleteConfirmId(id);
   };
 
   // Formatting helpers
@@ -415,7 +508,7 @@ export default function BhajanSection() {
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">भक्ति रस</span>
         </h2>
 
-        {isAdmin && !isEditing && (
+        {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
             className="flex items-center gap-1 text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 font-bold px-3 py-1.5 rounded-xl transition duration-300"
@@ -428,16 +521,21 @@ export default function BhajanSection() {
 
       {/* Admin Panel audio uploader */}
       <AnimatePresence>
-        {isAdmin && isEditing && (
+        {isEditing && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className="mb-6 bg-amber-50/90 border border-amber-200/50 p-4 rounded-3xl shadow-inner text-slate-800"
           >
-            <h3 className="text-md font-bold text-amber-800 mb-3 flex items-center gap-1.5">
-              <Music className="w-4 h-4 text-amber-600" />
-              <span>नया ऑडियो भजन अपलोड करें (ImageKit)</span>
+            <h3 className="text-md font-bold text-amber-800 mb-3 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Music className="w-4 h-4 text-amber-600" />
+                <span>{editingBhajanId ? 'भजन विवरण संशोधित करें' : 'नया भजन जोड़ें (ऑडियो फ़ाइल या यूट्यूब लिंक)'}</span>
+              </span>
+              {editingBhajanId && (
+                <span className="text-[10px] bg-amber-200 text-amber-800 font-bold px-2 py-0.5 rounded-lg">संशोधन मोड</span>
+              )}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -468,46 +566,58 @@ export default function BhajanSection() {
               </div>
 
               <div className="flex flex-col gap-3 justify-between">
-                {/* Audio Upload */}
+                {/* Audio Upload / YouTube Link */}
                 <div>
-                  <label className="block text-xs font-bold text-amber-900 mb-1">ऑडियो फ़ाइल (Audio File):</label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-dashed border-amber-300 text-amber-700 font-semibold py-2 px-3 rounded-xl text-xs cursor-pointer transition"
-                    >
-                      {uploading ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
-                      ) : (
-                        <Upload className="w-4 h-4 text-amber-500" />
-                      )}
-                      <span>{uploading ? 'अपलोड हो रहा है...' : 'ऑडियो फाइल चुनें'}</span>
-                    </button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleAudioUpload}
-                      accept="audio/*"
-                      className="hidden"
-                    />
-                  </div>
-                  {/* Or paste direct URL */}
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      value={newAudioUrl}
-                      onChange={(e) => setNewAudioUrl(e.target.value)}
-                      placeholder="या डायरेक्ट ऑडियो URL यहाँ पेस्ट करें"
-                      className="w-full px-3 py-1.5 text-xs bg-white border border-amber-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    />
+                  <label className="block text-xs font-bold text-amber-900 mb-1">भजन का ऑडियो/यूट्यूब स्रोत (Audio/YouTube Source):</label>
+                  <div className="bg-white/80 border border-amber-200/50 rounded-2xl p-3 flex flex-col gap-2.5">
+                    {/* File Upload Option */}
+                    <div>
+                      <span className="block text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-1">विकल्प 1: ऑडियो फ़ाइल अपलोड करें</span>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full flex items-center justify-center gap-1.5 bg-amber-50/50 hover:bg-amber-100/50 border border-dashed border-amber-300 text-amber-800 font-semibold py-1.5 px-3 rounded-xl text-xs cursor-pointer transition"
+                      >
+                        {uploading ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />
+                        ) : (
+                          <Upload className="w-3.5 h-3.5 text-amber-600" />
+                        )}
+                        <span>{uploading ? 'अपलोड हो रहा है...' : 'फाइल चुनें'}</span>
+                      </button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleAudioUpload}
+                        accept="audio/*"
+                        className="hidden"
+                      />
+                    </div>
+
+                    <div className="relative flex py-0.5 items-center">
+                      <div className="flex-grow border-t border-amber-200/30"></div>
+                      <span className="flex-shrink mx-2 text-[9px] font-bold text-amber-500 uppercase">अथवा</span>
+                      <div className="flex-grow border-t border-amber-200/30"></div>
+                    </div>
+
+                    {/* URL/YouTube Input */}
+                    <div>
+                      <span className="block text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-1">विकल्प 2: ऑडियो URL या YouTube लिंक / एम्बेड कोड</span>
+                      <input
+                        type="text"
+                        value={newAudioUrl}
+                        onChange={(e) => setNewAudioUrl(e.target.value)}
+                        placeholder="उदा. https://www.youtube.com/watch?v=... या iframe"
+                        className="w-full px-3 py-1.5 text-xs bg-white border border-amber-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 placeholder:text-slate-400"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 {/* Form Actions */}
                 <div className="flex gap-2 mt-4">
                   <button
-                    onClick={() => setIsEditing(false)}
+                    onClick={handleCancelEditing}
                     className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 rounded-xl text-xs transition"
                   >
                     रद्द करें
@@ -520,10 +630,10 @@ export default function BhajanSection() {
                     {saveSuccess ? (
                       <>
                         <Check className="w-4 h-4" />
-                        <span>भजन सहेज लिया गया!</span>
+                        <span>{editingBhajanId ? 'भजन संशोधित कर दिया गया!' : 'भजन सहेज लिया गया!'}</span>
                       </>
                     ) : (
-                      <span>सहेजें</span>
+                      <span>{editingBhajanId ? 'संशोधन सहेजें' : 'सहेजें'}</span>
                     )}
                   </button>
                 </div>
@@ -539,33 +649,46 @@ export default function BhajanSection() {
         {/* Left Hand: Album / Spinning Diya & Metadata */}
         {activeTrack ? (
           <div className="w-full md:w-2/5 flex flex-col items-center text-center justify-center gap-4 border-b md:border-b-0 md:border-r border-sky-100 pb-6 md:pb-0 md:pr-6 shrink-0">
-            {/* Rotate Vinly Plate Disc */}
-            <div className="relative group select-none">
-              <div className="absolute inset-0 bg-gradient-to-tr from-amber-400/20 to-orange-500/20 rounded-full blur-lg opacity-80 pointer-events-none"></div>
-              
-              <div className={`w-36 h-36 md:w-44 md:h-44 rounded-full bg-slate-900 border-4 border-amber-100/80 shadow-2xl flex items-center justify-center overflow-hidden relative ${
-                isPlaying ? 'animate-[spin_10s_linear_infinite]' : ''
-              }`}>
-                {/* Vinyl Texture Lines */}
-                <div className="absolute inset-2 border border-dashed border-white/10 rounded-full pointer-events-none"></div>
-                <div className="absolute inset-6 border border-white/5 rounded-full pointer-events-none"></div>
-                <div className="absolute inset-10 border border-white/10 rounded-full pointer-events-none"></div>
-                
-                {/* Meditating Shiva center */}
-                <img
-                  src={activeTrack.thumbnailUrl}
-                  alt="भजन एल्बम"
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-amber-300 z-10"
-                  referrerPolicy="no-referrer"
-                />
-
-                {/* center hole */}
-                <div className="absolute w-3 h-3 bg-white border border-amber-400 rounded-full z-20"></div>
+            {activeYtId ? (
+              /* YouTube Video Embed Player */
+              <div className="w-full aspect-video rounded-2xl overflow-hidden border-2 border-amber-400/30 shadow-lg bg-slate-950 relative">
+                <iframe
+                  src={`https://www.youtube.com/embed/${activeYtId}?autoplay=0&rel=0&modestbranding=1`}
+                  title={activeTrack.title}
+                  className="w-full h-full absolute inset-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
               </div>
+            ) : (
+              /* Rotate Vinly Plate Disc */
+              <div className="relative group select-none">
+                <div className="absolute inset-0 bg-gradient-to-tr from-amber-400/20 to-orange-500/20 rounded-full blur-lg opacity-80 pointer-events-none"></div>
+                
+                <div className={`w-36 h-36 md:w-44 md:h-44 rounded-full bg-slate-900 border-4 border-amber-100/80 shadow-2xl flex items-center justify-center overflow-hidden relative ${
+                  isPlaying ? 'animate-[spin_10s_linear_infinite]' : ''
+                }`}>
+                  {/* Vinyl Texture Lines */}
+                  <div className="absolute inset-2 border border-dashed border-white/10 rounded-full pointer-events-none"></div>
+                  <div className="absolute inset-6 border border-white/5 rounded-full pointer-events-none"></div>
+                  <div className="absolute inset-10 border border-white/10 rounded-full pointer-events-none"></div>
+                  
+                  {/* Meditating Shiva center */}
+                  <img
+                    src={activeTrack.thumbnailUrl}
+                    alt="भजन एल्बम"
+                    className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-amber-300 z-10"
+                    referrerPolicy="no-referrer"
+                  />
 
-              {/* Devotional Ring Overlay */}
-              <div className="absolute -inset-1 border-2 border-amber-400/30 rounded-full scale-105 pointer-events-none"></div>
-            </div>
+                  {/* center hole */}
+                  <div className="absolute w-3 h-3 bg-white border border-amber-400 rounded-full z-20"></div>
+                </div>
+
+                {/* Devotional Ring Overlay */}
+                <div className="absolute -inset-1 border-2 border-amber-400/30 rounded-full scale-105 pointer-events-none"></div>
+              </div>
+            )}
 
             {/* Title & Singer HUD */}
             <div className="px-1 max-w-full">
@@ -610,22 +733,29 @@ export default function BhajanSection() {
           
           {/* Seek Progress Bar Row */}
           {activeTrack && (
-            <div className="flex flex-col gap-1 px-1">
-              {/* slider */}
-              <input
-                type="range"
-                min="0"
-                max={duration || 100}
-                value={currentTime}
-                onChange={handleSeek}
-                className="w-full h-1.5 bg-slate-100 hover:bg-slate-200 accent-amber-500 rounded-lg appearance-none cursor-pointer"
-              />
-              {/* timings display */}
-              <div className="flex justify-between text-[11px] font-mono font-semibold text-slate-400">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
+            activeYtId ? (
+              <div className="flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-50/40 rounded-2xl border border-amber-100/50 text-amber-800 text-[10px] md:text-xs font-bold text-center">
+                <Youtube className="w-4 h-4 text-red-600 animate-pulse shrink-0" />
+                <span>यूट्यूब भजन सक्रिय: नियंत्रण के लिए ऊपर प्लेयर का उपयोग करें</span>
               </div>
-            </div>
+            ) : (
+              <div className="flex flex-col gap-1 px-1">
+                {/* slider */}
+                <input
+                  type="range"
+                  min="0"
+                  max={duration || 100}
+                  value={currentTime}
+                  onChange={handleSeek}
+                  className="w-full h-1.5 bg-slate-100 hover:bg-slate-200 accent-amber-500 rounded-lg appearance-none cursor-pointer"
+                />
+                {/* timings display */}
+                <div className="flex justify-between text-[11px] font-mono font-semibold text-slate-400">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>{formatTime(duration)}</span>
+                </div>
+              </div>
+            )
           )}
 
           {/* Action Controllers Row */}
@@ -651,17 +781,26 @@ export default function BhajanSection() {
             </button>
 
             {/* MAIN PLAY-PAUSE ROUND CONTROLLER */}
-            <button
-              onClick={togglePlay}
-              className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white flex items-center justify-center shadow-lg shadow-orange-500/20 hover:scale-105 transition active:scale-95 border-2 border-white/60"
-              title={isPlaying ? 'रोकें' : 'बजाएं'}
-            >
-              {isPlaying ? (
-                <Pause className="w-6 h-6 fill-current text-white" />
-              ) : (
-                <Play className="w-6 h-6 fill-current text-white translate-x-0.5" />
-              )}
-            </button>
+            {activeYtId ? (
+              <div 
+                className="w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-500/20 border-2 border-white/60"
+                title="यूट्यूब प्लेयर सक्रिय है"
+              >
+                <Youtube className="w-6 h-6 text-white fill-current" />
+              </div>
+            ) : (
+              <button
+                onClick={togglePlay}
+                className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white flex items-center justify-center shadow-lg shadow-orange-500/20 hover:scale-105 transition active:scale-95 border-2 border-white/60"
+                title={isPlaying ? 'रोकें' : 'बजाएं'}
+              >
+                {isPlaying ? (
+                  <Pause className="w-6 h-6 fill-current text-white" />
+                ) : (
+                  <Play className="w-6 h-6 fill-current text-white translate-x-0.5" />
+                )}
+              </button>
+            )}
 
             {/* Skip Forward */}
             <button
@@ -691,67 +830,149 @@ export default function BhajanSection() {
           </div>
 
           {/* Volume control slider */}
-          <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-100 rounded-2xl px-3.5 py-1.5 self-center">
-            <button onClick={toggleMute} className="text-slate-500 hover:text-slate-700">
-              {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-rose-500" /> : <Volume2 className="w-4 h-4 text-amber-600" />}
-            </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.05"
-              value={isMuted ? 0 : volume}
-              onChange={handleVolumeChange}
-              className="w-20 h-1 bg-slate-200 accent-amber-500 rounded-lg appearance-none cursor-pointer"
-            />
-          </div>
+          {!activeYtId && (
+            <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-100 rounded-2xl px-3.5 py-1.5 self-center">
+              <button onClick={toggleMute} className="text-slate-500 hover:text-slate-700">
+                {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-rose-500" /> : <Volume2 className="w-4 h-4 text-amber-600" />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={isMuted ? 0 : volume}
+                onChange={handleVolumeChange}
+                className="w-20 h-1 bg-slate-200 accent-amber-500 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+          )}
 
           {/* Playlist Tracks queue list */}
           <div className="flex-1 mt-2">
             <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 select-none tracking-widest px-1">प्लेलिस्ट ट्रैक ({bhajans.length}):</p>
             <div className="max-h-36 overflow-y-auto flex flex-col gap-1.5 pr-1 text-sm scrollbar-thin">
-              {bhajans.map((track, idx) => (
-                <div
-                  key={track.id}
-                  onClick={() => handleSelectTrack(track.id)}
-                  className={`flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition active:scale-99 ${
-                    track.id === activeTrack?.id 
-                      ? 'bg-amber-50 border border-amber-200/50 text-amber-800 font-bold' 
-                      : 'hover:bg-slate-50/50 text-slate-600 font-medium'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="font-mono text-xs text-slate-400 w-4 shrink-0 text-center">
-                      {track.id === activeTrack?.id && isPlaying ? (
-                        <span className="text-amber-500">▶</span>
-                      ) : (
-                        idx + 1
-                      )}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate text-xs md:text-sm">{track.title}</p>
-                      <p className="text-[10px] text-slate-400 truncate">{track.singer}</p>
+              {bhajans.map((track, idx) => {
+                const isTrackYt = !!getYouTubeId(track.audioUrl);
+                return (
+                  <div
+                    key={track.id}
+                    onClick={() => handleSelectTrack(track.id)}
+                    className={`flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition active:scale-99 ${
+                      track.id === activeTrack?.id 
+                        ? 'bg-amber-50 border border-amber-200/50 text-amber-800 font-bold' 
+                        : 'hover:bg-slate-50/50 text-slate-600 font-medium'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="font-mono text-xs text-slate-400 w-4 shrink-0 text-center">
+                        {track.id === activeTrack?.id ? (
+                          isTrackYt ? (
+                            <Youtube className="w-3.5 h-3.5 text-red-500 fill-red-500 mx-auto animate-pulse" />
+                          ) : isPlaying ? (
+                            <span className="text-amber-500">▶</span>
+                          ) : (
+                            <span className="text-amber-500">⏸</span>
+                          )
+                        ) : (
+                          idx + 1
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-xs md:text-sm flex items-center gap-1">
+                          <span>{track.title}</span>
+                          {isTrackYt && (
+                            <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded bg-red-50 text-red-600 text-[8px] font-bold tracking-wide uppercase border border-red-100">
+                              यूट्यूब
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-[10px] text-slate-400 truncate">{track.singer}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-[10px] font-mono font-bold text-slate-400 mr-1">{track.duration}</span>
+                      <>
+                        <button
+                          onClick={(e) => handleStartEditBhajan(track, e)}
+                          className="p-1 text-slate-400 hover:text-amber-600 rounded-lg hover:bg-amber-50 transition"
+                          title="संशोधित करें"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteBhajan(track.id, e)}
+                          className="p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition"
+                          title="हटाएं"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] font-mono font-bold text-slate-400">{track.duration}</span>
-                    {isAdmin && (
-                      <button
-                        onClick={(e) => handleDeleteBhajan(track.id, e)}
-                        className="p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition"
-                        title="हटाएं"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Custom Alert Dialog Modal */}
+      {alertMessage && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-amber-100 text-center animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-3">
+              <Sparkles className="w-6 h-6 text-amber-500" />
+            </div>
+            <h3 className="text-md font-bold text-slate-800 mb-2">सूचना</h3>
+            <p className="text-xs text-slate-600 leading-relaxed mb-5">{alertMessage}</p>
+            <button
+              onClick={() => setAlertMessage(null)}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-xl text-xs shadow transition active:scale-95"
+            >
+              ठीक है (OK)
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-rose-100 text-center animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-3">
+              <Trash2 className="w-6 h-6 text-rose-500 animate-pulse" />
+            </div>
+            <h3 className="text-md font-bold text-slate-800 mb-2">भजन हटाएं?</h3>
+            <p className="text-xs text-slate-600 leading-relaxed mb-5 font-medium">
+              क्या आप वाकई इस भजन को प्लेलिस्ट से हटाना चाहते हैं? यह क्रिया वापस नहीं ली जा सकती।
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 rounded-xl text-xs transition"
+              >
+                रद्द करें
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await db.deleteBhajan(deleteConfirmId);
+                    setCurrentTrackId(null);
+                  } catch (e) {
+                    console.error(e);
+                  } finally {
+                    setDeleteConfirmId(null);
+                  }
+                }}
+                className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 rounded-xl text-xs shadow-lg shadow-rose-500/20 transition active:scale-95"
+              >
+                हाँ, हटाएं
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
