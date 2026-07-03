@@ -284,46 +284,6 @@ export default function TempleSettingsTab() {
                   )}
                 </div>
 
-                {/* 2. Header Image URL */}
-                <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-1.5">
-                  <label className="block text-[10px] font-bold text-slate-500">हेडर बैकग्राउंड यूआरएल (Header Image URL):</label>
-                  <input
-                    type="text"
-                    name="headerImageUrl"
-                    value={form.headerImageUrl || ''}
-                    onChange={handleChange}
-                    placeholder="हेडर बैकग्राउंड का सीधा इमेज यूआरएल"
-                    className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
-                  />
-                  <p className="text-[9px] text-slate-400">खाली होने पर, मुख्य अपलोडेड आवरण चित्र का उपयोग होगा।</p>
-                  {(form.headerImageUrl || form.templeCoverImage) && (
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-[9px] text-slate-400">वर्तमान सक्रिय:</span>
-                      <img src={form.headerImageUrl || form.templeCoverImage} className="w-10 h-6 object-cover rounded border shadow-xs" referrerPolicy="no-referrer" />
-                    </div>
-                  )}
-                </div>
-
-                {/* 3. Cover Image URL */}
-                <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-1.5">
-                  <label className="block text-[10px] font-bold text-slate-500">कवर इमेज यूआरएल (Cover Image URL):</label>
-                  <input
-                    type="text"
-                    name="templeCoverImageUrl"
-                    value={form.templeCoverImageUrl || ''}
-                    onChange={handleChange}
-                    placeholder="मुख्य कवर इमेज का सीधा यूआरएल"
-                    className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
-                  />
-                  <p className="text-[9px] text-slate-400">खाली होने पर, मुख्य अपलोडेड आवरण चित्र का उपयोग होगा।</p>
-                  {(form.templeCoverImageUrl || form.templeCoverImage) && (
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-[9px] text-slate-400">वर्तमान सक्रिय:</span>
-                      <img src={form.templeCoverImageUrl || form.templeCoverImage} className="w-10 h-6 object-cover rounded border shadow-xs" referrerPolicy="no-referrer" />
-                    </div>
-                  )}
-                </div>
-
                 {/* 4. Festival Banner URL */}
                 <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-1.5">
                   <label className="block text-[10px] font-bold text-slate-500">पर्व/उत्सव बैनर यूआरएल (Festival Banner URL):</label>

@@ -45,11 +45,11 @@ export default function TodayDarshan() {
   const imageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    setDarshan(db.getDailyDarshan());
+    setDarshan(db.getLatestShringar());
     setIsAdmin(db.isAdminLoggedIn());
 
     const unsubscribe = subscribeToDBUpdates(() => {
-      setDarshan(db.getDailyDarshan());
+      setDarshan(db.getLatestShringar());
       setIsAdmin(db.isAdminLoggedIn());
     });
     return unsubscribe;

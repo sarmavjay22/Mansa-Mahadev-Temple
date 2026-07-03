@@ -13,10 +13,12 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
   const [isAdmin, setIsAdmin] = useState(db.isAdminLoggedIn());
   const [currentTime, setCurrentTime] = useState(new Date());
   const [settings, setSettings] = useState<TempleSettings>(getCachedTempleSettings());
+  const [latestShringar, setLatestShringar] = useState(db.getLatestShringar());
 
   useEffect(() => {
     const unsubscribe = subscribeToDBUpdates(() => {
       setIsAdmin(db.isAdminLoggedIn());
+      setLatestShringar(db.getLatestShringar());
     });
     
     const unsubSettings = subscribeToTempleSettings((fetched) => {
@@ -53,7 +55,7 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
     <header 
       className="relative w-full overflow-hidden pt-6 pb-4 px-4 bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `linear-gradient(to bottom, rgba(227, 242, 253, 0.92), rgba(247, 249, 252, 0.96)), url(${settings.headerImageUrl || settings.templeCoverImageUrl || settings.templeCoverImage || "/src/assets/images/today_shringar_1782657607504.jpg"})`
+        backgroundImage: `linear-gradient(to bottom, rgba(227, 242, 253, 0.92), rgba(247, 249, 252, 0.96)), url(${latestShringar?.imageUrl || "/src/assets/images/today_shringar_1782657607504.jpg"})`
       }}
     >
       {/* Decorative Traditional Border Arch */}

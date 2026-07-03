@@ -33,8 +33,6 @@ export const DEFAULT_SETTINGS: TempleSettings = {
   footerCopyright: "श्री मंसा महादेव मंदिर सेवा समिति, तितरड़ी, उदयपुर (राज.)",
   developerName: "Google AI Studio Build",
   templeLogoUrl: "",
-  headerImageUrl: "",
-  templeCoverImageUrl: "",
   festivalBannerUrl: "",
   timingPatKhulna: "05:00 AM",
   timingMangalaAarti: "05:30 AM",

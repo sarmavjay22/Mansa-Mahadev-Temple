@@ -10,7 +10,8 @@ import {
   TempleTiming, 
   NotificationItem,
   TempleEvent,
-  CommitteeMember
+  CommitteeMember,
+  FestivalBanner
 } from '../types';
 
 // Default / Seed Data using the generated high-quality spiritual assets
@@ -468,6 +469,39 @@ const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
   }
 ];
 
+export const DEFAULT_FESTIVAL_BANNERS: FestivalBanner[] = [
+  {
+    id: "fbn_savan",
+    title: "सावन सोमवार विशेष उत्सव एवं महा रुद्राभिषेक",
+    description: "पवित्र श्रावण मास के पावन अवसर पर बाबा मंसा महादेव का दिव्य फूलों, औषधियों एवं पंचामृत से भव्य महा रुद्राभिषेक, विशेष अलौकिक श्रृंगार एवं महाआरती दर्शन।",
+    imageUrl: "https://images.unsplash.com/photo-1609137144814-7d526e959ec2?q=80&w=1200&auto=format&fit=crop",
+    startDate: "2026-07-01",
+    endDate: "2026-08-31",
+    isEnabled: true,
+    uploadedAt: new Date().toISOString()
+  },
+  {
+    id: "fbn_guru",
+    title: "श्री गुरु पूर्णिमा महोत्सव",
+    description: "आराध्य गुरुदेव के पावन सानिध्य में भव्य गुरु पूजन, सुmoodुर भजन संध्या, मंगल आरती एवं विशाल भंडारा (महाप्रसाद) का आयोजन। सभी भक्त सादर आमंत्रित हैं।",
+    imageUrl: "https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?q=80&w=1200&auto=format&fit=crop",
+    startDate: "2026-07-01",
+    endDate: "2026-07-10",
+    isEnabled: true,
+    uploadedAt: new Date().toISOString()
+  },
+  {
+    id: "fbn_haryali",
+    title: "हरियाली अमावस्या दिव्य झाँकी दर्शन",
+    description: "प्राकृतिक छटा एवं मनमोहक हरियाली के बीच बाबा मंसा महादेव का नाग-देव स्वरूप में अलौकिक श्रृंगार दर्शन एवं छप्पन भोग का दिव्य आयोजन।",
+    imageUrl: "https://images.unsplash.com/photo-1634547565985-78e718fe4f8b?q=80&w=1200&auto=format&fit=crop",
+    startDate: "2026-07-01",
+    endDate: "2026-07-20",
+    isEnabled: true,
+    uploadedAt: new Date().toISOString()
+  }
+];
+
 // Helper to initialize local storage
 function initDB() {
   if (!localStorage.getItem('mm_dailyDarshan')) {
@@ -493,6 +527,9 @@ function initDB() {
   }
   if (!localStorage.getItem('mm_notifications')) {
     localStorage.setItem('mm_notifications', JSON.stringify(DEFAULT_NOTIFICATIONS));
+  }
+  if (!localStorage.getItem('mm_festival_banners')) {
+    localStorage.setItem('mm_festival_banners', JSON.stringify(DEFAULT_FESTIVAL_BANNERS));
   }
   if (!localStorage.getItem('mm_admin_auth')) {
     // Default admin creds
@@ -572,6 +609,7 @@ export let firestoreGallery: GalleryItem[] = [];
 export let firestoreVideos: VideoDarshan[] = [];
 export let firestoreEvents: TempleEvent[] = [];
 export let firestoreCommittee: CommitteeMember[] = [];
+export let firestoreFestivalBanners: FestivalBanner[] = [];
 
 try {
   const cachedDarshan = localStorage.getItem('mm_dailyDarshan');
@@ -616,6 +654,15 @@ try {
   }
 } catch (e) {
   console.error("Failed to load cached committee", e);
+}
+
+try {
+  const cachedBanners = localStorage.getItem('mm_festival_banners');
+  if (cachedBanners) {
+    firestoreFestivalBanners = JSON.parse(cachedBanners);
+  }
+} catch (e) {
+  console.error("Failed to load cached festival banners", e);
 }
 
 // Subscribe to firestore 'dailyDarshan'
@@ -699,6 +746,47 @@ onSnapshot(collection(firestoreDb, 'committee'), (snapshot) => {
   console.error("Firestore committee subscription error:", error);
 });
 
+// Subscribe to firestore 'festival_banners'
+onSnapshot(collection(firestoreDb, 'festival_banners'), (snapshot) => {
+  const items: FestivalBanner[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as FestivalBanner);
+  });
+  if (items.length === 0) {
+    // Seed Firestore with default banners if empty
+    firestoreFestivalBanners = DEFAULT_FESTIVAL_BANNERS;
+    localStorage.setItem('mm_festival_banners', JSON.stringify(DEFAULT_FESTIVAL_BANNERS));
+    notifyDBChange();
+
+    DEFAULT_FESTIVAL_BANNERS.forEach(async (b) => {
+      try {
+        await setDoc(doc(firestoreDb, 'festival_banners', b.id), {
+          title: b.title,
+          description: b.description || "",
+          imageUrl: b.imageUrl,
+          startDate: b.startDate,
+          endDate: b.endDate,
+          isEnabled: b.isEnabled,
+          uploadedAt: b.uploadedAt
+        });
+      } catch (err) {
+        console.error("Failed to seed festival banner to Firestore:", err);
+      }
+    });
+  } else {
+    firestoreFestivalBanners = items;
+    localStorage.setItem('mm_festival_banners', JSON.stringify(items));
+    notifyDBChange();
+  }
+}, (error) => {
+  console.error("Firestore festival_banners subscription error:", error);
+});
+
+
+
 export const db = {
   // Authentication
   loginAdmin(email: string, pass: string): boolean {
@@ -725,6 +813,47 @@ export const db = {
   // Daily Darshan
   getDailyDarshan(): DailyDarshan | null {
     return firestoreDailyDarshan;
+  },
+
+  getLatestShringar(): GalleryItem | null {
+    const galleryItems = this.getGallery();
+    const todayItem = this.getDailyDarshan();
+    const combined: GalleryItem[] = [];
+
+    if (todayItem && todayItem.imageUrl) {
+      combined.push({
+        id: todayItem.id || "today",
+        imageUrl: todayItem.imageUrl,
+        date: todayItem.date,
+        festivalName: todayItem.festivalName || "दैनिक श्रृंगार दर्शन",
+        description: todayItem.description || "मंसा महादेव का आज का अलौकिक श्रृंगार दर्शन।",
+        uploadedAt: todayItem.uploadedAt
+      });
+    }
+
+    galleryItems.forEach(item => {
+      if (item.imageUrl) {
+        combined.push(item);
+      }
+    });
+
+    if (combined.length === 0) {
+      return null;
+    }
+
+    // Sort by uploadedAt descending first. If uploadedAt is same or missing, sort by date descending.
+    combined.sort((a, b) => {
+      const timeA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+      const timeB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+      if (timeA !== timeB) {
+        return timeB - timeA;
+      }
+      const dateA = a.date || '';
+      const dateB = b.date || '';
+      return dateB.localeCompare(dateA);
+    });
+
+    return combined[0];
   },
 
   async updateDailyDarshan(darshan: Omit<DailyDarshan, 'id' | 'uploadedAt'>) {
@@ -1154,6 +1283,45 @@ export const db = {
       await deleteDoc(doc(firestoreDb, 'committee', id));
     } catch (e) {
       console.error("Failed to delete committee member from Firestore:", e);
+    }
+  },
+
+  // Festival Banners
+  getFestivalBanners(): FestivalBanner[] {
+    return [...firestoreFestivalBanners].sort((a, b) => {
+      const timeA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+      const timeB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+      return timeB - timeA;
+    });
+  },
+
+  async addFestivalBanner(banner: Omit<FestivalBanner, 'id' | 'uploadedAt'>) {
+    const id = "fbn_" + Date.now();
+    const newBanner: FestivalBanner = {
+      id,
+      ...banner,
+      uploadedAt: new Date().toISOString()
+    };
+    try {
+      await setDoc(doc(firestoreDb, 'festival_banners', id), newBanner);
+    } catch (e) {
+      console.error("Failed to add festival banner to Firestore:", e);
+    }
+  },
+
+  async updateFestivalBanner(id: string, updatedFields: Partial<FestivalBanner>) {
+    try {
+      await setDoc(doc(firestoreDb, 'festival_banners', id), updatedFields, { merge: true });
+    } catch (e) {
+      console.error("Failed to update festival banner in Firestore:", e);
+    }
+  },
+
+  async deleteFestivalBanner(id: string) {
+    try {
+      await deleteDoc(doc(firestoreDb, 'festival_banners', id));
+    } catch (e) {
+      console.error("Failed to delete festival banner from Firestore:", e);
     }
   }
 };

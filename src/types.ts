@@ -101,8 +101,6 @@ export interface TempleSettings {
   footerCopyright: string;
   developerName: string;
   templeLogoUrl?: string;
-  headerImageUrl?: string;
-  templeCoverImageUrl?: string;
   festivalBannerUrl?: string;
   timingPatKhulna?: string;
   timingMangalaAarti?: string;
@@ -134,6 +132,17 @@ export interface CommitteeMember {
   mobile?: string;
   description?: string;
   order: number;
+  uploadedAt: string;
+}
+
+export interface FestivalBanner {
+  id: string;
+  imageUrl: string;
+  title: string;
+  description?: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  isEnabled: boolean;
   uploadedAt: string;
 }
 

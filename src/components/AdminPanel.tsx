@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
-import { NotificationItem, GalleryItem, DailyDarshan, VideoDarshan } from '../types';
+import { NotificationItem, GalleryItem, DailyDarshan, VideoDarshan, FestivalBanner } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
 import { 
   ShieldCheck, 
@@ -24,7 +24,8 @@ import {
   Settings,
   Edit2,
   Youtube,
-  Video
+  Video,
+  Calendar
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import TempleSettingsTab from './TempleSettingsTab';
@@ -39,7 +40,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'upload_video' | 'temple_settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'upload_video' | 'temple_settings' | 'festival_banners'>('overview');
 
   // Stats State
   const [stats, setStats] = useState({
@@ -47,6 +48,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     videoCount: 0,
     bhajanCount: 0,
     notificationCount: 0,
+    bannerCount: 0,
   });
 
   // Gallery order states
@@ -108,6 +110,27 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [deleteConfirmGalId, setDeleteConfirmGalId] = useState<string | null>(null);
   const [deleteConfirmNotifId, setDeleteConfirmNotifId] = useState<string | null>(null);
 
+  // Festival Banners State
+  const [banners, setBanners] = useState<FestivalBanner[]>([]);
+  const [bannerTitle, setBannerTitle] = useState('');
+  const [bannerDesc, setBannerDesc] = useState('');
+  const [bannerImageUrl, setBannerImageUrl] = useState('');
+  const [bannerStartDate, setBannerStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [bannerEndDate, setBannerEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [bannerIsEnabled, setBannerIsEnabled] = useState(true);
+  const [bannerSuccess, setBannerSuccess] = useState(false);
+  const [bannerUploading, setBannerUploading] = useState(false);
+
+  // Editing Festival Banner States
+  const [editingBannerId, setEditingBannerId] = useState<string | null>(null);
+  const [editBannerTitle, setEditBannerTitle] = useState('');
+  const [editBannerDesc, setEditBannerDesc] = useState('');
+  const [editBannerImageUrl, setEditBannerImageUrl] = useState('');
+  const [editBannerStartDate, setEditBannerStartDate] = useState('');
+  const [editBannerEndDate, setEditBannerEndDate] = useState('');
+  const [editBannerIsEnabled, setEditBannerIsEnabled] = useState(true);
+  const [deleteConfirmBannerId, setDeleteConfirmBannerId] = useState<string | null>(null);
+
   useEffect(() => {
     setIsLoggedIn(db.isAdminLoggedIn());
     loadDashboardData();
@@ -147,17 +170,20 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     const videoItems = db.getVideos();
     const bhajanItems = db.getBhajans();
     const notificationItems = db.getNotifications();
+    const bannerItems = db.getFestivalBanners();
 
     setStats({
       galleryCount: galleryItems.length,
       videoCount: videoItems.length,
       bhajanCount: bhajanItems.length,
       notificationCount: notificationItems.length,
+      bannerCount: bannerItems.length,
     });
 
     setNotifs(notificationItems);
     setGalList(galleryItems);
     setVideoList(videoItems);
+    setBanners(bannerItems);
   };
 
   const handleLogin = (e: FormEvent) => {
@@ -198,6 +224,92 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   const handleDeleteNotification = (id: string) => {
     db.deleteNotification(id);
+  };
+
+  // Festival banner image upload
+  const handleBannerImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setBannerUploading(true);
+      const url = await uploadToImageKit(file);
+      setBannerImageUrl(url);
+    } catch (err) {
+      console.error(err);
+      alert("उत्सव बैनर चित्र अपलोड विफल हुआ!");
+    } finally {
+      setBannerUploading(false);
+    }
+  };
+
+  const handleEditBannerImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setBannerUploading(true);
+      const url = await uploadToImageKit(file);
+      setEditBannerImageUrl(url);
+    } catch (err) {
+      console.error(err);
+      alert("उत्सव बैनर चित्र अपलोड विफल हुआ!");
+    } finally {
+      setBannerUploading(false);
+    }
+  };
+
+  const handleAddFestivalBanner = () => {
+    if (!bannerTitle.trim() || !bannerImageUrl || !bannerStartDate || !bannerEndDate) {
+      alert("कृपया उत्सव बैनर का शीर्षक, चित्र और तारीखें भरें।");
+      return;
+    }
+
+    db.addFestivalBanner({
+      title: bannerTitle.trim(),
+      description: bannerDesc.trim() || "",
+      imageUrl: bannerImageUrl,
+      startDate: bannerStartDate,
+      endDate: bannerEndDate,
+      isEnabled: bannerIsEnabled
+    });
+
+    setBannerTitle("");
+    setBannerDesc("");
+    setBannerImageUrl("");
+    setBannerStartDate(new Date().toISOString().split("T")[0]);
+    setBannerEndDate(new Date().toISOString().split("T")[0]);
+    setBannerIsEnabled(true);
+
+    setBannerSuccess(true);
+    setTimeout(() => {
+      setBannerSuccess(false);
+    }, 1500);
+    alert("नया उत्सव बैनर सफलतापूर्वक जोड़ दिया गया है!");
+  };
+
+  const handleUpdateFestivalBanner = (id: string) => {
+    if (!editBannerTitle.trim() || !editBannerImageUrl || !editBannerStartDate || !editBannerEndDate) {
+      alert("कृपया उत्सव बैनर का शीर्षक, चित्र और तारीखें भरें।");
+      return;
+    }
+
+    db.updateFestivalBanner(id, {
+      title: editBannerTitle.trim(),
+      description: editBannerDesc.trim() || "",
+      imageUrl: editBannerImageUrl,
+      startDate: editBannerStartDate,
+      endDate: editBannerEndDate,
+      isEnabled: editBannerIsEnabled
+    });
+
+    setEditingBannerId(null);
+    alert("उत्सव बैनर सफलतापूर्वक अपडेट हो गया है!");
+  };
+
+  const handleDeleteFestivalBanner = (id: string) => {
+    db.deleteFestivalBanner(id);
+    alert("उत्सव बैनर सफलतापूर्वक हटा दिया गया है!");
   };
 
   // Upload today's darshan image
@@ -563,6 +675,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab('festival_banners')}
+                  className={`flex-1 py-3.5 flex items-center justify-center gap-1.5 transition ${
+                    activeTab === 'festival_banners' ? 'text-amber-600 bg-white border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>उत्सव बैनर ({stats.bannerCount})</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab('temple_settings')}
                   className={`flex-1 py-3.5 flex items-center justify-center gap-1.5 transition ${
                     activeTab === 'temple_settings' ? 'text-amber-600 bg-white border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'
@@ -580,7 +702,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 {activeTab === 'overview' && (
                   <div className="flex flex-col gap-6">
                     {/* Database stats bento grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-800">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-slate-800">
                       
                       <div className="p-3 bg-sky-50 border border-sky-100 rounded-2xl flex flex-col items-center shadow-sm">
                         <span className="text-xs text-slate-400 font-bold font-mono">कुल गैलरी</span>
@@ -600,6 +722,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-2xl flex flex-col items-center shadow-sm">
                         <span className="text-xs text-slate-400 font-bold font-mono">सक्रिय सूचनाएं</span>
                         <span className="text-xl font-mono font-black text-emerald-600">{stats.notificationCount}</span>
+                      </div>
+
+                      <div className="p-3 bg-violet-50 border border-violet-100 rounded-2xl flex flex-col items-center shadow-sm">
+                        <span className="text-xs text-slate-400 font-bold font-mono">उत्सव बैनर</span>
+                        <span className="text-xl font-mono font-black text-violet-600">{stats.bannerCount}</span>
                       </div>
                     </div>
 
@@ -1436,6 +1563,333 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                             </div>
                           );
                         })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'festival_banners' && (
+                  <div className="flex flex-col gap-6 text-xs text-slate-700">
+                    {/* Add Banner Panel */}
+                    <div className="bg-violet-50/60 border border-violet-100 p-4 rounded-2xl flex flex-col gap-4">
+                      <h4 className="text-xs font-bold text-violet-950 flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-violet-600" />
+                        <span>नया उत्सव बैनर जोड़ें (Add New Festival Banner)</span>
+                      </h4>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Title & Description */}
+                        <div className="flex flex-col gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">उत्सव बैनर शीर्षक (Title) * :</label>
+                            <input
+                              type="text"
+                              value={bannerTitle}
+                              onChange={(e) => setBannerTitle(e.target.value)}
+                              placeholder="उदा. महाशिवरात्रि महोत्सव 2026..."
+                              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">विवरण (Description) :</label>
+                            <textarea
+                              value={bannerDesc}
+                              onChange={(e) => setBannerDesc(e.target.value)}
+                              placeholder="उदा. इस शिवरात्रि पर बाबा मंसा महादेव के भव्य श्रृंगार एवं महारुद्राभिषेक दर्शन..."
+                              rows={2}
+                              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none resize-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Dates & Toggle */}
+                        <div className="flex flex-col gap-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 mb-1">प्रारंभ तिथि (Start Date) * :</label>
+                              <div className="relative">
+                                <input
+                                  type="date"
+                                  value={bannerStartDate}
+                                  onChange={(e) => setBannerStartDate(e.target.value)}
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 mb-1">समाप्ति तिथि (End Date) * :</label>
+                              <div className="relative">
+                                <input
+                                  type="date"
+                                  value={bannerEndDate}
+                                  onChange={(e) => setBannerEndDate(e.target.value)}
+                                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 mt-2">
+                            <input
+                              type="checkbox"
+                              id="bannerIsEnabledCheckbox"
+                              checked={bannerIsEnabled}
+                              onChange={(e) => setBannerIsEnabled(e.target.checked)}
+                              className="w-4 h-4 text-violet-600 border-slate-300 rounded focus:ring-violet-500"
+                            />
+                            <label htmlFor="bannerIsEnabledCheckbox" className="text-xs font-bold text-slate-600 cursor-pointer">
+                              बैनर को तुरंत सक्रिय (Enable) करें
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Image Upload */}
+                      <div className="border border-dashed border-slate-200 bg-white p-4 rounded-xl flex flex-col sm:flex-row items-center gap-4">
+                        <div className="flex-1">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">उत्सव बैनर का चित्र (Image) * :</p>
+                          <div className="flex items-center gap-3">
+                            <label className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-100 hover:bg-violet-200/80 text-violet-700 font-bold rounded-xl cursor-pointer transition">
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>{bannerUploading ? 'अपलोड हो रहा है...' : 'चित्र अपलोड करें'}</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleBannerImageUpload}
+                                disabled={bannerUploading}
+                                className="hidden"
+                              />
+                            </label>
+                            {bannerUploading && <Loader2 className="w-4 h-4 text-violet-600 animate-spin" />}
+                          </div>
+                          <p className="text-[9px] text-slate-400 mt-1">अनुशंसित आकार: 1200x400 पिक्सल (3:1 अनुपात)</p>
+                        </div>
+
+                        {bannerImageUrl && (
+                          <div className="relative w-44 h-16 rounded-lg overflow-hidden border border-slate-100 shadow-sm shrink-0">
+                            <img src={bannerImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                            <button
+                              onClick={() => setBannerImageUrl('')}
+                              className="absolute top-1 right-1 p-0.5 bg-black/60 hover:bg-black/80 text-white rounded-full transition"
+                              title="हटाएं"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={handleAddFestivalBanner}
+                        disabled={bannerUploading}
+                        className="self-end flex items-center gap-1.5 px-5 py-2 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow transition disabled:opacity-50"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>बैनर जोड़ें</span>
+                      </button>
+                    </div>
+
+                    {/* Banner list queue */}
+                    <div>
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest px-1">मौजूदा उत्सव बैनर ({banners.length}):</p>
+                      
+                      <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
+                        {banners.length === 0 ? (
+                          <p className="text-center text-slate-400 py-6 font-medium bg-slate-50 border border-dashed border-slate-200 rounded-2xl">कोई उत्सव बैनर नहीं मिला।</p>
+                        ) : (
+                          banners.map(banner => {
+                            const isEditing = editingBannerId === banner.id;
+                            
+                            return (
+                              <div
+                                key={banner.id}
+                                className={`flex flex-col p-4 rounded-2xl border transition ${
+                                  isEditing ? 'bg-amber-50/40 border-amber-200' : 'bg-slate-50 hover:bg-slate-100/50 border-slate-200/50'
+                                }`}
+                              >
+                                {isEditing ? (
+                                  /* Inline editing form */
+                                  <div className="flex flex-col gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">शीर्षक :</label>
+                                        <input
+                                          type="text"
+                                          value={editBannerTitle}
+                                          onChange={(e) => setEditBannerTitle(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none font-bold"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">विवरण :</label>
+                                        <input
+                                          type="text"
+                                          value={editBannerDesc}
+                                          onChange={(e) => setEditBannerDesc(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                                        />
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">प्रारंभ तिथि :</label>
+                                        <input
+                                          type="date"
+                                          value={editBannerStartDate}
+                                          onChange={(e) => setEditBannerStartDate(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">समाप्ति तिथि :</label>
+                                        <input
+                                          type="date"
+                                          value={editBannerEndDate}
+                                          onChange={(e) => setEditBannerEndDate(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                                        />
+                                      </div>
+                                      <div className="flex items-center gap-1.5 self-end py-2">
+                                        <input
+                                          type="checkbox"
+                                          id={`editBannerCheckbox-${banner.id}`}
+                                          checked={editBannerIsEnabled}
+                                          onChange={(e) => setEditBannerIsEnabled(e.target.checked)}
+                                          className="w-4 h-4 text-violet-600 border-slate-300 rounded focus:ring-violet-500"
+                                        />
+                                        <label htmlFor={`editBannerCheckbox-${banner.id}`} className="text-xs font-bold text-slate-600 cursor-pointer">
+                                          सक्रिय (Enabled) है
+                                        </label>
+                                      </div>
+                                    </div>
+
+                                    <div className="border border-dashed border-amber-200 bg-white/50 p-3 rounded-xl flex flex-col sm:flex-row items-center gap-4">
+                                      <div className="flex-1">
+                                        <span className="text-[10px] font-bold text-slate-500 block mb-1">चित्र बदलें :</span>
+                                        <div className="flex items-center gap-2">
+                                          <label className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-xl cursor-pointer font-bold transition">
+                                            <Upload className="w-3 h-3" />
+                                            <span>अपलोड करें</span>
+                                            <input
+                                              type="file"
+                                              accept="image/*"
+                                              onChange={handleEditBannerImageUpload}
+                                              className="hidden"
+                                            />
+                                          </label>
+                                          {bannerUploading && <Loader2 className="w-4 h-4 text-amber-600 animate-spin" />}
+                                        </div>
+                                      </div>
+
+                                      {editBannerImageUrl && (
+                                        <div className="w-24 h-10 rounded-lg overflow-hidden border border-amber-200 shrink-0">
+                                          <img src={editBannerImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="flex justify-end gap-1.5 mt-2">
+                                      <button
+                                        onClick={() => handleUpdateFestivalBanner(banner.id)}
+                                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition flex items-center gap-1"
+                                      >
+                                        <Check className="w-3.5 h-3.5" />
+                                        <span>सुरक्षित करें</span>
+                                      </button>
+                                      <button
+                                        onClick={() => setEditingBannerId(null)}
+                                        className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition flex items-center gap-1"
+                                      >
+                                        <X className="w-3.5 h-3.5" />
+                                        <span>रद्द करें</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  /* Display Mode */
+                                  <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                                      {/* Banner thumbnail */}
+                                      <div className="w-24 h-12 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-slate-200">
+                                        <img src={banner.imageUrl} alt={banner.title} className="w-full h-full object-cover" />
+                                      </div>
+
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="font-bold text-slate-900 text-xs">{banner.title}</span>
+                                          {banner.isEnabled ? (
+                                            <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 font-bold text-[8px] rounded-md">सक्रिय</span>
+                                          ) : (
+                                            <span className="px-1.5 py-0.5 bg-slate-200 text-slate-500 font-bold text-[8px] rounded-md">निष्क्रिय</span>
+                                          )}
+                                        </div>
+                                        <p className="text-slate-500 text-[10px] mt-0.5 line-clamp-1">{banner.description || 'कोई विवरण नहीं'}</p>
+                                        <div className="flex items-center gap-3 text-[9px] text-slate-400 font-bold font-mono mt-1">
+                                          <span className="flex items-center gap-0.5">
+                                            <Calendar className="w-3 h-3 text-slate-400" />
+                                            <span>{formatDateDMY(banner.startDate)} से {formatDateDMY(banner.endDate)}</span>
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Action buttons */}
+                                    <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                                      {deleteConfirmBannerId === banner.id ? (
+                                        <div className="flex items-center gap-1 bg-rose-50 border border-rose-100 p-1 rounded-xl">
+                                          <span className="text-[9px] text-rose-600 font-bold px-1 select-none">हटाएं?</span>
+                                          <button
+                                            onClick={() => {
+                                              handleDeleteFestivalBanner(banner.id);
+                                              setDeleteConfirmBannerId(null);
+                                            }}
+                                            className="px-2 py-1 bg-rose-500 text-white font-extrabold text-[9px] rounded-lg shadow-sm hover:bg-rose-600 transition"
+                                          >
+                                            हाँ
+                                          </button>
+                                          <button
+                                            onClick={() => setDeleteConfirmBannerId(null)}
+                                            className="px-2 py-1 bg-slate-200 text-slate-700 font-extrabold text-[9px] rounded-lg hover:bg-slate-300 transition"
+                                          >
+                                            नहीं
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <button
+                                            onClick={() => {
+                                              setEditingBannerId(banner.id);
+                                              setEditBannerTitle(banner.title);
+                                              setEditBannerDesc(banner.description || '');
+                                              setEditBannerImageUrl(banner.imageUrl);
+                                              setEditBannerStartDate(banner.startDate);
+                                              setEditBannerEndDate(banner.endDate);
+                                              setEditBannerIsEnabled(banner.isEnabled);
+                                            }}
+                                            className="p-1.5 text-amber-600 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-lg transition"
+                                            title="संपादित करें"
+                                          >
+                                            <Edit2 className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            onClick={() => setDeleteConfirmBannerId(banner.id)}
+                                            className="p-1.5 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition"
+                                            title="हटाएं"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
                       </div>
                     </div>
                   </div>

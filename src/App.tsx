@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import NotificationBanner from './components/NotificationBanner';
 import TodayDarshan from './components/TodayDarshan';
+import FestivalBannerSlider from './components/FestivalBannerSlider';
 import TodayVideo from './components/TodayVideo';
 import AartiSection from './components/AartiSection';
 import BhajanSection from './components/BhajanSection';
@@ -39,14 +40,17 @@ export default function App() {
       {/* 1. Header Section */}
       <Header onOpenAdmin={() => setIsAdminOpen(true)} />
 
-      {/* 2. Notification Announcements Ticker */}
-      <NotificationBanner />
-
       {/* 3. Main Multi-Module Content Stack */}
       <main className="w-full relative z-10 flex flex-col gap-8 mt-2">
         
         {/* Today's Shringar Darshan (Visual Core) */}
         <TodayDarshan />
+        
+        {/* Festival Banner Slider (Perv & Utsav Core) */}
+        <FestivalBannerSlider />
+
+        {/* 2. Notification Announcements Ticker */}
+        <NotificationBanner />
         
         {/* Today's Video Darshan (YouTube Core) */}
         <TodayVideo />
