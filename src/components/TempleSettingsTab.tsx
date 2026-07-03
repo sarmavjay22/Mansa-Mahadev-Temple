@@ -38,7 +38,22 @@ export default function TempleSettingsTab() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm(prev => {
+      const next = { ...prev, [name]: value };
+      if (name === 'timingPatKhulna') {
+        next.morningDarshanTime = value;
+      }
+      if (name === 'timingEveningOpening') {
+        next.eveningDarshanTime = value;
+      }
+      if (name === 'morningDarshanTime') {
+        next.timingPatKhulna = value;
+      }
+      if (name === 'eveningDarshanTime') {
+        next.timingEveningOpening = value;
+      }
+      return next;
+    });
   };
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>, fieldName: keyof TempleSettings) => {
@@ -586,30 +601,105 @@ export default function TempleSettingsTab() {
               </h3>
             </div>
 
-            {/* Morning Opening Time */}
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 mb-1">सुबह पट खुलने का समय (Morning Opening):</label>
-              <input
-                type="text"
-                name="morningDarshanTime"
-                value={form.morningDarshanTime}
-                onChange={handleChange}
-                placeholder="उदा. 05:00 AM"
-                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none"
-              />
-            </div>
+            {/* 🕰️ Daily Darshan Timings Management */}
+            <div className="col-span-1 sm:col-span-2 border-t border-slate-200/60 pt-4 mt-2">
+              <h4 className="text-xs font-bold text-amber-600 mb-3 flex items-center gap-1.5">
+                <span>🕰️ नित्य दर्शन समय सारणी (दैनिक) (Darshan Schedule)</span>
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-white p-3 border border-slate-200/60 rounded-xl">
+                
+                {/* 1. पट खुलना */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 mb-1">पट खुलना (Morning Opening):</label>
+                  <input
+                    type="text"
+                    name="timingPatKhulna"
+                    value={form.timingPatKhulna || ''}
+                    onChange={handleChange}
+                    placeholder="उदा. 05:00 AM"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                  />
+                </div>
 
-            {/* Evening Opening Time */}
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 mb-1">शाम पट खुलने का समय (Evening Opening):</label>
-              <input
-                type="text"
-                name="eveningDarshanTime"
-                value={form.eveningDarshanTime}
-                onChange={handleChange}
-                placeholder="उदा. 04:00 PM"
-                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none"
-              />
+                {/* 2. मंगला आरती */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 mb-1">मंगला आरती (Mangala Aarti):</label>
+                  <input
+                    type="text"
+                    name="timingMangalaAarti"
+                    value={form.timingMangalaAarti || ''}
+                    onChange={handleChange}
+                    placeholder="उदा. 05:30 AM"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                  />
+                </div>
+
+                {/* 3. जलाभिषेक एवं श्रृंगार */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 mb-1">जलाभिषेक एवं श्रृंगार (Abhishek & Shringar):</label>
+                  <input
+                    type="text"
+                    name="timingJalabhishek"
+                    value={form.timingJalabhishek || ''}
+                    onChange={handleChange}
+                    placeholder="उदा. 06:00 AM - 11:30 AM"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                  />
+                </div>
+
+                {/* 4. मध्याह्न भोग एवं विश्राम */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 mb-1">मध्याह्न भोग एवं विश्राम (Noon Closing):</label>
+                  <input
+                    type="text"
+                    name="timingNoonClosing"
+                    value={form.timingNoonClosing || ''}
+                    onChange={handleChange}
+                    placeholder="उदा. 12:00 PM - 04:00 PM"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                  />
+                </div>
+
+                {/* 5. संध्या पट खुलना */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 mb-1">संध्या पट खुलना (Evening Opening):</label>
+                  <input
+                    type="text"
+                    name="timingEveningOpening"
+                    value={form.timingEveningOpening || ''}
+                    onChange={handleChange}
+                    placeholder="उदा. 04:00 PM"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                  />
+                </div>
+
+                {/* 6. संध्या आरती */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 mb-1">संध्या आरती (Sandhya Aarti):</label>
+                  <input
+                    type="text"
+                    name="timingSandhyaAarti"
+                    value={form.timingSandhyaAarti || ''}
+                    onChange={handleChange}
+                    placeholder="उदा. 07:00 PM"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                  />
+                </div>
+
+                {/* 7. शयन आरती एवं पट बंद */}
+                <div className="sm:col-span-2">
+                  <label className="block text-[10px] font-bold text-slate-500 mb-1">शयन आरती एवं पट बंद (Closing):</label>
+                  <input
+                    type="text"
+                    name="timingShayanAarti"
+                    value={form.timingShayanAarti || ''}
+                    onChange={handleChange}
+                    placeholder="उदा. 09:00 PM"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                  />
+                </div>
+
+              </div>
             </div>
 
             {/* About Temple (Hindi description) */}

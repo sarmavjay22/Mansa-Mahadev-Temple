@@ -124,11 +124,26 @@ export default function TempleInfoSection() {
   const displayMapLink = settings.googleMapsLink || info.contact.googleMapsLink;
 
   const displayTimings = timings.map(t => {
-    if (t.id === "1" && settings.morningDarshanTime) {
-      return { ...t, time: settings.morningDarshanTime };
+    if (t.id === "1") {
+      return { ...t, time: settings.timingPatKhulna || settings.morningDarshanTime || t.time };
     }
-    if (t.id === "5" && settings.eveningDarshanTime) {
-      return { ...t, time: settings.eveningDarshanTime };
+    if (t.id === "2") {
+      return { ...t, time: settings.timingMangalaAarti || t.time };
+    }
+    if (t.id === "3") {
+      return { ...t, time: settings.timingJalabhishek || t.time };
+    }
+    if (t.id === "4") {
+      return { ...t, time: settings.timingNoonClosing || t.time };
+    }
+    if (t.id === "5") {
+      return { ...t, time: settings.timingEveningOpening || settings.eveningDarshanTime || t.time };
+    }
+    if (t.id === "6") {
+      return { ...t, time: settings.timingSandhyaAarti || t.time };
+    }
+    if (t.id === "7") {
+      return { ...t, time: settings.timingShayanAarti || t.time };
     }
     return t;
   });

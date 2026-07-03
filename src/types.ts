@@ -104,6 +104,13 @@ export interface TempleSettings {
   headerImageUrl?: string;
   templeCoverImageUrl?: string;
   festivalBannerUrl?: string;
+  timingPatKhulna?: string;
+  timingMangalaAarti?: string;
+  timingJalabhishek?: string;
+  timingNoonClosing?: string;
+  timingEveningOpening?: string;
+  timingSandhyaAarti?: string;
+  timingShayanAarti?: string;
 }
 
 export interface TempleEvent {

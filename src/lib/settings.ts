@@ -35,7 +35,14 @@ export const DEFAULT_SETTINGS: TempleSettings = {
   templeLogoUrl: "",
   headerImageUrl: "",
   templeCoverImageUrl: "",
-  festivalBannerUrl: ""
+  festivalBannerUrl: "",
+  timingPatKhulna: "05:00 AM",
+  timingMangalaAarti: "05:30 AM",
+  timingJalabhishek: "06:00 AM - 11:30 AM",
+  timingNoonClosing: "12:00 PM - 04:00 PM",
+  timingEveningOpening: "04:00 PM",
+  timingSandhyaAarti: "07:00 PM",
+  timingShayanAarti: "09:00 PM"
 };
 
 let currentSettings: TempleSettings = { ...DEFAULT_SETTINGS };
