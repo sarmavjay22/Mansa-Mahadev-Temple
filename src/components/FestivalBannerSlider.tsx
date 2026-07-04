@@ -37,6 +37,20 @@ const MOCK_BANNERS: FestivalBanner[] = [
   }
 ];
 
+const formatDate = (dateStr: string): string => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  const year = parts[0];
+  const monthNum = parseInt(parts[1], 10);
+  const day = parts[2].padStart(2, '0');
+  
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthName = months[monthNum - 1] || 'Jan';
+  
+  return `${day} ${monthName} ${year}`;
+};
+
 export default function FestivalBannerSlider() {
   const [banners, setBanners] = useState<FestivalBanner[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -50,10 +64,16 @@ export default function FestivalBannerSlider() {
       const day = String(d.getDate()).padStart(2, '0');
       const todayStr = `${year}-${month}-${day}`;
 
-      const activeBanners = db.getFestivalBanners().filter(b => {
-        if (!b.isEnabled) return false;
+      const allEnabledBanners = db.getFestivalBanners().filter(b => b.isEnabled);
+      let activeBanners = allEnabledBanners.filter(b => {
+        if (!b.startDate || !b.endDate) return true;
         return b.startDate <= todayStr && b.endDate >= todayStr;
       });
+
+      // If at least one valid (enabled) festival banner exists, the Festival Banner Slider must always be displayed.
+      if (activeBanners.length === 0 && allEnabledBanners.length > 0) {
+        activeBanners = allEnabledBanners;
+      }
       setBanners(activeBanners);
     };
     updateBanners();
@@ -65,7 +85,7 @@ export default function FestivalBannerSlider() {
     if (banners.length <= 1) return;
     const interval = setInterval(() => {
       handleNext();
-    }, 5000); // Rotate every 5 seconds
+    }, 9000); // Rotate every 9 seconds, resets automatically on manual navigation (index change)
     return () => clearInterval(interval);
   }, [currentIndex, banners.length]);
 
@@ -120,11 +140,11 @@ export default function FestivalBannerSlider() {
               }}
               className="absolute inset-0 w-full h-full"
             >
-              {/* Banner Image */}
+              {/* Banner Image (not darkened) */}
               <img
                 src={currentBanner.imageUrl}
                 alt={currentBanner.title}
-                className="w-full h-full object-cover brightness-[0.65]"
+                className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
 
@@ -138,9 +158,9 @@ export default function FestivalBannerSlider() {
               <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-amber-400/60 rounded-br-lg pointer-events-none" />
 
               {/* Banner Content */}
-              <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-8 text-white">
-                <div className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-amber-400 tracking-wider mb-1 md:mb-1.5 uppercase">
-                  <Sparkles className="w-3 h-3 text-amber-400 fill-amber-400" />
+              <div className="absolute inset-0 flex flex-col justify-end p-5 pl-[40px] md:p-8 md:pl-[52px] text-white">
+                <div className="flex items-center gap-1.5 text-[11px] md:text-[13px] font-bold text-[#222222] tracking-wider mb-1 md:mb-1.5 uppercase">
+                  <Sparkles className="w-3 h-3 text-[#222222] fill-[#222222]" />
                   <span>पर्व एवं विशेष उत्सव</span>
                 </div>
 
@@ -149,7 +169,7 @@ export default function FestivalBannerSlider() {
                 </h3>
 
                 {currentBanner.description && (
-                  <p className="text-[11px] sm:text-xs md:text-sm text-slate-200 mt-1 line-clamp-2 font-medium max-w-2xl drop-shadow-sm leading-relaxed">
+                  <p className="text-[13px] sm:text-sm md:text-base text-white mt-1 line-clamp-2 font-bold max-w-2xl drop-shadow-md leading-relaxed">
                     {currentBanner.description}
                   </p>
                 )}
@@ -159,8 +179,8 @@ export default function FestivalBannerSlider() {
                   <Calendar className="w-3 h-3 shrink-0" />
                   <span>
                     {currentBanner.startDate === currentBanner.endDate
-                      ? currentBanner.startDate
-                      : `${currentBanner.startDate} से ${currentBanner.endDate}`}
+                      ? formatDate(currentBanner.startDate)
+                      : `${formatDate(currentBanner.startDate)} से ${formatDate(currentBanner.endDate)}`}
                   </span>
                 </div>
               </div>
@@ -173,19 +193,19 @@ export default function FestivalBannerSlider() {
               {/* Left Arrow */}
               <button
                 onClick={handlePrev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 p-1.5 md:p-2 rounded-full bg-black/40 hover:bg-black/60 text-white/80 hover:text-white border border-white/10 backdrop-blur-xs transition"
+                className="absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 z-20 p-1 sm:p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white/80 hover:text-white border border-white/10 backdrop-blur-xs transition"
                 title="पिछला"
               >
-                <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
+                <ChevronLeft className="w-3.5 h-3.5 md:w-4 md:h-4" />
               </button>
 
               {/* Right Arrow */}
               <button
                 onClick={handleNext}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 p-1.5 md:p-2 rounded-full bg-black/40 hover:bg-black/60 text-white/80 hover:text-white border border-white/10 backdrop-blur-xs transition"
+                className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 z-20 p-1 sm:p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white/80 hover:text-white border border-white/10 backdrop-blur-xs transition"
                 title="अगला"
               >
-                <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
+                <ChevronRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
               </button>
 
               {/* Dots indicator */}

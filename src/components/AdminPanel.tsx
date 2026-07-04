@@ -243,7 +243,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   };
 
-  const handleEditBannerImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleEditBannerImageUpload = async (e: ChangeEvent<HTMLInputElement>, bannerId?: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -251,6 +251,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       setBannerUploading(true);
       const url = await uploadToImageKit(file);
       setEditBannerImageUrl(url);
+      if (bannerId) {
+        // Persist the updated image URL to the existing database record immediately to preserve all other fields
+        await db.updateFestivalBanner(bannerId, { imageUrl: url });
+      }
     } catch (err) {
       console.error(err);
       alert("उत्सव बैनर चित्र अपलोड विफल हुआ!");
@@ -1776,7 +1780,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                             <input
                                               type="file"
                                               accept="image/*"
-                                              onChange={handleEditBannerImageUpload}
+                                              onChange={(e) => handleEditBannerImageUpload(e, banner.id)}
+                                              disabled={bannerUploading}
                                               className="hidden"
                                             />
                                           </label>
@@ -1794,14 +1799,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                     <div className="flex justify-end gap-1.5 mt-2">
                                       <button
                                         onClick={() => handleUpdateFestivalBanner(banner.id)}
-                                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition flex items-center gap-1"
+                                        disabled={bannerUploading}
+                                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-lg transition flex items-center gap-1"
                                       >
                                         <Check className="w-3.5 h-3.5" />
                                         <span>सुरक्षित करें</span>
                                       </button>
                                       <button
                                         onClick={() => setEditingBannerId(null)}
-                                        className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg transition flex items-center gap-1"
+                                        disabled={bannerUploading}
+                                        className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 disabled:opacity-50 text-slate-700 font-bold rounded-lg transition flex items-center gap-1"
                                       >
                                         <X className="w-3.5 h-3.5" />
                                         <span>रद्द करें</span>
