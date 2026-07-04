@@ -67,8 +67,8 @@ export default function NotificationBanner() {
               </span>
 
               {/* Title and message */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs font-semibold leading-normal min-w-0 flex-1">
-                <span className={`font-extrabold truncate uppercase text-[10px] tracking-wider px-2 py-0.5 rounded-md ${
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm font-semibold leading-normal min-w-0 flex-1">
+                <span className={`font-extrabold truncate uppercase text-[12px] tracking-wider px-2 py-0.5 rounded-md ${
                   currentNotif.type === 'alert' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'
                 }`}>
                   {currentNotif.type === 'festival' ? '🚩 पर्व विशेष' : currentNotif.type === 'alert' ? '🚨 ध्यान दें' : '📢 घोषणा'}

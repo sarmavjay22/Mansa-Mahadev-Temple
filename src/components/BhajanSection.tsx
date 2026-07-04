@@ -692,11 +692,19 @@ export default function BhajanSection() {
 
             {/* Title & Singer HUD */}
             <div className="px-1 max-w-full">
-              <h3 className="text-md md:text-lg font-bold text-slate-800 line-clamp-1 flex items-center justify-center gap-1.5">
+              <h3 className={`text-md md:text-lg font-bold line-clamp-1 flex items-center justify-center gap-1.5 ${
+                (activeTrack.title.toLowerCase().includes('shriram') || 
+                 activeTrack.title.toLowerCase().includes('shree ram') || 
+                 activeTrack.title.toLowerCase().includes('bethe') || 
+                 activeTrack.title.toLowerCase().includes('baithe') || 
+                 activeTrack.title.includes('श्रीराम')) 
+                  ? 'text-amber-800' 
+                  : 'text-slate-800'
+              }`}>
                 <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
                 <span>{activeTrack.title}</span>
               </h3>
-              <p className="text-xs text-slate-500 font-bold mt-1">स्वर: {activeTrack.singer}</p>
+              <p className="text-sm text-slate-500 font-bold mt-1">स्वर: {activeTrack.singer}</p>
             </div>
             
             {/* Visualizer bars when playing or error message */}
@@ -734,7 +742,7 @@ export default function BhajanSection() {
           {/* Seek Progress Bar Row */}
           {activeTrack && (
             activeYtId ? (
-              <div className="flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-50/40 rounded-2xl border border-amber-100/50 text-amber-800 text-[10px] md:text-xs font-bold text-center">
+              <div className="flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-50/40 rounded-2xl border border-amber-100/50 text-amber-800 text-[13px] md:text-[15px] font-bold text-center">
                 <Youtube className="w-4 h-4 text-red-600 animate-pulse shrink-0" />
                 <span>यूट्यूब भजन सक्रिय: नियंत्रण के लिए ऊपर प्लेयर का उपयोग करें</span>
               </div>
@@ -849,7 +857,7 @@ export default function BhajanSection() {
 
           {/* Playlist Tracks queue list */}
           <div className="flex-1 mt-2">
-            <p className="text-[10px] font-bold text-slate-400 uppercase mb-2 select-none tracking-widest px-1">प्लेलिस्ट ट्रैक ({bhajans.length}):</p>
+            <p className="text-[13px] font-extrabold text-slate-400 uppercase mb-2 select-none tracking-widest px-1">प्लेलिस्ट ट्रैक ({bhajans.length}):</p>
             <div className="max-h-36 overflow-y-auto flex flex-col gap-1.5 pr-1 text-sm scrollbar-thin">
               {bhajans.map((track, idx) => {
                 const isTrackYt = !!getYouTubeId(track.audioUrl);
@@ -878,7 +886,15 @@ export default function BhajanSection() {
                         )}
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate text-xs md:text-sm flex items-center gap-1">
+                        <p className={`truncate text-xs md:text-sm flex items-center gap-1 ${
+                          (track.title.toLowerCase().includes('shriram') || 
+                           track.title.toLowerCase().includes('shree ram') || 
+                           track.title.toLowerCase().includes('bethe') || 
+                           track.title.toLowerCase().includes('baithe') || 
+                           track.title.includes('श्रीराम')) 
+                            ? 'text-amber-800 font-bold' 
+                            : ''
+                        }`}>
                           <span>{track.title}</span>
                           {isTrackYt && (
                             <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded bg-red-50 text-red-600 text-[8px] font-bold tracking-wide uppercase border border-red-100">

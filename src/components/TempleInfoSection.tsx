@@ -308,7 +308,7 @@ export default function TempleInfoSection() {
         <div className="flex border-b border-sky-100 bg-sky-50/40 select-none">
           <button
             onClick={() => setActiveTab('timings')}
-            className={`flex-1 py-4 text-xs md:text-sm font-bold flex items-center justify-center gap-1.5 transition ${
+            className={`flex-1 py-4 text-sm md:text-base font-bold flex items-center justify-center gap-1.5 transition ${
               activeTab === 'timings' 
                 ? 'text-amber-600 bg-white border-b-2 border-amber-500' 
                 : 'text-slate-500 hover:text-slate-700'
@@ -320,19 +320,19 @@ export default function TempleInfoSection() {
 
           <button
             onClick={() => setActiveTab('about')}
-            className={`flex-1 py-4 text-xs md:text-sm font-bold flex items-center justify-center gap-1.5 transition ${
+            className={`flex-1 py-4 text-sm md:text-base font-bold flex items-center justify-center gap-1.5 transition ${
               activeTab === 'about' 
                 ? 'text-amber-600 bg-white border-b-2 border-amber-500' 
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <BookOpen className="w-4 h-4" />
-            <span>इतिहास व परिचय</span>
+            <span>इतिहास एवं परिचय</span>
           </button>
 
           <button
             onClick={() => setActiveTab('contact')}
-            className={`flex-1 py-4 text-xs md:text-sm font-bold flex items-center justify-center gap-1.5 transition ${
+            className={`flex-1 py-4 text-sm md:text-base font-bold flex items-center justify-center gap-1.5 transition ${
               activeTab === 'contact' 
                 ? 'text-amber-600 bg-white border-b-2 border-amber-500' 
                 : 'text-slate-500 hover:text-slate-700'
@@ -349,7 +349,7 @@ export default function TempleInfoSection() {
           {/* 1. TIMINGS VIEW */}
           {activeTab === 'timings' && (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-100 px-3 py-2 rounded-xl self-start">
+              <div className="flex items-center gap-2 text-lg md:text-xl font-bold text-amber-700 bg-amber-50 border border-amber-100 px-3 py-2 rounded-xl self-start">
                 <Clock className="w-4 h-4" />
                 <span>नित्य दर्शन समय सारणी (दैनिक)</span>
               </div>
@@ -384,22 +384,22 @@ export default function TempleInfoSection() {
               
               {/* About description */}
               <div className="flex flex-col gap-2">
-                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1 text-amber-600">
-                  <Sparkles className="w-4 h-4 fill-current" />
+                <h3 className="text-lg md:text-xl font-bold text-orange-600 flex items-center gap-1.5">
+                  <Sparkles className="w-5 h-5 fill-current" />
                   <span>मंदिर परिचय</span>
                 </h3>
-                <p className="text-xs md:text-sm leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap">
+                <p className="text-xl md:text-2xl leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap">
                   {displayAbout}
                 </p>
               </div>
 
               {/* History details */}
               <div className="flex flex-col gap-2">
-                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1 text-amber-600">
-                  <BookOpen className="w-4 h-4" />
+                <h3 className="text-lg md:text-xl font-bold text-orange-600 flex items-center gap-1.5">
+                  <BookOpen className="w-5 h-5" />
                   <span>धार्मिक मान्यता एवं इतिहास</span>
                 </h3>
-                <p className="text-xs md:text-sm leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap">
+                <p className="text-xl md:text-2xl leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap">
                   {displayHistory}
                 </p>
               </div>
@@ -416,11 +416,11 @@ export default function TempleInfoSection() {
                 {/* Contact Person Card */}
                 {settings.contactPerson && (
                   <div className="p-4 bg-amber-50/50 rounded-2xl border border-amber-100/50">
-                    <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                      <User className="w-3.5 h-3.5 text-amber-500" />
-                      <span>मुख्य संपर्क व्यक्ति (Contact Person)</span>
+                    <p className="text-[16px] font-bold text-amber-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                      <User className="w-4 h-4 text-amber-500" />
+                      <span>मुख्य संपर्क व्यक्ति</span>
                     </p>
-                    <p className="text-xs md:text-sm font-bold text-slate-700">
+                    <p className="text-lg md:text-xl font-normal text-slate-700">
                       {settings.contactPerson}
                     </p>
                   </div>
@@ -428,11 +428,11 @@ export default function TempleInfoSection() {
                 
                 {/* Physical address card */}
                 <div className="p-4 bg-sky-50/50 rounded-2xl border border-sky-100/50">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-orange-500" />
+                  <p className="text-[16px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                    <MapPin className="w-4 h-4 text-orange-500" />
                     <span>मंदिर का मुख्य पता</span>
                   </p>
-                  <p className="text-xs md:text-sm font-bold text-slate-700">
+                  <p className="text-lg md:text-xl font-normal text-slate-700">
                     {displayAddress}
                   </p>
                 </div>
@@ -449,8 +449,8 @@ export default function TempleInfoSection() {
                       <Phone className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">फ़ोन संपर्क</p>
-                      <p className="text-xs font-bold font-mono">{displayPhone}</p>
+                      <p className="text-[15px] font-bold text-slate-500 uppercase">फ़ोन संपर्क</p>
+                      <p className="text-lg font-normal font-mono">{displayPhone}</p>
                     </div>
                   </a>
 
@@ -465,8 +465,8 @@ export default function TempleInfoSection() {
                       <MessageSquare className="w-4 h-4 fill-current" />
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">व्हाट्सएप संपर्क</p>
-                      <p className="text-xs font-bold font-mono">चैट शुरू करें</p>
+                      <p className="text-[15px] font-bold text-slate-500 uppercase">व्हाट्सएप संपर्क</p>
+                      <p className="text-lg font-normal font-mono">चैट शुरू करें</p>
                     </div>
                   </a>
 
@@ -479,8 +479,8 @@ export default function TempleInfoSection() {
                       <Mail className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">ईमेल आईडी</p>
-                      <p className="text-xs font-bold font-mono truncate max-w-[150px]">{displayEmail}</p>
+                      <p className="text-[15px] font-bold text-slate-500 uppercase">ईमेल आईडी</p>
+                      <p className="text-lg font-normal font-mono truncate max-w-[220px]">{displayEmail}</p>
                     </div>
                   </a>
 
@@ -495,8 +495,8 @@ export default function TempleInfoSection() {
                       <Map className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-amber-100 uppercase">नेविगेशन रूट</p>
-                      <p className="text-xs font-black flex items-center gap-0.5">नक्शा खोलें <ExternalLink className="w-3 h-3" /></p>
+                      <p className="text-[15px] font-bold text-amber-100 uppercase">नेविगेशन रूट</p>
+                      <p className="text-sm font-black flex items-center gap-0.5">नक्शा खोलें <ExternalLink className="w-3 h-3" /></p>
                     </div>
                   </a>
                 </div>

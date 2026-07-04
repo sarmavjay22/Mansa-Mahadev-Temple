@@ -485,9 +485,9 @@ export default function TodayDarshan() {
 
           {/* Quick Share / Information HUD */}
           <div className="mt-6 pt-4 border-t border-sky-100 flex items-center justify-between gap-3">
-            <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
-              <Info className="w-3 h-3 text-sky-400 shrink-0" />
-              <span>मोबाइल पर पिंच ज़ूम उपलब्ध है।</span>
+            <span className="text-[11px] font-bold text-black flex items-center gap-1">
+              <Info className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+              <span>मोबाइल पर पिंच ज़ूम उपलब्ध</span>
             </span>
 
             <button
