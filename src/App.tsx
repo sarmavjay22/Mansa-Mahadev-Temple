@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 import { subscribeToTempleSettings, getCachedTempleSettings } from './lib/settings';
 import { TempleSettings } from './types';
+import { db, subscribeToDBUpdates } from './lib/db';
 
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -22,6 +23,57 @@ export default function App() {
     const unsubscribe = subscribeToTempleSettings((fetched) => {
       setSettings(fetched);
     });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const applySocialShareSettings = () => {
+      const shareSettings = db.getSocialShareSettings();
+      const title = shareSettings.websiteTitle || "मंसा महादेव मंदिर तितरड़ी, उदयपुर";
+      const desc = shareSettings.websiteDescription || "श्री मंसा महादेव मंदिर तितरड़ी, उदयपुर - दर्शन, आरती, भजन, और दिव्य मंदिर की जानकारी।";
+      const image = shareSettings.websiteShareImageUrl || "https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?q=80&w=1200&auto=format&fit=crop";
+      const url = shareSettings.defaultShareUrl || window.location.origin;
+      const favicon = shareSettings.faviconUrl;
+
+      // Dynamic Meta Tag helper
+      const updateMeta = (nameOrProperty: string, content: string, isProperty = true) => {
+        const attribute = isProperty ? 'property' : 'name';
+        let element = document.querySelector(`meta[${attribute}="${nameOrProperty}"]`);
+        if (!element) {
+          element = document.createElement('meta');
+          element.setAttribute(attribute, nameOrProperty);
+          document.head.appendChild(element);
+        }
+        element.setAttribute('content', content);
+      };
+
+      // Apply dynamic metadata
+      updateMeta('og:title', title, true);
+      updateMeta('og:description', desc, true);
+      updateMeta('og:image', image, true);
+      updateMeta('og:url', url, true);
+
+      updateMeta('twitter:title', title, false);
+      updateMeta('twitter:description', desc, false);
+      updateMeta('twitter:image', image, false);
+
+      // Apply dynamic favicon if provided
+      if (favicon && favicon.trim()) {
+        let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+        if (!link) {
+          link = document.createElement('link');
+          link.rel = 'icon';
+          document.head.appendChild(link);
+        }
+        link.href = favicon.trim();
+      }
+    };
+
+    // Apply immediately on mount
+    applySocialShareSettings();
+
+    // Subscribe to real-time changes
+    const unsubscribe = subscribeToDBUpdates(applySocialShareSettings);
     return unsubscribe;
   }, []);
 

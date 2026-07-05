@@ -182,22 +182,64 @@ export default function TodayDarshan() {
 
   // Share functionality
   const handleShare = async () => {
-    if (!darshan) return;
-    const shareText = `ॐ नमः शिवाय! मंसा महादेव मंदिर तितरड़ी, उदयपुर का आज का अलौकिक श्रृंगार दर्शन: ${darshan.festivalName || ''} (${darshan.date}). दर्शन के लिए देखें: ${window.location.href}`;
-    
+    // Get latest social share settings dynamically every time (no cached values)
+    const settings = db.getSocialShareSettings();
+    const title = settings.websiteTitle || 'मंसा महादेव मंदिर तितरड़ी, उदयपुर';
+    const desc = settings.websiteDescription || '';
+    const shareImageUrl = settings.websiteShareImageUrl || '';
+    const shareUrl = settings.defaultShareUrl || window.location.origin;
+
+    // Construct the share text exactly as requested (without direct image URL as text, which gets previewed automatically by WhatsApp):
+    // 🛕 {Website Title}
+    //
+    // {Website Description}
+    //
+    // 🌐 {Website URL}
+    let shareParts: string[] = [];
+    shareParts.push(`🛕 ${title}`);
+    if (desc && desc.trim()) {
+      shareParts.push(desc.trim());
+    }
+    shareParts.push(`🌐 ${shareUrl}`);
+
+    const shareText = shareParts.join('\n\n');
+
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: 'मंसा महादेव मंदिर दर्शन',
+        const shareData: ShareData = {
+          title: title,
           text: shareText,
-          url: window.location.href,
-        });
+        };
+
+        // If a share image URL is set, fetch it and convert to a File to share directly as an attachment.
+        // This displays a full high-resolution image preview in WhatsApp with the text as the caption,
+        // without printing the image URL as text.
+        if (shareImageUrl && shareImageUrl.trim()) {
+          try {
+            const response = await fetch(shareImageUrl.trim(), { mode: 'cors' });
+            if (response.ok) {
+              const blob = await response.blob();
+              const mimeType = blob.type || 'image/png';
+              const ext = mimeType.split('/')[1] || 'png';
+              const file = new File([blob], `temple_darshan.${ext}`, { type: mimeType });
+
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                shareData.files = [file];
+              }
+            }
+          } catch (fileErr) {
+            console.warn("Could not fetch share image file, falling back to text-only share", fileErr);
+          }
+        }
+
+        await navigator.share(shareData);
       } catch (error) {
         console.log("Error sharing", error);
       }
     } else {
+      // Fallback for desktop / clipboard copy
       navigator.clipboard.writeText(shareText);
-      alert("दर्शन संदेश और लिंक क्लिपबोर्ड पर कॉपी हो गया है! आप इसे व्हाट्सएप या अन्य कहीं भी शेयर कर सकते हैं।");
+      alert("विवरण और लिंक क्लिपबोर्ड पर कॉपी हो गया है! आप इसे व्हाट्सएप या अन्य कहीं भी शेयर कर सकते हैं।");
     }
   };
 
