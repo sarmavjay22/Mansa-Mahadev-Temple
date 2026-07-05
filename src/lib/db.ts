@@ -13,7 +13,9 @@ import {
   CommitteeMember,
   FestivalBanner,
   TempleGalleryItem,
-  SocialShareSettings
+  SocialShareSettings,
+  DonationSettings,
+  BhajanDocument
 } from '../types';
 
 // Default / Seed Data using the generated high-quality spiritual assets
@@ -521,6 +523,22 @@ export const DEFAULT_SOCIAL_SHARE_SETTINGS: SocialShareSettings = {
   defaultShareUrl: ""
 };
 
+export const DEFAULT_DONATION_SETTINGS: DonationSettings = {
+  isEnabled: true,
+  qrCodeUrl: "https://i.ibb.co/DfckK8Pf/file-0000000073a471fbac7baf3abda72214.png", // A high-quality default QR code image
+  upiId: "mansamahadev@upi",
+  upiLink: "upi://pay?pa=mansamahadev@upi&pn=Mansa%20Mahadev%20Temple&tn=Temple%20Donation",
+  message: "मंदिर के धार्मिक कार्यों, सेवा एवं विकास में अपना सहयोग प्रदान करें।",
+  committeeName: "श्री मंसा महादेव मंदिर विकास एवं प्रबंधन समिति",
+  trusteeName: "श्री मंसा महादेव मंदिर मुख्य ट्रस्टी",
+  members: [
+    { id: "dm_1", name: "श्री रामलाल जी पटेल", designation: "अध्यक्ष" },
+    { id: "dm_2", name: "श्री मोहन लाल जी शर्मा", designation: "सचिव" },
+    { id: "dm_3", name: "श्री दिनेश जी वैष्णव", designation: "कोषाध्यक्ष" },
+    { id: "dm_4", name: "श्री शांतिलाल जी डांगी", designation: "उपाध्यक्ष" }
+  ]
+};
+
 export const DEFAULT_TEMPLE_GALLERY: TempleGalleryItem[] = [
   {
     id: "temple_gal_1",
@@ -664,6 +682,8 @@ export let firestoreCommittee: CommitteeMember[] = [];
 export let firestoreFestivalBanners: FestivalBanner[] = [];
 export let firestoreTempleGallery: TempleGalleryItem[] = [];
 export let firestoreSocialShareSettings: SocialShareSettings | null = null;
+export let firestoreDonationSettings: DonationSettings | null = null;
+export let firestoreBhajanDocuments: BhajanDocument[] = [];
 
 try {
   const cachedSocialShare = localStorage.getItem('mm_social_share');
@@ -672,6 +692,24 @@ try {
   }
 } catch (e) {
   console.error("Failed to load cached social share settings", e);
+}
+
+try {
+  const cachedDonation = localStorage.getItem('mm_donation');
+  if (cachedDonation) {
+    firestoreDonationSettings = JSON.parse(cachedDonation);
+  }
+} catch (e) {
+  console.error("Failed to load cached donation settings", e);
+}
+
+try {
+  const cachedBhajanDocs = localStorage.getItem('mm_bhajan_documents');
+  if (cachedBhajanDocs) {
+    firestoreBhajanDocuments = JSON.parse(cachedBhajanDocs);
+  }
+} catch (e) {
+  console.error("Failed to load cached bhajan documents", e);
 }
 
 try {
@@ -912,6 +950,74 @@ onSnapshot(doc(firestoreDb, 'settings', 'social_share'), (docSnap) => {
   notifyDBChange();
 }, (error) => {
   console.error("Firestore social_share subscription error:", error);
+});
+
+// Subscribe to firestore 'settings/donation' document
+onSnapshot(doc(firestoreDb, 'settings', 'donation'), (docSnap) => {
+  if (docSnap.exists()) {
+    firestoreDonationSettings = docSnap.data() as DonationSettings;
+    localStorage.setItem('mm_donation', JSON.stringify(firestoreDonationSettings));
+  } else {
+    firestoreDonationSettings = DEFAULT_DONATION_SETTINGS;
+    localStorage.setItem('mm_donation', JSON.stringify(DEFAULT_DONATION_SETTINGS));
+    setDoc(doc(firestoreDb, 'settings', 'donation'), DEFAULT_DONATION_SETTINGS).catch(err => {
+      console.error("Failed to seed donation settings to Firestore:", err);
+    });
+  }
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore donation subscription error:", error);
+});
+
+// Subscribe to firestore 'bhajan_documents' collection
+onSnapshot(collection(firestoreDb, 'bhajan_documents'), (snapshot) => {
+  const items: BhajanDocument[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as BhajanDocument);
+  });
+  firestoreBhajanDocuments = items;
+  localStorage.setItem('mm_bhajan_documents', JSON.stringify(items));
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore bhajan_documents subscription error:", error);
+});
+
+export let firestorePushSubscriptions: PushNotificationSubscription[] = [];
+export let firestorePushNotifications: PushNotificationPayload[] = [];
+
+// Subscribe to firestore 'notification_subscriptions' collection
+onSnapshot(collection(firestoreDb, 'notification_subscriptions'), (snapshot) => {
+  const items: PushNotificationSubscription[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as PushNotificationSubscription);
+  });
+  firestorePushSubscriptions = items;
+  localStorage.setItem('mm_push_subscriptions', JSON.stringify(items));
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore notification_subscriptions subscription error:", error);
+});
+
+// Subscribe to firestore 'push_notifications' collection
+onSnapshot(collection(firestoreDb, 'push_notifications'), (snapshot) => {
+  const items: PushNotificationPayload[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as PushNotificationPayload);
+  });
+  firestorePushNotifications = items;
+  localStorage.setItem('mm_push_notifications', JSON.stringify(items));
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore push_notifications subscription error:", error);
 });
 
 
@@ -1513,6 +1619,103 @@ export const db = {
       await setDoc(doc(firestoreDb, 'settings', 'social_share'), settings);
     } catch (e) {
       console.error("Failed to update social share settings in Firestore:", e);
+    }
+  },
+
+  // Donation Settings
+  getDonationSettings(): DonationSettings {
+    const data = localStorage.getItem('mm_donation');
+    if (!data) return firestoreDonationSettings || DEFAULT_DONATION_SETTINGS;
+    try {
+      return JSON.parse(data) as DonationSettings;
+    } catch (e) {
+      return firestoreDonationSettings || DEFAULT_DONATION_SETTINGS;
+    }
+  },
+
+  async updateDonationSettings(settings: DonationSettings) {
+    try {
+      await setDoc(doc(firestoreDb, 'settings', 'donation'), settings);
+    } catch (e) {
+      console.error("Failed to update donation settings in Firestore:", e);
+    }
+  },
+
+  // Bhajan Documents
+  getBhajanDocuments(): BhajanDocument[] {
+    const cached = localStorage.getItem('mm_bhajan_documents');
+    return cached ? JSON.parse(cached) : firestoreBhajanDocuments;
+  },
+
+  async addBhajanDocument(docItem: Omit<BhajanDocument, 'id' | 'uploadedAt'>) {
+    const id = "bdoc_" + Date.now();
+    const newDoc: BhajanDocument = {
+      id,
+      ...docItem,
+      uploadedAt: new Date().toISOString()
+    };
+    try {
+      await setDoc(doc(firestoreDb, 'bhajan_documents', id), newDoc);
+    } catch (e) {
+      console.error("Failed to add bhajan document to Firestore:", e);
+    }
+  },
+
+  async deleteBhajanDocument(id: string) {
+    try {
+      await deleteDoc(doc(firestoreDb, 'bhajan_documents', id));
+    } catch (e) {
+      console.error("Failed to delete bhajan document from Firestore:", e);
+    }
+  },
+
+  async updateBhajanDocument(id: string, updatedFields: Partial<BhajanDocument>) {
+    try {
+      await setDoc(doc(firestoreDb, 'bhajan_documents', id), updatedFields, { merge: true });
+    } catch (e) {
+      console.error("Failed to update bhajan document in Firestore:", e);
+    }
+  },
+
+  // Push Notifications API
+  getPushSubscriptions(): PushNotificationSubscription[] {
+    const cached = localStorage.getItem('mm_push_subscriptions');
+    return cached ? JSON.parse(cached) : firestorePushSubscriptions;
+  },
+
+  async addPushSubscription(subscriptionId: string) {
+    const subscription: PushNotificationSubscription = {
+      id: subscriptionId,
+      subscribedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    };
+    try {
+      await setDoc(doc(firestoreDb, 'notification_subscriptions', subscriptionId), subscription);
+    } catch (e) {
+      console.error("Failed to add push subscription to Firestore:", e);
+    }
+  },
+
+  getPushNotifications(): PushNotificationPayload[] {
+    const cached = localStorage.getItem('mm_push_notifications');
+    const items: PushNotificationPayload[] = cached ? JSON.parse(cached) : firestorePushNotifications;
+    return items.sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
+  },
+
+  async sendPushNotification(notification: Omit<PushNotificationPayload, 'id' | 'sentAt'>) {
+    const id = "pnotif_" + Date.now();
+    const newNotification: PushNotificationPayload = {
+      id,
+      title: notification.title,
+      message: notification.message,
+      imageUrl: notification.imageUrl || '',
+      targetUrl: notification.targetUrl || '',
+      sentAt: new Date().toISOString()
+    };
+    try {
+      await setDoc(doc(firestoreDb, 'push_notifications', id), newNotification);
+    } catch (e) {
+      console.error("Failed to send push notification to Firestore:", e);
     }
   }
 };

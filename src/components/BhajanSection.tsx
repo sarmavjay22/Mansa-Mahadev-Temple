@@ -24,7 +24,12 @@ import {
   Youtube,
   Video,
   Edit,
-  X
+  X,
+  BookOpen,
+  Eye,
+  ExternalLink,
+  Download,
+  Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -79,6 +84,29 @@ export default function BhajanSection() {
   // Custom alert and delete confirmation states
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // Devotional Bhajan Documents states
+  const [bhajanDocs, setBhajanDocs] = useState<any[]>([]);
+  const [isBhajanPopupOpen, setIsBhajanPopupOpen] = useState(false);
+  const [selectedBhajanDoc, setSelectedBhajanDoc] = useState<any | null>(null);
+  const [bhajanSearchQuery, setBhajanSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (!isBhajanPopupOpen) {
+      setBhajanSearchQuery('');
+    }
+  }, [isBhajanPopupOpen]);
+
+  useEffect(() => {
+    // Initial fetch of active documents
+    setBhajanDocs(db.getBhajanDocuments().filter((d: any) => d.isOn));
+
+    // Listen for database changes
+    const unsubscribe = subscribeToDBUpdates(() => {
+      setBhajanDocs(db.getBhajanDocuments().filter((d: any) => d.isOn));
+    });
+    return unsubscribe;
+  }, []);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -518,6 +546,222 @@ export default function BhajanSection() {
           </button>
         )}
       </div>
+
+      {/* Premium Capsule Button for Bhakti Bhajan Collection */}
+      <div className="flex justify-center mb-6">
+        <button
+          onClick={() => setIsBhajanPopupOpen(true)}
+          className="relative inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-slate-950 font-black text-sm md:text-base shadow-xl hover:shadow-orange-200/50 hover:scale-[1.02] active:scale-98 transition-all duration-300 group border-2 border-amber-300/60 overflow-hidden select-none"
+        >
+          {/* Pulsing glow background */}
+          <span className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></span>
+          <BookOpen className="w-5 h-5 text-slate-950 group-hover:rotate-6 transition-transform duration-300" />
+          <span className="tracking-wide">📖 भक्तिमय भजन संग्रह</span>
+          <span className="ml-1.5 flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-950"></span>
+          </span>
+        </button>
+      </div>
+
+      {/* 1. Responsive List Popup */}
+      <AnimatePresence>
+        {isBhajanPopupOpen && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: 'spring', duration: 0.5 }}
+              className="relative w-full max-w-lg h-[80vh] bg-gradient-to-b from-amber-50 to-white rounded-3xl shadow-2xl border-2 border-amber-100/50 overflow-hidden flex flex-col"
+            >
+              {/* Header */}
+              <div className="relative p-5 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 border-b border-amber-200/40 shrink-0 select-none flex items-center gap-3">
+                <BookOpen className="w-6 h-6 text-slate-950 fill-current" />
+                <div>
+                  <h3 className="text-base md:text-lg font-black tracking-wide">📖 भक्तिमय भजन संग्रह</h3>
+                  <p className="text-[10px] md:text-xs text-slate-900 font-bold opacity-80 mt-0.5">भजन, आरती एवं स्तोत्र संग्रह (PDF / Images)</p>
+                </div>
+
+                {/* Close Button Top Right - FIXED & VISIBLE */}
+                <button
+                  onClick={() => setIsBhajanPopupOpen(false)}
+                  className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-950/10 hover:bg-slate-950/20 text-slate-950 flex items-center justify-center transition duration-200 focus:outline-none"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5 font-bold" />
+                </button>
+              </div>
+
+              {/* Search Bar - Aesthetic & Modern */}
+              {bhajanDocs.length > 0 && (
+                <div className="px-5 py-3.5 bg-amber-50/50 border-b border-amber-100/60 flex items-center gap-2 select-none shrink-0">
+                  <div className="relative flex-1">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-amber-600" />
+                    </span>
+                    <input
+                      type="text"
+                      value={bhajanSearchQuery}
+                      onChange={(e) => setBhajanSearchQuery(e.target.value)}
+                      placeholder="भजन, आरती या चालीसा का नाम खोजें..."
+                      className="w-full pl-9 pr-8 py-2.5 bg-white border border-amber-200/60 rounded-2xl text-xs md:text-sm text-slate-800 placeholder-slate-400 font-extrabold focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition duration-200 shadow-sm"
+                    />
+                    {bhajanSearchQuery && (
+                      <button
+                        onClick={() => setBhajanSearchQuery('')}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition"
+                        title="खोज साफ करें"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-5 md:p-6 scrollbar-thin">
+                {bhajanDocs.length === 0 ? (
+                  <div className="text-center py-16 flex flex-col items-center justify-center">
+                    <BookOpen className="w-16 h-16 text-amber-200/80 mb-4 animate-pulse" />
+                    <p className="text-sm font-extrabold text-amber-900">संग्रह में वर्तमान में कोई दस्तावेज़ उपलब्ध नहीं है।</p>
+                    <p className="text-xs text-slate-400 mt-1 font-medium">कृपया एडमिन पैनल से दस्तावेज़ जोड़ें।</p>
+                  </div>
+                ) : bhajanDocs.filter(d => d.title.toLowerCase().includes(bhajanSearchQuery.toLowerCase())).length === 0 ? (
+                  <div className="text-center py-16 flex flex-col items-center justify-center">
+                    <Search className="w-12 h-12 text-amber-300/80 mb-3" />
+                    <p className="text-sm font-extrabold text-amber-900">खोज के अनुसार कोई दस्तावेज़ नहीं मिला।</p>
+                    <p className="text-xs text-slate-400 mt-1 font-medium">कृपया कोई अन्य शब्द लिखकर प्रयास करें।</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3.5">
+                    {bhajanDocs
+                      .filter(d => d.title.toLowerCase().includes(bhajanSearchQuery.toLowerCase()))
+                      .map((doc, idx) => (
+                        <button
+                          key={doc.id}
+                          onClick={() => setSelectedBhajanDoc(doc)}
+                          className="w-full text-left flex items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-amber-100 shadow-sm hover:border-amber-400 hover:shadow-md active:scale-99 transition duration-300 group"
+                        >
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <span className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 border border-orange-100 font-mono font-black text-xs flex items-center justify-center shrink-0 group-hover:bg-orange-500 group-hover:text-white transition duration-300">
+                              {idx + 1}
+                            </span>
+                            <div className="min-w-0">
+                              <h4 className="text-xs md:text-sm font-extrabold text-slate-800 leading-snug group-hover:text-amber-800 transition duration-200 truncate">
+                                {doc.title}
+                              </h4>
+                              <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase">
+                                {doc.mediaType === 'pdf' ? (
+                                  <span className="px-1.5 py-0.5 bg-red-50 text-red-600 border border-red-100 rounded">📄 PDF File</span>
+                                ) : (
+                                  <span className="px-1.5 py-0.5 bg-sky-50 text-sky-600 border border-sky-100 rounded">🖼️ {doc.mediaType.toUpperCase()} Image</span>
+                                )}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 text-xs text-amber-600 font-bold shrink-0">
+                            <span className="hidden sm:inline">खोलें</span>
+                            <Eye className="w-4 h-4 text-amber-500 group-hover:translate-x-0.5 transition-transform" />
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Button - FIXED & VISIBLE */}
+              <div className="p-4 bg-slate-50 border-t border-amber-100 shrink-0 flex items-center justify-center select-none">
+                <button
+                  onClick={() => setIsBhajanPopupOpen(false)}
+                  className="px-8 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-xs md:text-sm rounded-xl shadow-md transition duration-200"
+                >
+                  बंद करें
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 2. Full Screen Document Viewer Modal */}
+      <AnimatePresence>
+        {selectedBhajanDoc && (
+          <div className="fixed inset-0 z-[120] bg-slate-950 flex flex-col">
+            {/* Header HUD */}
+            <div className="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between text-white select-none shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0 pr-4">
+                <BookOpen className="w-5 h-5 text-amber-400 shrink-0" />
+                <h3 className="text-xs md:text-sm font-extrabold text-slate-100 truncate">
+                  {selectedBhajanDoc.title}
+                </h3>
+              </div>
+
+              {/* Utility buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={selectedBhajanDoc.mediaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-[10px] md:text-xs rounded-xl transition shadow"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">सीधे खोलें</span>
+                </a>
+                
+                <button
+                  onClick={() => setSelectedBhajanDoc(null)}
+                  className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition"
+                  title="बंद करें"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Document Body Area */}
+            <div className="flex-1 bg-slate-900/65 flex items-center justify-center p-2 overflow-hidden relative">
+              {selectedBhajanDoc.mediaType === 'pdf' ? (
+                /* Embed PDF safely with Fallback */
+                <div className="w-full h-full max-w-4xl mx-auto rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex flex-col relative">
+                  <iframe
+                    src={selectedBhajanDoc.mediaUrl.includes('google.com') ? selectedBhajanDoc.mediaUrl : `https://docs.google.com/viewer?url=${encodeURIComponent(selectedBhajanDoc.mediaUrl)}&embedded=true`}
+                    title={selectedBhajanDoc.title}
+                    className="w-full h-full absolute inset-0"
+                    referrerPolicy="no-referrer"
+                  ></iframe>
+                  {/* Subtle mobile guidance fallback if iframe loads slowly */}
+                  <div className="absolute bottom-4 left-4 right-4 text-center z-10 pointer-events-none sm:hidden">
+                    <span className="px-3 py-1.5 bg-slate-900/90 text-[10px] text-slate-400 font-bold rounded-lg border border-slate-800 shadow">
+                      💡 अगर फाइल लोड न हो तो ऊपर "सीधे खोलें" पर टैप करें।
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                /* Image viewer with zoom and pan support style containment */
+                <div className="w-full h-full flex flex-col items-center justify-center p-2 relative overflow-auto">
+                  <img
+                    src={selectedBhajanDoc.mediaUrl}
+                    alt={selectedBhajanDoc.title}
+                    className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-slate-800"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="mt-4 px-3 py-1.5 bg-slate-950/80 text-[10px] text-slate-400 font-semibold rounded-lg border border-slate-800/80">
+                    🖼️ फुल पेज इमेज मोड
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Viewer Footer bar */}
+            <div className="bg-slate-900 border-t border-slate-800 p-3 flex items-center justify-center text-slate-400 font-mono text-[10px] shrink-0 select-none">
+              <span>मंसा महादेव मंदिर • TITRARDI, UDAIPUR • PDF / IMAGE READER</span>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Admin Panel audio uploader */}
       <AnimatePresence>

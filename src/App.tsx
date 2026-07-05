@@ -7,6 +7,7 @@ import TodayVideo from './components/TodayVideo';
 import AartiSection from './components/AartiSection';
 import BhajanSection from './components/BhajanSection';
 import TempleGallery from './components/TempleGallery';
+import DonationCard from './components/DonationCard';
 import TempleInfoSection from './components/TempleInfoSection';
 import AdminPanel from './components/AdminPanel';
 import { motion, AnimatePresence } from 'motion/react';
@@ -14,6 +15,7 @@ import { Sparkles } from 'lucide-react';
 import { subscribeToTempleSettings, getCachedTempleSettings } from './lib/settings';
 import { TempleSettings } from './types';
 import { db, subscribeToDBUpdates } from './lib/db';
+import NotificationManager from './components/NotificationManager';
 
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -84,6 +86,7 @@ export default function App() {
         background: `linear-gradient(to bottom, ${settings.primaryThemeColor || '#e3f2fd'}, ${settings.secondaryThemeColor || '#f7f9fc'}, ${settings.primaryThemeColor || '#e3f2fd'})`
       }}
     >
+      <NotificationManager />
       
       {/* Decorative Aura Background Elements */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-sky-400/5 via-sky-300/2 to-transparent rounded-full blur-3xl pointer-events-none"></div>
@@ -116,6 +119,9 @@ export default function App() {
 
         {/* 📸 Temple Gallery Card & Single Popup */}
         <TempleGallery />
+
+        {/* ❤️ Temple Service & Donation Card */}
+        <DonationCard />
 
         {/* Temple Timings, History, Maps, & Direct Contacts */}
         <TempleInfoSection />

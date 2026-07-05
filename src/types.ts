@@ -167,4 +167,46 @@ export interface SocialShareSettings {
   defaultShareUrl?: string;
 }
 
+export interface DonationMember {
+  id: string;
+  name: string;
+  designation: string;
+}
+
+export interface BhajanDocument {
+  id: string;
+  title: string;
+  mediaType: 'pdf' | 'jpg' | 'png';
+  mediaUrl: string;
+  isOn: boolean;
+  uploadedAt: string;
+}
+
+export interface DonationSettings {
+  isEnabled: boolean;
+  qrCodeUrl: string;
+  upiId: string;
+  upiLink: string;
+  message: string;
+  committeeName?: string;
+  trusteeName?: string;
+  members?: DonationMember[];
+}
+
+export interface PushNotificationPayload {
+  id: string;
+  title: string;
+  message: string;
+  imageUrl?: string;
+  targetUrl?: string;
+  sentAt: string;
+}
+
+export interface PushNotificationSubscription {
+  id: string;
+  subscribedAt: string;
+  userAgent?: string;
+}
+
+
 

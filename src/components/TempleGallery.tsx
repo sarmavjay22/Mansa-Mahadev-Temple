@@ -258,31 +258,33 @@ export default function TempleGallery() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm select-none"
+            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm select-none cursor-pointer"
           >
             <motion.div 
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 15 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="bg-[#fffdf9] rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col border border-amber-100"
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fffdf9] rounded-3xl w-full max-w-2xl max-h-[calc(100vh-2rem)] overflow-hidden shadow-2xl flex flex-col border border-amber-100 cursor-default"
             >
               {/* Header */}
-              <div className="p-5 border-b border-amber-100 flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50">
+              <div className="p-5 border-b border-amber-100 flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 shrink-0">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500" />
                   <h2 className="text-lg md:text-xl font-black text-slate-800">📸 मँदिर दर्शन दीर्घा (गैलरी)</h2>
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="w-9 h-9 rounded-full bg-white border border-amber-200/50 flex items-center justify-center hover:bg-amber-100 text-slate-500 transition duration-200"
+                  className="w-9 h-9 rounded-full bg-white border border-amber-200/50 flex items-center justify-center hover:bg-amber-100 text-slate-500 transition duration-200 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Popup Content: 3 Big Options */}
-              <div className="p-6 flex flex-col gap-4">
+              <div className="p-6 flex flex-col gap-4 flex-1 overflow-y-auto">
                 <p className="text-sm text-amber-800 font-bold text-center mb-1">
                   मंसा महादेव मंदिर दर्शन दीर्घा की पावन श्रेणियां:
                 </p>
@@ -293,7 +295,7 @@ export default function TempleGallery() {
                     whileHover={{ y: -3, scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedCategory('mandir_parisar')}
-                    className="flex flex-col items-center bg-white border border-amber-200/60 p-5 rounded-2xl shadow-sm text-center transition-all duration-300"
+                    className="flex flex-col items-center bg-white border border-amber-200/60 p-5 rounded-2xl shadow-sm text-center transition-all duration-300 cursor-pointer"
                   >
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200/60 mb-3 flex items-center justify-center shadow-inner">
                       <span className="text-3xl">🛕</span>
@@ -309,7 +311,7 @@ export default function TempleGallery() {
                     whileHover={{ y: -3, scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedCategory('utsav')}
-                    className="flex flex-col items-center bg-white border border-amber-200/60 p-5 rounded-2xl shadow-sm text-center transition-all duration-300"
+                    className="flex flex-col items-center bg-white border border-amber-200/60 p-5 rounded-2xl shadow-sm text-center transition-all duration-300 cursor-pointer"
                   >
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200/60 mb-3 flex items-center justify-center shadow-inner">
                       <span className="text-3xl">🎉</span>
@@ -325,7 +327,7 @@ export default function TempleGallery() {
                     whileHover={{ y: -3, scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedCategory('bhaktimay')}
-                    className="flex flex-col items-center bg-white border border-amber-200/60 p-5 rounded-2xl shadow-sm text-center transition-all duration-300"
+                    className="flex flex-col items-center bg-white border border-amber-200/60 p-5 rounded-2xl shadow-sm text-center transition-all duration-300 cursor-pointer"
                   >
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-rose-50 to-rose-100 border-2 border-rose-200/60 mb-3 flex items-center justify-center shadow-inner">
                       <span className="text-3xl">🙏</span>
@@ -339,10 +341,10 @@ export default function TempleGallery() {
               </div>
 
               {/* Footer */}
-              <div className="p-4 bg-amber-50/50 border-t border-amber-100 text-center flex justify-center">
+              <div className="p-4 bg-amber-50/50 border-t border-amber-100 text-center flex justify-center shrink-0">
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="px-6 py-2 rounded-xl bg-amber-600 text-[#fffdf5] font-bold text-xs hover:bg-amber-700 transition duration-200"
+                  className="px-6 py-2 rounded-xl bg-amber-600 text-[#fffdf5] font-bold text-xs hover:bg-amber-700 transition duration-200 cursor-pointer"
                 >
                   बंद करें
                 </button>
@@ -359,21 +361,23 @@ export default function TempleGallery() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm select-none"
+            onClick={() => setSelectedCategory(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm select-none cursor-pointer"
           >
             <motion.div 
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 15 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="bg-[#fffdf9] rounded-3xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-amber-100"
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fffdf9] rounded-3xl w-full max-w-4xl max-h-[calc(100vh-2rem)] overflow-hidden shadow-2xl flex flex-col border border-amber-100 cursor-default"
             >
               {/* Header with Back button */}
-              <div className="p-5 border-b border-amber-100 flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50">
+              <div className="p-5 border-b border-amber-100 flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 shrink-0">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setSelectedCategory(null)}
-                    className="p-1.5 rounded-lg bg-white border border-amber-200 text-amber-800 hover:bg-amber-50 transition"
+                    className="p-1.5 rounded-lg bg-white border border-amber-200 text-amber-800 hover:bg-amber-50 transition cursor-pointer"
                     title="श्रेणी मेनू पर वापस जाएं"
                   >
                     <ArrowLeft className="w-5 h-5" />
@@ -387,7 +391,7 @@ export default function TempleGallery() {
                 </div>
                 <button 
                   onClick={() => { setSelectedCategory(null); setIsOpen(false); }}
-                  className="w-9 h-9 rounded-full bg-white border border-amber-200/50 flex items-center justify-center hover:bg-amber-100 text-slate-500 transition duration-200"
+                  className="w-9 h-9 rounded-full bg-white border border-amber-200/50 flex items-center justify-center hover:bg-amber-100 text-slate-500 transition duration-200 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -438,7 +442,7 @@ export default function TempleGallery() {
                     <p className="text-slate-600 font-bold text-sm">इस श्रेणी में अभी कोई तस्वीर उपलब्ध नहीं है।</p>
                     <button
                       onClick={() => setSelectedCategory(null)}
-                      className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold rounded-xl text-xs transition shadow-sm"
+                      className="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold rounded-xl text-xs transition shadow-sm cursor-pointer"
                     >
                       अन्य श्रेणी चुनें
                     </button>
@@ -447,16 +451,16 @@ export default function TempleGallery() {
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-4 border-t border-amber-100 bg-amber-50/40 flex items-center justify-between gap-3">
+              <div className="px-6 py-4 border-t border-amber-100 bg-amber-50/40 flex items-center justify-between gap-3 shrink-0">
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className="px-5 py-2 rounded-xl border border-amber-200 bg-white text-amber-800 font-bold text-xs hover:bg-amber-50 transition"
+                  className="px-5 py-2 rounded-xl border border-amber-200 bg-white text-amber-800 font-bold text-xs hover:bg-amber-50 transition cursor-pointer"
                 >
                   श्रेणी मेनू
                 </button>
                 <button
                   onClick={() => { setSelectedCategory(null); setIsOpen(false); }}
-                  className="px-5 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition"
+                  className="px-5 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition cursor-pointer"
                 >
                   बंद करें
                 </button>
