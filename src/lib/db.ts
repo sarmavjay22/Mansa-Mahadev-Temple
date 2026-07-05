@@ -11,7 +11,9 @@ import {
   NotificationItem,
   TempleEvent,
   CommitteeMember,
-  FestivalBanner
+  FestivalBanner,
+  TempleGalleryItem,
+  SocialShareSettings
 } from '../types';
 
 // Default / Seed Data using the generated high-quality spiritual assets
@@ -478,17 +480,23 @@ export const DEFAULT_FESTIVAL_BANNERS: FestivalBanner[] = [
     startDate: "2026-07-01",
     endDate: "2026-08-31",
     isEnabled: true,
-    uploadedAt: new Date().toISOString()
+    uploadedAt: new Date().toISOString(),
+    time: "06:00 PM",
+    location: "मुख्य मंदिर गर्भगृह, मंसा महादेव मंदिर",
+    specialNote: "कृपया अपने साथ शुद्ध जल, दूध और विल्व पत्र अवश्य लाएं।"
   },
   {
     id: "fbn_guru",
     title: "श्री गुरु पूर्णिमा महोत्सव",
-    description: "आराध्य गुरुदेव के पावन सानिध्य में भव्य गुरु पूजन, सुmoodुर भजन संध्या, मंगल आरती एवं विशाल भंडारा (महाप्रसाद) का आयोजन। सभी भक्त सादर आमंत्रित हैं।",
+    description: "आराध्य गुरुदेव के पावन सानिध्य में भव्य गुरु पूजन, सुमधुर भजन संध्या, मंगल आरती एवं विशाल भंडारा (महाप्रसाद) का आयोजन। सभी भक्त सादर आमंत्रित हैं।",
     imageUrl: "https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?q=80&w=1200&auto=format&fit=crop",
     startDate: "2026-07-01",
     endDate: "2026-07-10",
     isEnabled: true,
-    uploadedAt: new Date().toISOString()
+    uploadedAt: new Date().toISOString(),
+    time: "05:00 PM",
+    location: "महादेव मंदिर सभाकक्ष एवं प्रांगण",
+    specialNote: "महोत्सव के पश्चात् विशाल भंडारा (प्रसाद वितरण) रहेगा।"
   },
   {
     id: "fbn_haryali",
@@ -498,7 +506,48 @@ export const DEFAULT_FESTIVAL_BANNERS: FestivalBanner[] = [
     startDate: "2026-07-01",
     endDate: "2026-07-20",
     isEnabled: true,
-    uploadedAt: new Date().toISOString()
+    uploadedAt: new Date().toISOString(),
+    time: "07:30 PM",
+    location: "मंसा महादेव मंदिर परिसर",
+    specialNote: "विशेष महाआरती रात्रि 8:00 बजे होगी।"
+  }
+];
+
+export const DEFAULT_SOCIAL_SHARE_SETTINGS: SocialShareSettings = {
+  websiteTitle: "मंसा महादेव मंदिर",
+  websiteDescription: "दैनिक श्रृंगार दर्शन, आरती वीडियो, उत्सव, सुंदरकांड, मंदिर दर्शन दीर्घा (गैलरी) एवं मंदिर की सम्पूर्ण जानकारी।",
+  websiteShareImageUrl: "https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?q=80&w=1200&auto=format&fit=crop",
+  faviconUrl: "",
+  defaultShareUrl: ""
+};
+
+export const DEFAULT_TEMPLE_GALLERY: TempleGalleryItem[] = [
+  {
+    id: "temple_gal_1",
+    imageUrl: "/src/assets/images/today_shringar_1782657607504.jpg",
+    caption: "मंसा महादेव मुख्य मंदिर एवं दिव्य गर्भगृह का विहंगम दृश्य",
+    category: "mandir_parisar",
+    uploadDate: "2026-07-04",
+    isActive: true,
+    uploadedAt: "2026-07-04T00:00:00.000Z"
+  },
+  {
+    id: "temple_gal_2",
+    imageUrl: "https://images.unsplash.com/photo-1609137144814-7d526e959ec2?q=80&w=600&auto=format&fit=crop",
+    caption: "श्रावण सोमवार एवं भव्य महाआरती उत्सव",
+    category: "utsav",
+    uploadDate: "2026-07-02",
+    isActive: true,
+    uploadedAt: "2026-07-02T00:00:00.000Z"
+  },
+  {
+    id: "temple_gal_3",
+    imageUrl: "https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?q=80&w=600&auto=format&fit=crop",
+    caption: "श्रद्धालुओं द्वारा शिव नाम संकीर्तन एवं भक्तिमय क्षण",
+    category: "bhaktimay",
+    uploadDate: "2026-07-03",
+    isActive: true,
+    uploadedAt: "2026-07-03T00:00:00.000Z"
   }
 ];
 
@@ -530,6 +579,9 @@ function initDB() {
   }
   if (!localStorage.getItem('mm_festival_banners')) {
     localStorage.setItem('mm_festival_banners', JSON.stringify(DEFAULT_FESTIVAL_BANNERS));
+  }
+  if (!localStorage.getItem('mm_temple_gallery')) {
+    localStorage.setItem('mm_temple_gallery', JSON.stringify(DEFAULT_TEMPLE_GALLERY));
   }
   if (!localStorage.getItem('mm_admin_auth')) {
     // Default admin creds
@@ -610,6 +662,17 @@ export let firestoreVideos: VideoDarshan[] = [];
 export let firestoreEvents: TempleEvent[] = [];
 export let firestoreCommittee: CommitteeMember[] = [];
 export let firestoreFestivalBanners: FestivalBanner[] = [];
+export let firestoreTempleGallery: TempleGalleryItem[] = [];
+export let firestoreSocialShareSettings: SocialShareSettings | null = null;
+
+try {
+  const cachedSocialShare = localStorage.getItem('mm_social_share');
+  if (cachedSocialShare) {
+    firestoreSocialShareSettings = JSON.parse(cachedSocialShare);
+  }
+} catch (e) {
+  console.error("Failed to load cached social share settings", e);
+}
 
 try {
   const cachedDarshan = localStorage.getItem('mm_dailyDarshan');
@@ -627,6 +690,15 @@ try {
   }
 } catch (e) {
   console.error("Failed to load cached gallery", e);
+}
+
+try {
+  const cachedTempleGallery = localStorage.getItem('mm_temple_gallery');
+  if (cachedTempleGallery) {
+    firestoreTempleGallery = JSON.parse(cachedTempleGallery);
+  }
+} catch (e) {
+  console.error("Failed to load cached temple_gallery", e);
 }
 
 try {
@@ -770,7 +842,10 @@ onSnapshot(collection(firestoreDb, 'festival_banners'), (snapshot) => {
           startDate: b.startDate,
           endDate: b.endDate,
           isEnabled: b.isEnabled,
-          uploadedAt: b.uploadedAt
+          uploadedAt: b.uploadedAt,
+          time: b.time || "",
+          location: b.location || "",
+          specialNote: b.specialNote || ""
         });
       } catch (err) {
         console.error("Failed to seed festival banner to Firestore:", err);
@@ -783,6 +858,60 @@ onSnapshot(collection(firestoreDb, 'festival_banners'), (snapshot) => {
   }
 }, (error) => {
   console.error("Firestore festival_banners subscription error:", error);
+});
+
+// Subscribe to firestore 'temple_gallery'
+onSnapshot(collection(firestoreDb, 'temple_gallery'), (snapshot) => {
+  const items: TempleGalleryItem[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as TempleGalleryItem);
+  });
+  if (items.length === 0) {
+    firestoreTempleGallery = DEFAULT_TEMPLE_GALLERY;
+    localStorage.setItem('mm_temple_gallery', JSON.stringify(DEFAULT_TEMPLE_GALLERY));
+    notifyDBChange();
+
+    DEFAULT_TEMPLE_GALLERY.forEach(async (b) => {
+      try {
+        await setDoc(doc(firestoreDb, 'temple_gallery', b.id), {
+          imageUrl: b.imageUrl,
+          caption: b.caption,
+          category: b.category,
+          uploadDate: b.uploadDate,
+          isActive: b.isActive,
+          uploadedAt: b.uploadedAt
+        });
+      } catch (err) {
+        console.error("Failed to seed temple gallery to Firestore:", err);
+      }
+    });
+  } else {
+    firestoreTempleGallery = items;
+    localStorage.setItem('mm_temple_gallery', JSON.stringify(items));
+    notifyDBChange();
+  }
+}, (error) => {
+  console.error("Firestore temple_gallery subscription error:", error);
+});
+
+// Subscribe to firestore 'settings/social_share' document
+onSnapshot(doc(firestoreDb, 'settings', 'social_share'), (docSnap) => {
+  if (docSnap.exists()) {
+    firestoreSocialShareSettings = docSnap.data() as SocialShareSettings;
+    localStorage.setItem('mm_social_share', JSON.stringify(firestoreSocialShareSettings));
+  } else {
+    firestoreSocialShareSettings = DEFAULT_SOCIAL_SHARE_SETTINGS;
+    localStorage.setItem('mm_social_share', JSON.stringify(DEFAULT_SOCIAL_SHARE_SETTINGS));
+    setDoc(doc(firestoreDb, 'settings', 'social_share'), DEFAULT_SOCIAL_SHARE_SETTINGS).catch(err => {
+      console.error("Failed to seed social share settings to Firestore:", err);
+    });
+  }
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore social_share subscription error:", error);
 });
 
 
@@ -929,6 +1058,49 @@ export const db = {
       await deleteDoc(doc(firestoreDb, 'gallery', id));
     } catch (e) {
       console.error("Failed to delete gallery item from Firestore:", e);
+    }
+  },
+
+  // Temple Gallery
+  getTempleGallery(): TempleGalleryItem[] {
+    return [...firestoreTempleGallery].sort((a, b) => {
+      const dateA = a.uploadDate ? new Date(a.uploadDate).getTime() : 0;
+      const dateB = b.uploadDate ? new Date(b.uploadDate).getTime() : 0;
+      return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+    });
+  },
+
+  async addTempleGalleryItem(item: Omit<TempleGalleryItem, 'id' | 'uploadedAt'> & { id?: string }) {
+    const id = item.id || "temple_gal_" + Date.now();
+    const newItem: TempleGalleryItem = {
+      id,
+      imageUrl: item.imageUrl,
+      caption: item.caption,
+      category: item.category,
+      uploadDate: item.uploadDate,
+      isActive: item.isActive,
+      uploadedAt: new Date().toISOString()
+    };
+    try {
+      await setDoc(doc(firestoreDb, 'temple_gallery', id), newItem);
+    } catch (e) {
+      console.error("Failed to add temple gallery item to Firestore:", e);
+    }
+  },
+
+  async updateTempleGalleryItem(id: string, updatedFields: Partial<TempleGalleryItem>) {
+    try {
+      await setDoc(doc(firestoreDb, 'temple_gallery', id), updatedFields, { merge: true });
+    } catch (e) {
+      console.error("Failed to update temple gallery item in Firestore:", e);
+    }
+  },
+
+  async deleteTempleGalleryItem(id: string) {
+    try {
+      await deleteDoc(doc(firestoreDb, 'temple_gallery', id));
+    } catch (e) {
+      console.error("Failed to delete temple gallery item from Firestore:", e);
     }
   },
 
@@ -1322,6 +1494,25 @@ export const db = {
       await deleteDoc(doc(firestoreDb, 'festival_banners', id));
     } catch (e) {
       console.error("Failed to delete festival banner from Firestore:", e);
+    }
+  },
+
+  // Social Share Settings
+  getSocialShareSettings(): SocialShareSettings {
+    const data = localStorage.getItem('mm_social_share');
+    if (!data) return firestoreSocialShareSettings || DEFAULT_SOCIAL_SHARE_SETTINGS;
+    try {
+      return JSON.parse(data) as SocialShareSettings;
+    } catch (e) {
+      return firestoreSocialShareSettings || DEFAULT_SOCIAL_SHARE_SETTINGS;
+    }
+  },
+
+  async updateSocialShareSettings(settings: SocialShareSettings) {
+    try {
+      await setDoc(doc(firestoreDb, 'settings', 'social_share'), settings);
+    } catch (e) {
+      console.error("Failed to update social share settings in Firestore:", e);
     }
   }
 };

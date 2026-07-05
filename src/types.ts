@@ -144,5 +144,27 @@ export interface FestivalBanner {
   endDate: string; // YYYY-MM-DD
   isEnabled: boolean;
   uploadedAt: string;
+  time?: string;
+  location?: string;
+  specialNote?: string;
 }
+
+export interface TempleGalleryItem {
+  id: string;
+  imageUrl: string;
+  caption: string;
+  category: 'mandir_parisar' | 'utsav' | 'bhaktimay';
+  uploadDate: string; // YYYY-MM-DD
+  isActive: boolean;
+  uploadedAt: string;
+}
+
+export interface SocialShareSettings {
+  websiteTitle: string;
+  websiteDescription: string;
+  websiteShareImageUrl: string;
+  faviconUrl?: string;
+  defaultShareUrl?: string;
+}
+
 

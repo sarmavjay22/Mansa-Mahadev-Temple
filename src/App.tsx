@@ -6,6 +6,7 @@ import FestivalBannerSlider from './components/FestivalBannerSlider';
 import TodayVideo from './components/TodayVideo';
 import AartiSection from './components/AartiSection';
 import BhajanSection from './components/BhajanSection';
+import TempleGallery from './components/TempleGallery';
 import TempleInfoSection from './components/TempleInfoSection';
 import AdminPanel from './components/AdminPanel';
 import { motion, AnimatePresence } from 'motion/react';
@@ -60,6 +61,9 @@ export default function App() {
 
         {/* Bhajan Audio Player */}
         <BhajanSection />
+
+        {/* 📸 Temple Gallery Card & Single Popup */}
+        <TempleGallery />
 
         {/* Temple Timings, History, Maps, & Direct Contacts */}
         <TempleInfoSection />

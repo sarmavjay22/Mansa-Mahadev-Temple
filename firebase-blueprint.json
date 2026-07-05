@@ -34,12 +34,31 @@
         "footerCopyright": { "type": "string" },
         "developerName": { "type": "string" }
       }
+    },
+    "TempleGalleryItem": {
+      "title": "Temple Gallery Item",
+      "description": "An image item in the general temple gallery, classified by category.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "caption": { "type": "string" },
+        "category": { "type": "string", "enum": ["mandir_parisar", "utsav", "bhaktimay"] },
+        "uploadDate": { "type": "string" },
+        "isActive": { "type": "boolean" },
+        "uploadedAt": { "type": "string" }
+      },
+      "required": ["imageUrl", "category", "uploadDate", "isActive"]
     }
   },
   "firestore": {
     "settings": {
       "schema": "TempleSettings",
       "description": "Contains temple settings and configurations."
+    },
+    "temple_gallery": {
+      "schema": "TempleGalleryItem",
+      "description": "General temple gallery photos categorized by tabs."
     }
   }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
-import { NotificationItem, GalleryItem, DailyDarshan, VideoDarshan, FestivalBanner } from '../types';
+import { NotificationItem, GalleryItem, DailyDarshan, VideoDarshan, FestivalBanner, TempleGalleryItem } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
 import { 
   ShieldCheck, 
@@ -25,7 +25,8 @@ import {
   Edit2,
   Youtube,
   Video,
-  Calendar
+  Calendar,
+  Share2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import TempleSettingsTab from './TempleSettingsTab';
@@ -40,7 +41,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'upload_video' | 'temple_settings' | 'festival_banners'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'upload_video' | 'temple_settings' | 'festival_banners' | 'temple_gallery' | 'social_share'>('overview');
 
   // Stats State
   const [stats, setStats] = useState({
@@ -49,6 +50,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     bhajanCount: 0,
     notificationCount: 0,
     bannerCount: 0,
+    templeGalleryCount: 0,
   });
 
   // Gallery order states
@@ -120,6 +122,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [bannerIsEnabled, setBannerIsEnabled] = useState(true);
   const [bannerSuccess, setBannerSuccess] = useState(false);
   const [bannerUploading, setBannerUploading] = useState(false);
+  const [bannerTime, setBannerTime] = useState('');
+  const [bannerLocation, setBannerLocation] = useState('');
+  const [bannerSpecialNote, setBannerSpecialNote] = useState('');
 
   // Editing Festival Banner States
   const [editingBannerId, setEditingBannerId] = useState<string | null>(null);
@@ -129,7 +134,113 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [editBannerStartDate, setEditBannerStartDate] = useState('');
   const [editBannerEndDate, setEditBannerEndDate] = useState('');
   const [editBannerIsEnabled, setEditBannerIsEnabled] = useState(true);
+  const [editBannerTime, setEditBannerTime] = useState('');
+  const [editBannerLocation, setEditBannerLocation] = useState('');
+  const [editBannerSpecialNote, setEditBannerSpecialNote] = useState('');
   const [deleteConfirmBannerId, setDeleteConfirmBannerId] = useState<string | null>(null);
+
+  // Temple Gallery states
+  const [templeGalList, setTempleGalList] = useState<TempleGalleryItem[]>([]);
+  const [newTgImage, setNewTgImage] = useState('');
+  const [newTgCaption, setNewTgCaption] = useState('');
+  const [newTgCategory, setNewTgCategory] = useState<'mandir_parisar' | 'utsav' | 'bhaktimay'>('mandir_parisar');
+  const [newTgDate, setNewTgDate] = useState(new Date().toISOString().split('T')[0]);
+  const [newTgIsActive, setNewTgIsActive] = useState(true);
+  const [tgUploading, setTgUploading] = useState(false);
+  const [tgSuccess, setTgSuccess] = useState(false);
+
+  const [editingTgId, setEditingTgId] = useState<string | null>(null);
+  const [editTgImage, setEditTgImage] = useState('');
+  const [editTgCaption, setEditTgCaption] = useState('');
+  const [editTgCategory, setEditTgCategory] = useState<'mandir_parisar' | 'utsav' | 'bhaktimay'>('mandir_parisar');
+  const [editTgDate, setEditTgDate] = useState('');
+  const [editTgIsActive, setEditTgIsActive] = useState(true);
+  const [deleteConfirmTgId, setDeleteConfirmTgId] = useState<string | null>(null);
+
+  // Social Share Settings State
+  const [ssTitle, setSsTitle] = useState('');
+  const [ssDescription, setSsDescription] = useState('');
+  const [ssShareImageUrl, setSsShareImageUrl] = useState('');
+  const [ssFaviconUrl, setSsFaviconUrl] = useState('');
+  const [ssDefaultShareUrl, setSsDefaultShareUrl] = useState('');
+  const [ssSuccess, setSsSuccess] = useState(false);
+  const [ssUploading, setSsUploading] = useState(false);
+  const [ssFaviconError, setSsFaviconError] = useState(false);
+  const [ssFaviconValidating, setSsFaviconValidating] = useState(false);
+
+  useEffect(() => {
+    const trimmed = ssFaviconUrl.trim();
+    if (!trimmed) {
+      setSsFaviconError(false);
+      setSsFaviconValidating(false);
+      return;
+    }
+
+    setSsFaviconValidating(true);
+    const img = new window.Image();
+    img.src = trimmed;
+    
+    let isMounted = true;
+    img.onload = () => {
+      if (isMounted) {
+        setSsFaviconError(false);
+        setSsFaviconValidating(false);
+      }
+    };
+    img.onerror = () => {
+      if (isMounted) {
+        setSsFaviconError(true);
+        setSsFaviconValidating(false);
+      }
+    };
+
+    return () => {
+      isMounted = false;
+    };
+  }, [ssFaviconUrl]);
+
+  const handleSsImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setSsUploading(true);
+      const url = await uploadToImageKit(file);
+      setSsShareImageUrl(url);
+    } catch (err) {
+      console.error(err);
+      alert("चित्र अपलोड विफल हुआ!");
+    } finally {
+      setSsUploading(false);
+    }
+  };
+
+  const handleSaveSocialShareSettings = async () => {
+    if (!ssTitle.trim() || !ssDescription.trim() || !ssShareImageUrl.trim()) {
+      alert("कृपया वेबसाइट का शीर्षक, विवरण और शेयर चित्र यूआरएल अवश्य दर्ज करें।");
+      return;
+    }
+
+    if (ssFaviconUrl.trim() && ssFaviconError) {
+      const proceed = window.confirm("चेतावनी: दर्ज किया गया फेविकॉन यूआरएल (Favicon URL) अमान्य है या लोड नहीं हो रहा है। क्या आप अभी भी इसे सहेजना चाहते हैं?");
+      if (!proceed) return;
+    }
+
+    try {
+      await db.updateSocialShareSettings({
+        websiteTitle: ssTitle.trim(),
+        websiteDescription: ssDescription.trim(),
+        websiteShareImageUrl: ssShareImageUrl.trim(),
+        faviconUrl: ssFaviconUrl.trim(),
+        defaultShareUrl: ssDefaultShareUrl.trim()
+      });
+      setSsSuccess(true);
+      setTimeout(() => setSsSuccess(false), 2000);
+      alert("सोशल शेयर सेटिंग्स सफलतापूर्वक अपडेट कर दी गई हैं!");
+    } catch (err) {
+      console.error(err);
+      alert("सेटिंग्स सहेजने में त्रुटि आई!");
+    }
+  };
 
   useEffect(() => {
     setIsLoggedIn(db.isAdminLoggedIn());
@@ -162,6 +273,13 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         setVideoTodayTitle('');
         setVideoTodayUrl('');
       }
+    } else if (activeTab === 'social_share') {
+      const settings = db.getSocialShareSettings();
+      setSsTitle(settings.websiteTitle || '');
+      setSsDescription(settings.websiteDescription || '');
+      setSsShareImageUrl(settings.websiteShareImageUrl || '');
+      setSsFaviconUrl(settings.faviconUrl || '');
+      setSsDefaultShareUrl(settings.defaultShareUrl || '');
     }
   }, [activeTab]);
 
@@ -171,6 +289,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     const bhajanItems = db.getBhajans();
     const notificationItems = db.getNotifications();
     const bannerItems = db.getFestivalBanners();
+    const templeGalleryItems = db.getTempleGallery();
 
     setStats({
       galleryCount: galleryItems.length,
@@ -178,12 +297,100 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       bhajanCount: bhajanItems.length,
       notificationCount: notificationItems.length,
       bannerCount: bannerItems.length,
+      templeGalleryCount: templeGalleryItems.length,
     });
 
     setNotifs(notificationItems);
     setGalList(galleryItems);
     setVideoList(videoItems);
     setBanners(bannerItems);
+    setTempleGalList(templeGalleryItems);
+  };
+
+  const handleTgImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setTgUploading(true);
+      const url = await uploadToImageKit(file);
+      setNewTgImage(url);
+    } catch (err) {
+      console.error(err);
+      alert("चित्र अपलोड विफल हुआ!");
+    } finally {
+      setTgUploading(false);
+    }
+  };
+
+  const handleEditTgImageUpload = async (e: ChangeEvent<HTMLInputElement>, id?: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setTgUploading(true);
+      const url = await uploadToImageKit(file);
+      setEditTgImage(url);
+      if (id) {
+        await db.updateTempleGalleryItem(id, { imageUrl: url });
+      }
+    } catch (err) {
+      console.error(err);
+      alert("चित्र अपलोड विफल हुआ!");
+    } finally {
+      setTgUploading(false);
+    }
+  };
+
+  const handleAddTempleGallery = () => {
+    if (!newTgImage || !newTgCaption.trim() || !newTgDate) {
+      alert("कृपया चित्र का चयन करें, विवरण और तारीख भरें।");
+      return;
+    }
+    db.addTempleGalleryItem({
+      imageUrl: newTgImage,
+      caption: newTgCaption.trim(),
+      category: newTgCategory,
+      uploadDate: newTgDate,
+      isActive: newTgIsActive
+    });
+    setNewTgImage('');
+    setNewTgCaption('');
+    setNewTgCategory('mandir_parisar');
+    setNewTgDate(new Date().toISOString().split('T')[0]);
+    setNewTgIsActive(true);
+    setTgSuccess(true);
+    setTimeout(() => setTgSuccess(false), 1500);
+    alert("गैलरी चित्र सफलतापूर्वक जोड़ दिया गया है!");
+  };
+
+  const handleStartEditTg = (item: TempleGalleryItem) => {
+    setEditingTgId(item.id);
+    setEditTgImage(item.imageUrl);
+    setEditTgCaption(item.caption);
+    setEditTgCategory(item.category);
+    setEditTgDate(item.uploadDate);
+    setEditTgIsActive(item.isActive);
+  };
+
+  const handleUpdateTempleGallery = (id: string) => {
+    if (!editTgImage || !editTgCaption.trim() || !editTgDate) {
+      alert("कृपया चित्र, विवरण और तारीख दर्ज करें।");
+      return;
+    }
+    db.updateTempleGalleryItem(id, {
+      imageUrl: editTgImage,
+      caption: editTgCaption.trim(),
+      category: editTgCategory,
+      uploadDate: editTgDate,
+      isActive: editTgIsActive
+    });
+    setEditingTgId(null);
+    alert("चित्र विवरण सफलतापूर्वक अपडेट किया गया!");
+  };
+
+  const handleDeleteTempleGallery = (id: string) => {
+    db.deleteTempleGalleryItem(id);
+    setDeleteConfirmTgId(null);
+    alert("गैलरी चित्र सफलतापूर्वक हटा दिया गया है!");
   };
 
   const handleLogin = (e: FormEvent) => {
@@ -275,7 +482,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       imageUrl: bannerImageUrl,
       startDate: bannerStartDate,
       endDate: bannerEndDate,
-      isEnabled: bannerIsEnabled
+      isEnabled: bannerIsEnabled,
+      time: bannerTime.trim(),
+      location: bannerLocation.trim(),
+      specialNote: bannerSpecialNote.trim()
     });
 
     setBannerTitle("");
@@ -284,6 +494,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     setBannerStartDate(new Date().toISOString().split("T")[0]);
     setBannerEndDate(new Date().toISOString().split("T")[0]);
     setBannerIsEnabled(true);
+    setBannerTime("");
+    setBannerLocation("");
+    setBannerSpecialNote("");
 
     setBannerSuccess(true);
     setTimeout(() => {
@@ -304,7 +517,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       imageUrl: editBannerImageUrl,
       startDate: editBannerStartDate,
       endDate: editBannerEndDate,
-      isEnabled: editBannerIsEnabled
+      isEnabled: editBannerIsEnabled,
+      time: editBannerTime.trim(),
+      location: editBannerLocation.trim(),
+      specialNote: editBannerSpecialNote.trim()
     });
 
     setEditingBannerId(null);
@@ -689,6 +905,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab('temple_gallery')}
+                  className={`flex-1 py-3.5 flex items-center justify-center gap-1.5 transition ${
+                    activeTab === 'temple_gallery' ? 'text-amber-600 bg-white border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Image className="w-4 h-4 text-amber-500" />
+                  <span>मंदिर गैलरी ({stats.templeGalleryCount})</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab('temple_settings')}
                   className={`flex-1 py-3.5 flex items-center justify-center gap-1.5 transition ${
                     activeTab === 'temple_settings' ? 'text-amber-600 bg-white border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'
@@ -696,6 +922,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 >
                   <Settings className="w-4 h-4" />
                   <span>मँदिर सेटिंग्स</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('social_share')}
+                  className={`flex-1 py-3.5 flex items-center justify-center gap-1.5 transition ${
+                    activeTab === 'social_share' ? 'text-amber-600 bg-white border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Share2 className="w-4 h-4 text-orange-500" />
+                  <span>सोशल शेयर</span>
                 </button>
               </div>
 
@@ -731,6 +967,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       <div className="p-3 bg-violet-50 border border-violet-100 rounded-2xl flex flex-col items-center shadow-sm">
                         <span className="text-xs text-slate-400 font-bold font-mono">उत्सव बैनर</span>
                         <span className="text-xl font-mono font-black text-violet-600">{stats.bannerCount}</span>
+                      </div>
+
+                      <div className="p-3 bg-amber-50 border border-amber-100 rounded-2xl flex flex-col items-center shadow-sm col-span-2 sm:col-span-1">
+                        <span className="text-xs text-slate-400 font-bold font-mono">मंदिर गैलरी</span>
+                        <span className="text-xl font-mono font-black text-amber-600">{stats.templeGalleryCount}</span>
                       </div>
                     </div>
 
@@ -1605,6 +1846,17 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                               className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none resize-none"
                             />
                           </div>
+
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 mb-1">विशेष सूचना (Special Note - Optional) :</label>
+                            <input
+                              type="text"
+                              value={bannerSpecialNote}
+                              onChange={(e) => setBannerSpecialNote(e.target.value)}
+                              placeholder="उदा. महोत्सव के पश्चात् महाप्रसाद का वितरण रहेगा।"
+                              className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
                         </div>
 
                         {/* Dates & Toggle */}
@@ -1632,6 +1884,30 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                   className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
                                 />
                               </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 mb-1">समय (Time) :</label>
+                              <input
+                                type="text"
+                                value={bannerTime}
+                                onChange={(e) => setBannerTime(e.target.value)}
+                                placeholder="उदा. 06:00 PM"
+                                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 mb-1">स्थान (Location) :</label>
+                              <input
+                                type="text"
+                                value={bannerLocation}
+                                onChange={(e) => setBannerLocation(e.target.value)}
+                                placeholder="उदा. मंसा महादेव मंदिर परिसर"
+                                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                              />
                             </div>
                           </div>
 
@@ -1770,6 +2046,36 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                       </div>
                                     </div>
 
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">समय (Time) :</label>
+                                        <input
+                                          type="text"
+                                          value={editBannerTime}
+                                          onChange={(e) => setEditBannerTime(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">स्थान (Location) :</label>
+                                        <input
+                                          type="text"
+                                          value={editBannerLocation}
+                                          onChange={(e) => setEditBannerLocation(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">विशेष सूचना (Special Note) :</label>
+                                        <input
+                                          type="text"
+                                          value={editBannerSpecialNote}
+                                          onChange={(e) => setEditBannerSpecialNote(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none"
+                                        />
+                                      </div>
+                                    </div>
+
                                     <div className="border border-dashed border-amber-200 bg-white/50 p-3 rounded-xl flex flex-col sm:flex-row items-center gap-4">
                                       <div className="flex-1">
                                         <span className="text-[10px] font-bold text-slate-500 block mb-1">चित्र बदलें :</span>
@@ -1875,6 +2181,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                               setEditBannerStartDate(banner.startDate);
                                               setEditBannerEndDate(banner.endDate);
                                               setEditBannerIsEnabled(banner.isEnabled);
+                                              setEditBannerTime(banner.time || '');
+                                              setEditBannerLocation(banner.location || '');
+                                              setEditBannerSpecialNote(banner.specialNote || '');
                                             }}
                                             className="p-1.5 text-amber-600 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-lg transition"
                                             title="संपादित करें"
@@ -1902,8 +2211,438 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                   </div>
                 )}
 
-                {activeTab === 'temple_settings' && (
+                {activeTab === 'temple_gallery' && (
+                  <div className="flex flex-col gap-5 text-xs text-slate-700">
+                    <div className="bg-amber-50/60 border border-amber-100 p-4 rounded-2xl flex flex-col gap-3">
+                      <h4 className="text-xs font-bold text-amber-900 flex items-center gap-1">
+                        <Plus className="w-4 h-4 text-amber-600" />
+                        <span>मंदिर गैलरी में नया चित्र जोड़ें</span>
+                      </h4>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 mb-1">चित्र का विवरण (Caption):</label>
+                          <input
+                            type="text"
+                            value={newTgCaption}
+                            onChange={(e) => setNewTgCaption(e.target.value)}
+                            placeholder="उदा. गर्भगृह का मनमोहक श्रृंगार..."
+                            className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none font-bold text-slate-700"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 mb-1">श्रेणी (Category):</label>
+                          <select
+                            value={newTgCategory}
+                            onChange={(e: any) => setNewTgCategory(e.target.value)}
+                            className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none font-bold text-slate-700"
+                          >
+                            <option value="mandir_parisar">🛕 मंदिर एवं परिसर</option>
+                            <option value="utsav">🎉 उत्सव</option>
+                            <option value="bhaktimay">🙏 भक्तिमय क्षण</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 mb-1">अपलोड तिथि (Upload Date):</label>
+                          <input
+                            type="date"
+                            value={newTgDate}
+                            onChange={(e) => setNewTgDate(e.target.value)}
+                            className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none text-slate-700"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end py-2">
+                          <input
+                            type="checkbox"
+                            id="newTgIsActive"
+                            checked={newTgIsActive}
+                            onChange={(e) => setNewTgIsActive(e.target.checked)}
+                            className="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500"
+                          />
+                          <label htmlFor="newTgIsActive" className="text-xs font-bold text-slate-600 cursor-pointer">
+                            सक्रिय (Active Status) है
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="border border-dashed border-amber-200 bg-white p-3 rounded-xl flex flex-col sm:flex-row items-center gap-4">
+                        <div className="flex-1 w-full">
+                          <span className="text-[10px] font-bold text-slate-500 block mb-1">गैलरी चित्र अपलोड करें (Image URL/Upload):</span>
+                          <div className="flex items-center gap-2">
+                            <label className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-xl cursor-pointer font-bold transition shrink-0 select-none">
+                              <Upload className="w-3 h-3" />
+                              <span>फाइल चुनें</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleTgImageUpload}
+                                disabled={tgUploading}
+                                className="hidden"
+                              />
+                            </label>
+                            <input
+                              type="text"
+                              value={newTgImage}
+                              onChange={(e) => setNewTgImage(e.target.value)}
+                              placeholder="या सीधे इमेज यूआरएल (URL) दर्ज करें..."
+                              className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none text-xs text-slate-700"
+                            />
+                            {tgUploading && <Loader2 className="w-4 h-4 text-amber-600 animate-spin shrink-0" />}
+                          </div>
+                        </div>
+
+                        {newTgImage && (
+                          <div className="w-20 h-14 rounded-lg overflow-hidden border border-amber-200 shrink-0 relative bg-slate-50 select-none">
+                            <img src={newTgImage} alt="Preview" className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => setNewTgImage('')}
+                              className="absolute top-0.5 right-0.5 bg-black/50 text-white rounded-full p-0.5 hover:bg-black/75"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={handleAddTempleGallery}
+                        disabled={tgUploading}
+                        className="w-full py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-extrabold rounded-xl shadow-md transition duration-300 hover:scale-[1.01] active:scale-99 flex items-center justify-center gap-1.5 select-none"
+                      >
+                        {tgSuccess ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                        <span>{tgSuccess ? 'सफलतापूर्वक जोड़ा गया!' : 'नया चित्र जोड़ें'}</span>
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <p className="text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest px-1 select-none">गैलरी चित्रों की सूची ({templeGalList.length}):</p>
+                      
+                      <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
+                        {templeGalList.length === 0 ? (
+                          <p className="text-center text-slate-400 py-6 font-medium bg-slate-50 border border-dashed border-slate-200 rounded-2xl select-none">कोई गैलरी चित्र नहीं मिला।</p>
+                        ) : (
+                          templeGalList.map(item => {
+                            const isEditing = editingTgId === item.id;
+                            return (
+                              <div
+                                key={item.id}
+                                className={`flex flex-col p-4 rounded-2xl border transition ${
+                                  isEditing ? 'bg-amber-50/40 border-amber-200' : 'bg-slate-50 hover:bg-slate-100/50 border-slate-200/50'
+                                }`}
+                              >
+                                {isEditing ? (
+                                  <div className="flex flex-col gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">विवरण (Caption):</label>
+                                        <input
+                                          type="text"
+                                          value={editTgCaption}
+                                          onChange={(e) => setEditTgCaption(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none font-bold text-slate-700"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">श्रेणी (Category):</label>
+                                        <select
+                                          value={editTgCategory}
+                                          onChange={(e: any) => setEditTgCategory(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none font-bold text-slate-700"
+                                        >
+                                          <option value="mandir_parisar">🛕 मंदिर एवं परिसर</option>
+                                          <option value="utsav">🎉 उत्सव</option>
+                                          <option value="bhaktimay">🙏 भक्तिमय क्षण</option>
+                                        </select>
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                      <div>
+                                        <label className="block text-[10px] font-bold text-slate-500 mb-1">अपलोड तिथि (Upload Date):</label>
+                                        <input
+                                          type="date"
+                                          value={editTgDate}
+                                          onChange={(e) => setEditTgDate(e.target.value)}
+                                          className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none text-slate-700"
+                                        />
+                                      </div>
+
+                                      <div className="flex items-center gap-1.5 self-end py-2 select-none">
+                                        <input
+                                          type="checkbox"
+                                          id={`editTgIsActive-${item.id}`}
+                                          checked={editTgIsActive}
+                                          onChange={(e) => setEditTgIsActive(e.target.checked)}
+                                          className="w-4 h-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500"
+                                        />
+                                        <label htmlFor={`editTgIsActive-${item.id}`} className="text-xs font-bold text-slate-600 cursor-pointer">
+                                          सक्रिय (Active Status) है
+                                        </label>
+                                      </div>
+                                    </div>
+
+                                    <div className="border border-dashed border-amber-200 bg-white/50 p-3 rounded-xl flex flex-col sm:flex-row items-center gap-4">
+                                      <div className="flex-1 w-full">
+                                        <span className="text-[10px] font-bold text-slate-500 block mb-1">चित्र बदलें (Upload or URL):</span>
+                                        <div className="flex items-center gap-2">
+                                          <label className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-xl cursor-pointer font-bold transition shrink-0 select-none">
+                                            <Upload className="w-3 h-3" />
+                                            <span>अपलोड करें</span>
+                                            <input
+                                              type="file"
+                                              accept="image/*"
+                                              onChange={(e) => handleEditTgImageUpload(e, item.id)}
+                                              disabled={tgUploading}
+                                              className="hidden"
+                                            />
+                                          </label>
+                                          <input
+                                            type="text"
+                                            value={editTgImage}
+                                            onChange={(e) => setEditTgImage(e.target.value)}
+                                            className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none text-xs text-slate-700"
+                                          />
+                                          {tgUploading && <Loader2 className="w-4 h-4 text-amber-600 animate-spin shrink-0" />}
+                                        </div>
+                                      </div>
+
+                                      {editTgImage && (
+                                        <div className="w-16 h-12 rounded-lg overflow-hidden border border-amber-200 shrink-0 select-none bg-slate-50">
+                                          <img src={editTgImage} alt="Preview" className="w-full h-full object-cover" />
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="flex justify-end gap-1.5 mt-2 select-none">
+                                      <button
+                                        onClick={() => handleUpdateTempleGallery(item.id)}
+                                        className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold rounded-xl transition"
+                                      >
+                                        अपडेट करें
+                                      </button>
+                                      <button
+                                        onClick={() => setEditingTgId(null)}
+                                        className="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-extrabold rounded-xl transition"
+                                      >
+                                        रद्द करें
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-16 h-12 rounded-xl overflow-hidden border border-slate-200/50 shrink-0 bg-slate-100 select-none">
+                                        <img src={item.imageUrl} alt={item.caption} className="w-full h-full object-cover" />
+                                      </div>
+                                      <div className="flex flex-col gap-0.5">
+                                        <p className="font-bold text-slate-800 line-clamp-1">{item.caption}</p>
+                                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-semibold select-none">
+                                          <span className="px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-100">
+                                            {item.category === 'mandir_parisar' ? '🛕 मंदिर परिसर' : item.category === 'utsav' ? '🎉 उत्सव' : '🙏 भक्तिमय'}
+                                          </span>
+                                          <span>• {item.uploadDate}</span>
+                                          <span className={`px-1.5 py-0.5 rounded font-black ${
+                                            item.isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
+                                          }`}>
+                                            {item.isActive ? 'सक्रिय' : 'निष्क्रिय'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-1 z-10 shrink-0 select-none">
+                                      {deleteConfirmTgId === item.id ? (
+                                        <div className="flex items-center gap-1 bg-rose-50 border border-rose-100 rounded-xl p-1 shrink-0">
+                                          <span className="text-[9px] text-rose-600 font-bold px-1 select-none">हटाएं?</span>
+                                          <button
+                                            onClick={() => handleDeleteTempleGallery(item.id)}
+                                            className="px-2 py-1 bg-rose-500 text-white font-extrabold text-[9px] rounded-lg shadow-sm hover:bg-rose-600 transition"
+                                          >
+                                            हाँ
+                                          </button>
+                                          <button
+                                            onClick={() => setDeleteConfirmTgId(null)}
+                                            className="px-2 py-1 bg-slate-200 text-slate-700 font-extrabold text-[9px] rounded-lg hover:bg-slate-300 transition"
+                                          >
+                                            नहीं
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <button
+                                            onClick={() => handleStartEditTg(item)}
+                                            className="p-1.5 text-amber-600 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-lg transition"
+                                            title="संपादित करें"
+                                          >
+                                            <Edit2 className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            onClick={() => setDeleteConfirmTgId(item.id)}
+                                            className="p-1.5 text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition"
+                                            title="हटाएं"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                 {activeTab === 'temple_settings' && (
                   <TempleSettingsTab />
+                )}
+
+                {activeTab === 'social_share' && (
+                  <div className="flex flex-col gap-5 text-xs text-slate-700">
+                    <div className="bg-amber-50/60 border border-amber-100 p-5 rounded-2xl flex flex-col gap-4">
+                      <h4 className="text-sm font-bold text-amber-950 flex items-center gap-1.5 border-b border-amber-100 pb-2">
+                        <Share2 className="w-5 h-5 text-orange-500" />
+                        <span>सोशल मीडिया शेयर एवं रिच सोशल प्रीव्यू सेटिंग्स (WhatsApp Open Graph)</span>
+                      </h4>
+
+                      <p className="text-[11px] text-slate-500 font-medium -mt-2 leading-relaxed">
+                        यहाँ से आप मंसा महादेव मंदिर वेबसाइट का सोशल मीडिया प्रीव्यू (Social Preview Card) कस्टमाइज़ कर सकते हैं। जब भी कोई इस वेबसाइट को WhatsApp, Facebook या Twitter पर साझा करेगा, तो यही जानकारी और चित्र दिखाई देंगे।
+                      </p>
+
+                      <div className="grid grid-cols-1 gap-4">
+                        {/* Title */}
+                        <div>
+                          <label className="block text-xs font-bold text-amber-950 mb-1">वेबसाइट का शीर्षक (Website Share Title):</label>
+                          <input
+                            type="text"
+                            value={ssTitle}
+                            onChange={(e) => setSsTitle(e.target.value)}
+                            placeholder="उदा. मंसा महादेव मंदिर"
+                            className="w-full px-4 py-2 bg-white border border-amber-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold text-slate-800 text-xs"
+                          />
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                          <label className="block text-xs font-bold text-amber-950 mb-1">वेबसाइट का विवरण (Website Description / Rich Snippet):</label>
+                          <textarea
+                            value={ssDescription}
+                            onChange={(e) => setSsDescription(e.target.value)}
+                            placeholder="वेबसाइट का आकर्षक और भक्तिमय छोटा विवरण लिखें..."
+                            rows={4}
+                            className="w-full px-4 py-2 bg-white border border-amber-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs text-slate-700 leading-relaxed font-semibold resize-none"
+                          />
+                        </div>
+
+                        {/* Image URL & Upload */}
+                        <div className="border border-dashed border-amber-200 bg-amber-50/20 p-4 rounded-xl flex flex-col gap-3">
+                          <div>
+                            <span className="block text-xs font-bold text-amber-950 mb-1.5">सोशल प्रीव्यू इमेज यूआरएल (Website Share Image URL):</span>
+                            <div className="flex items-center gap-2">
+                              <label className="flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-800 px-3.5 py-2 rounded-xl cursor-pointer font-bold transition shrink-0 select-none">
+                                <Upload className="w-3.5 h-3.5" />
+                                <span>अपलोड करें</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleSsImageUpload}
+                                  disabled={ssUploading}
+                                  className="hidden"
+                                />
+                              </label>
+                              <input
+                                type="text"
+                                value={ssShareImageUrl}
+                                onChange={(e) => setSsShareImageUrl(e.target.value)}
+                                placeholder="https://example.com/share-preview.jpg"
+                                className="flex-1 px-3 py-2 bg-white border border-amber-200 rounded-xl focus:outline-none text-xs text-slate-700"
+                              />
+                              {ssUploading && <Loader2 className="w-4 h-4 text-amber-600 animate-spin shrink-0" />}
+                            </div>
+                            <span className="block text-[10px] text-slate-400 font-bold mt-1.5 leading-normal">
+                              ⚠️ महत्वपूर्ण: इमेज का साइज़ चौड़ाई में बड़ा (जैसे 1200x630 पिक्सल) होना चाहिए ताकि WhatsApp सोशल प्रीव्यू में पूरा बैनर दिखाई दे। यह इमेज केवल बाहरी लिंक से ही लोड होगी।
+                            </span>
+                          </div>
+
+                          {ssShareImageUrl && (
+                            <div className="max-w-md border border-amber-100 rounded-2xl overflow-hidden shadow-sm bg-white p-2">
+                              <span className="text-[10px] font-black text-slate-400 block mb-1 px-1 uppercase tracking-wider">सोशल शेयर प्रीव्यू चित्र:</span>
+                              <img src={ssShareImageUrl} alt="Social Preview" className="w-full h-40 object-cover rounded-xl" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Two Columns for Favicon & Default URL */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-amber-950 mb-1">फेविकॉन इमेज लिंक (Favicon URL - Optional):</label>
+                            <input
+                              type="text"
+                              value={ssFaviconUrl}
+                              onChange={(e) => setSsFaviconUrl(e.target.value)}
+                              placeholder="https://example.com/favicon.ico"
+                              className="w-full px-4 py-2 bg-white border border-amber-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs text-slate-700 font-medium"
+                            />
+                            {ssFaviconValidating && (
+                              <p className="text-[10px] text-amber-600 font-bold mt-1.5 animate-pulse">फेविकॉन जाँचा जा रहा है...</p>
+                            )}
+                            {!ssFaviconValidating && ssFaviconError && ssFaviconUrl.trim() && (
+                              <p className="text-[10px] text-red-600 font-bold mt-1.5">Invalid Favicon URL</p>
+                            )}
+                            {!ssFaviconValidating && !ssFaviconError && ssFaviconUrl.trim() && (
+                              <div className="mt-2.5 flex items-center gap-2.5 border border-amber-200/60 rounded-xl p-2 bg-amber-50/20 max-w-xs shadow-sm">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider shrink-0">फेविकॉन प्रीव्यू:</span>
+                                <div className="w-8 h-8 rounded-lg bg-white border border-amber-200/60 shadow-inner flex items-center justify-center p-1.5">
+                                  <img src={ssFaviconUrl} alt="Favicon Preview" className="w-full h-full object-contain" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-bold text-amber-950 mb-1">डिफ़ॉल्ट शेयर यूआरएल (Default Share URL - Optional):</label>
+                            <input
+                              type="text"
+                              value={ssDefaultShareUrl}
+                              onChange={(e) => setSsDefaultShareUrl(e.target.value)}
+                              placeholder="https://mansamahadevtemple.org"
+                              className="w-full px-4 py-2 bg-white border border-amber-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs text-slate-700 font-medium"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Save Button */}
+                      <button
+                        type="button"
+                        onClick={handleSaveSocialShareSettings}
+                        disabled={ssUploading}
+                        className="mt-2 w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 font-black rounded-xl shadow-md hover:scale-[1.01] active:scale-99 transition duration-300 flex items-center justify-center gap-2 select-none"
+                      >
+                        {ssSuccess ? (
+                          <>
+                            <Check className="w-5 h-5 text-slate-950" />
+                            <span>सेटिंग्स सफलतापूर्वक सुरक्षित कर दी गईं!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Database className="w-5 h-5 text-slate-950" />
+                            <span>सोशल शेयर सेटिंग्स सुरक्षित करें</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
