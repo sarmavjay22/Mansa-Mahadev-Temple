@@ -50,7 +50,7 @@ export default function NotificationManager() {
 
       localStorage.setItem(shownKey, 'true');
 
-      const options: NotificationOptions = {
+      const options: any = {
         body: notif.message,
         icon: '/favicon.ico',
         badge: '/favicon.ico',

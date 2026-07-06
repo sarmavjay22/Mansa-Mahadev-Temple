@@ -226,27 +226,30 @@ export default function TempleGallery() {
   }
 
   return (
-    <section id="temple-gallery-section" className="w-full max-w-4xl mx-auto px-4 py-6">
+    <section id="temple-gallery-section" className="w-full max-w-4xl mx-auto px-4">
       {/* "भोलेनाथ के श्रृंगार दर्शन" style Accent Card */}
       <div 
         onClick={() => setIsOpen(true)}
-        className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-6 mb-6 flex flex-col items-center justify-center gap-4 text-center cursor-pointer select-none transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"
+        className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 p-8 flex flex-col items-center justify-center gap-4 text-center cursor-pointer select-none transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"
       >
-        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center justify-center gap-2 flex-wrap">
-          <Sparkles className="w-6 h-6 text-amber-500 fill-amber-500 shrink-0" />
+        <h2 className="text-2xl md:text-3xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-8 h-8 text-amber-500 fill-amber-500 animate-pulse shrink-0" />
+            <span>मँदिर दर्शन दीर्घा</span>
+          </div>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsOpen(true);
             }}
             title="मँदिर दर्शन दीर्घा (गैलरी) देखने के लिए यहाँ क्लिक करें"
-            className="inline-flex items-center gap-2 bg-[#fffdf5] hover:bg-amber-50/80 dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 hover:border-amber-400 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-md md:text-lg font-bold tracking-wide font-sans cursor-pointer transition duration-300 transform active:scale-95 group"
+            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-8 py-3.5 rounded-full shadow-md hover:shadow-lg text-lg md:text-xl font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group"
           >
-            <span>मँदिर दर्शन दीर्घा (गैलरी)</span>
+            <span>📸 मँदिर दर्शन दीर्घा (गैलरी) देखें</span>
           </button>
         </h2>
 
-        <p className="text-sm md:text-base text-slate-500 font-bold mt-1 text-center max-w-md px-4 leading-relaxed">
+        <p className="text-base md:text-lg text-amber-950 font-black mt-2 text-center max-w-lg px-4 leading-relaxed">
           मँदिर परिसर, उत्सवों एवं सुंदर भक्तिमय क्षणों की अलौकिक सुंदर छवियों का संग्रह
         </p>
       </div>
@@ -414,9 +417,10 @@ export default function TempleGallery() {
                       >
                         <img
                           src={item.imageUrl}
-                          alt={item.caption || 'मंसा महादेव'}
+                          alt={item.caption || 'मंसा महादेव मंदिर तितरड़ी उदयपुर गैलरी चित्र'}
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-500 pointer-events-none"
+                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-3 pointer-events-none">
                           {item.caption && (

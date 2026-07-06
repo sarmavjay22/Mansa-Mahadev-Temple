@@ -149,7 +149,7 @@ export default function TempleInfoSection() {
   });
 
   return (
-    <section id="temple-info" className="w-full max-w-4xl mx-auto px-4 py-6">
+    <section id="temple-info" className="w-full max-w-4xl mx-auto px-4">
       
       {/* Title Header Row */}
       <div className="flex items-center justify-between mb-6">
@@ -302,10 +302,10 @@ export default function TempleInfoSection() {
       )}
 
       {/* Main Tabbed Glassmorphism Layout */}
-      <div className="w-full bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-xl shadow-sky-100/40 overflow-hidden">
+      <div className="w-full bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 overflow-hidden">
         
         {/* Navigation Tab Header Row */}
-        <div className="flex border-b border-sky-100 bg-sky-50/40 select-none">
+        <div className="flex border-b border-amber-200/60 bg-amber-100/30 select-none">
           <button
             onClick={() => setActiveTab('timings')}
             className={`flex-1 py-4 text-sm md:text-base font-bold flex items-center justify-center gap-1.5 transition ${

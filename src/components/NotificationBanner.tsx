@@ -39,7 +39,7 @@ export default function NotificationBanner() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className={`w-full max-w-4xl mx-auto px-4 py-1.5`}
+          className={`w-full max-w-4xl mx-auto px-4`}
         >
           {/* Glassmorphic notices bar */}
           <div className={`relative overflow-hidden flex items-center justify-between gap-3 px-4 py-2.5 rounded-2xl border backdrop-blur-md shadow-sm transition ${

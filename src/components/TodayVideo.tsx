@@ -77,16 +77,15 @@ export default function TodayVideo() {
   const activeVideoId = todayVideo ? getYouTubeId(todayVideo.youtubeUrl) : null;
 
   return (
-    <section id="today-video" className="w-full max-w-4xl mx-auto px-4 py-6">
-      <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-3xl shadow-lg shadow-sky-100/30 p-4 mb-6 relative flex flex-wrap items-center justify-center gap-3">
-        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center justify-center gap-2 flex-wrap w-full">
-          <Youtube className="w-5 h-5 text-red-600 fill-red-100 shrink-0" />
+    <section id="today-video" className="w-full max-w-4xl mx-auto px-4">
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3">
+        <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
           <button
             onClick={() => setIsAartiVideoOpen(true)}
             title="आरती वीडियो गैलरी देखने के लिए यहाँ क्लिक करें"
-            className="inline-flex items-center gap-2 bg-[#fffdf5] hover:bg-amber-50/80 dark:bg-slate-800 border border-amber-300 dark:border-amber-500/50 hover:border-amber-400 text-slate-800 dark:text-slate-100 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-md md:text-lg font-bold tracking-wide font-sans cursor-pointer transition duration-300 transform active:scale-95 group text-center"
+            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
           >
-            <span>भोलेनाथ की आरती वीडियो</span>
+            <span>🎥 भोलेनाथ की आरती वीडियो</span>
           </button>
         </h2>
       </div>

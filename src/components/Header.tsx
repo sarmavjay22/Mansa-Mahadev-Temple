@@ -109,9 +109,10 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
             <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full p-1 bg-white/90 backdrop-blur shadow-lg border-2 border-amber-300/60 overflow-hidden flex items-center justify-center">
               <img
                 src={settings.templeLogoUrl || settings.templeLogo || "/src/assets/images/temple_logo_1782657591698.jpg"}
-                alt={settings.templeNameHindi || "लोगो"}
+                alt={`${settings.templeNameHindi || "मंसा महादेव मंदिर"} - मंदिर लोगो`}
                 className="w-full h-full object-cover rounded-full"
                 referrerPolicy="no-referrer"
+                loading="eager"
               />
             </div>
             {/* Spiritual Aura Ripple */}

@@ -113,7 +113,7 @@ export default function FestivalBannerSlider() {
   return (
     <section id="festival-banners-slider" className="w-full max-w-4xl mx-auto px-4 select-none relative z-10">
       {/* Container with gold traditional border glow */}
-      <div className="relative overflow-hidden bg-white/70 backdrop-blur-md border border-amber-200/50 rounded-3xl shadow-xl shadow-amber-100/20 p-2">
+      <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 p-2">
         <div 
           onClick={() => setSelectedBanner(currentBanner)}
           className="relative h-44 sm:h-56 md:h-64 w-full overflow-hidden rounded-2xl bg-slate-900 cursor-pointer group"
@@ -135,9 +135,10 @@ export default function FestivalBannerSlider() {
               {/* Banner Image (not darkened) */}
               <img
                 src={currentBanner.imageUrl}
-                alt={currentBanner.title}
+                alt={`${currentBanner.title} - मंसा महादेव मंदिर तितरड़ी`}
                 className="w-full h-full object-cover group-hover:scale-105 transition duration-700 ease-out"
                 referrerPolicy="no-referrer"
+                loading="lazy"
               />
 
               {/* Gradient Overlay */}
@@ -252,9 +253,10 @@ export default function FestivalBannerSlider() {
               <div className="relative h-44 sm:h-52 w-full bg-slate-900 shrink-0">
                 <img 
                   src={selectedBanner.imageUrl} 
-                  alt={selectedBanner.title} 
+                  alt={`${selectedBanner.title} - मंसा महादेव मंदिर तितरड़ी`} 
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/30" />
                 

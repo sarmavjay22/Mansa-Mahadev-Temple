@@ -974,6 +974,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   };
 
+  const handleClose = () => {
+    if (isLoggedIn && activeTab !== 'overview') {
+      setActiveTab('overview');
+    } else {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -994,7 +1002,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           </div>
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-200 text-slate-500 transition"
           >
             <X className="w-4 h-4" />
