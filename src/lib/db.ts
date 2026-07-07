@@ -458,22 +458,7 @@ export function sanitizeBhajans(items: BhajanItem[]): BhajanItem[] {
   });
 }
 
-const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: "notif_1",
-    title: "सावन मास महोत्सव",
-    message: "सावन मास के प्रत्येक सोमवार को मंसा महादेव मंदिर में विशेष रुद्राभिषेक और रात्रि दीपमालिका का आयोजन किया जाएगा। सभी श्रद्धालु सादर आमंत्रित हैं।",
-    date: new Date().toISOString().split('T')[0],
-    type: "festival"
-  },
-  {
-    id: "notif_2",
-    title: "महा शिवरात्रि पर्व तैयारी",
-    message: "महाशिवरात्रि पर मंसा महादेव मंदिर में चार प्रहर की विशेष पूजा और भव्य पालकी यात्रा निकाली जाएगी। मंदिर को आकर्षक रोशनी से सजाया जाएगा।",
-    date: "2026-06-25",
-    type: "general"
-  }
-];
+const DEFAULT_NOTIFICATIONS: NotificationItem[] = [];
 
 export const DEFAULT_FESTIVAL_BANNERS: FestivalBanner[] = [
   {
@@ -678,6 +663,7 @@ onSnapshot(collection(firestoreDb, 'bhajans'), (snapshot) => {
 
 export let firestoreDailyDarshan: DailyDarshan | null = null;
 export let firestoreGallery: GalleryItem[] = [];
+export let firestoreNotifications: NotificationItem[] = [];
 export let firestoreVideos: VideoDarshan[] = [];
 export let firestoreEvents: TempleEvent[] = [];
 export let firestoreCommittee: CommitteeMember[] = [];
@@ -775,6 +761,15 @@ try {
   }
 } catch (e) {
   console.error("Failed to load cached festival banners", e);
+}
+
+try {
+  const cachedNotifications = localStorage.getItem('mm_notifications');
+  if (cachedNotifications) {
+    firestoreNotifications = JSON.parse(cachedNotifications);
+  }
+} catch (e) {
+  console.error("Failed to load cached notifications", e);
 }
 
 // Subscribe to firestore 'dailyDarshan'
@@ -1022,7 +1017,34 @@ onSnapshot(collection(firestoreDb, 'push_notifications'), (snapshot) => {
   console.error("Firestore push_notifications subscription error:", error);
 });
 
+// Subscribe to firestore 'notifications' collection
+onSnapshot(collection(firestoreDb, 'notifications'), (snapshot) => {
+  const items: NotificationItem[] = [];
+  snapshot.forEach((docSnap) => {
+    items.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    } as NotificationItem);
+  });
+  firestoreNotifications = items;
+  localStorage.setItem('mm_notifications', JSON.stringify(items));
+  notifyDBChange();
+}, (error) => {
+  console.error("Firestore notifications subscription error:", error);
+});
 
+
+
+
+function isMorning(item: GalleryItem): boolean {
+  const text = ((item.festivalName || '') + ' ' + (item.description || '')).toLowerCase();
+  return text.includes('सुबह') || text.includes('प्रातः') || text.includes('shringar') || text.includes('morning') || text.includes('morn') || text.includes('pratah');
+}
+
+function isEvening(item: GalleryItem): boolean {
+  const text = ((item.festivalName || '') + ' ' + (item.description || '')).toLowerCase();
+  return text.includes('शाम') || text.includes('संध्या') || text.includes('सायं') || text.includes('evening') || text.includes('eve') || text.includes('sandhya') || text.includes('shyam');
+}
 
 export const db = {
   // Authentication
@@ -1052,6 +1074,7 @@ export const db = {
     return firestoreDailyDarshan;
   },
 
+
   getLatestShringar(): GalleryItem | null {
     const galleryItems = this.getGallery();
     const todayItem = this.getDailyDarshan();
@@ -1070,7 +1093,9 @@ export const db = {
 
     galleryItems.forEach(item => {
       if (item.imageUrl) {
-        combined.push(item);
+        if (!combined.some(c => c.id === item.id)) {
+          combined.push(item);
+        }
       }
     });
 
@@ -1078,19 +1103,47 @@ export const db = {
       return null;
     }
 
-    // Sort by uploadedAt descending first. If uploadedAt is same or missing, sort by date descending.
-    combined.sort((a, b) => {
-      const timeA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
-      const timeB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
-      if (timeA !== timeB) {
-        return timeB - timeA;
+    // 1. Find the latest date among all items
+    let latestDate = '';
+    combined.forEach(item => {
+      if (item.date && item.date > latestDate) {
+        latestDate = item.date;
       }
-      const dateA = a.date || '';
-      const dateB = b.date || '';
-      return dateB.localeCompare(dateA);
     });
 
-    return combined[0];
+    if (!latestDate) {
+      // Fallback if no dates exist: sort by uploadedAt descending
+      combined.sort((a, b) => {
+        const timeA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+        const timeB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+        return timeB - timeA;
+      });
+      return combined[0];
+    }
+
+    // 2. Filter for items of that latest date
+    const latestItems = combined.filter(item => item.date === latestDate);
+
+    // 3. Find the latest entry of that date (Evening is later than Morning)
+    latestItems.sort((a, b) => {
+      const isMorningA = isMorning(a);
+      const isMorningB = isMorning(b);
+      const isEveningA = isEvening(a);
+      const isEveningB = isEvening(b);
+
+      const rankA = isEveningA && !isMorningA ? 1 : (isMorningA && !isEveningA ? 2 : 1.5);
+      const rankB = isEveningB && !isMorningB ? 1 : (isMorningB && !isEveningB ? 2 : 1.5);
+
+      if (rankA !== rankB) {
+        return rankA - rankB; // Evening (rank 1) before Morning (rank 2)
+      }
+      
+      const timeA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+      const timeB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+      return timeB - timeA;
+    });
+
+    return latestItems[0];
   },
 
   async updateDailyDarshan(darshan: Omit<DailyDarshan, 'id' | 'uploadedAt'>) {
@@ -1123,16 +1176,29 @@ export const db = {
 
   // Gallery
   getGallery(): GalleryItem[] {
-    // Return sorted by order if available, else date descending
     return [...firestoreGallery].sort((a, b) => {
-      const orderA = (a as any).order !== undefined ? (a as any).order : 999999;
-      const orderB = (b as any).order !== undefined ? (b as any).order : 999999;
-      if (orderA !== orderB) {
-        return orderA - orderB;
+      const dateA = a.date || '';
+      const dateB = b.date || '';
+      if (dateA !== dateB) {
+        return dateB.localeCompare(dateA); // Newest date first
       }
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+
+      // Same date: Morning (सुबह) before Evening (शाम)
+      const isMorningA = isMorning(a);
+      const isMorningB = isMorning(b);
+      const isEveningA = isEvening(a);
+      const isEveningB = isEvening(b);
+
+      const rankA = isMorningA && !isEveningA ? 1 : (isEveningA && !isMorningA ? 2 : 1.5);
+      const rankB = isMorningB && !isEveningB ? 1 : (isEveningB && !isMorningB ? 2 : 1.5);
+
+      if (rankA !== rankB) {
+        return rankA - rankB; // Morning (rank 1) before Evening (rank 2)
+      }
+
+      const timeA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+      const timeB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+      return timeB - timeA;
     });
   },
 
@@ -1441,30 +1507,39 @@ export const db = {
 
   // Notifications
   getNotifications(): NotificationItem[] {
-    const data = localStorage.getItem('mm_notifications');
-    const items: NotificationItem[] = data ? JSON.parse(data) : DEFAULT_NOTIFICATIONS;
+    const items = firestoreNotifications.length > 0 ? firestoreNotifications : (() => {
+      try {
+        const data = localStorage.getItem('mm_notifications');
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    })();
     return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   },
 
-  addNotification(notification: { title: string; message: string; type: 'general' | 'festival' | 'alert' }) {
-    const items = this.getNotifications();
+  async addNotification(notification: { title: string; message: string; type: 'general' | 'festival' | 'alert' }) {
+    const id = "notif_" + Date.now();
     const newItem: NotificationItem = {
-      id: "notif_" + Date.now(),
+      id,
       title: notification.title,
       message: notification.message,
       type: notification.type,
       date: new Date().toISOString().split('T')[0]
     };
-    items.unshift(newItem); // put at start
-    localStorage.setItem('mm_notifications', JSON.stringify(items));
-    notifyDBChange();
+    try {
+      await setDoc(doc(firestoreDb, 'notifications', id), newItem);
+    } catch (error) {
+      console.error("Failed to add notification to Firestore:", error);
+    }
   },
 
-  deleteNotification(id: string) {
-    let items = this.getNotifications();
-    items = items.filter(n => n.id !== id);
-    localStorage.setItem('mm_notifications', JSON.stringify(items));
-    notifyDBChange();
+  async deleteNotification(id: string) {
+    try {
+      await deleteDoc(doc(firestoreDb, 'notifications', id));
+    } catch (error) {
+      console.error("Failed to delete notification from Firestore:", error);
+    }
   },
 
   // Temple Info

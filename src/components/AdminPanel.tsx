@@ -1736,23 +1736,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                   ) : (
                                     <div className="flex items-center gap-1 shrink-0 bg-slate-100/60 p-0.5 rounded-lg border border-slate-200/40">
                                       <button
-                                        onClick={() => handleMoveGallery(index, 'up')}
-                                        disabled={index === 0}
-                                        className="p-1 text-[11px] text-slate-500 hover:text-amber-600 hover:bg-white rounded transition disabled:opacity-30 disabled:hover:bg-transparent"
-                                        title="ऊपर ले जाएं"
-                                      >
-                                        ▲
-                                      </button>
-                                      <button
-                                        onClick={() => handleMoveGallery(index, 'down')}
-                                        disabled={index === galList.length - 1}
-                                        className="p-1 text-[11px] text-slate-500 hover:text-amber-600 hover:bg-white rounded transition disabled:opacity-30 disabled:hover:bg-transparent"
-                                        title="नीचे ले जाएं"
-                                      >
-                                        ▼
-                                      </button>
-                                      <span className="w-px h-3.5 bg-slate-200 mx-1"></span>
-                                      <button
                                         onClick={() => handleStartEditGal(item)}
                                         className="p-1 text-slate-500 hover:text-amber-600 hover:bg-white rounded transition"
                                         title="संपादित करें"

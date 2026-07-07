@@ -106,7 +106,36 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
     combined.sort((a, b) => {
       const dateA = a.date || '';
       const dateB = b.date || '';
-      return dateB.localeCompare(dateA);
+      if (dateA !== dateB) {
+        return dateB.localeCompare(dateA);
+      }
+
+      // Same date: Morning (सुबह) before Evening (शाम)
+      const isMorning = (item: GalleryItem) => {
+        const text = ((item.festivalName || '') + ' ' + (item.description || '')).toLowerCase();
+        return text.includes('सुबह') || text.includes('प्रातः') || text.includes('shringar') || text.includes('morning') || text.includes('morn') || text.includes('pratah');
+      };
+
+      const isEvening = (item: GalleryItem) => {
+        const text = ((item.festivalName || '') + ' ' + (item.description || '')).toLowerCase();
+        return text.includes('शाम') || text.includes('संध्या') || text.includes('सायं') || text.includes('evening') || text.includes('eve') || text.includes('sandhya') || text.includes('shyam');
+      };
+
+      const isMorningA = isMorning(a);
+      const isMorningB = isMorning(b);
+      const isEveningA = isEvening(a);
+      const isEveningB = isEvening(b);
+
+      const rankA = isMorningA && !isEveningA ? 1 : (isEveningA && !isMorningA ? 2 : 1.5);
+      const rankB = isMorningB && !isEveningB ? 1 : (isEveningB && !isMorningB ? 2 : 1.5);
+
+      if (rankA !== rankB) {
+        return rankA - rankB; // Morning (rank 1) before Evening (rank 2)
+      }
+
+      const timeA = a.uploadedAt ? new Date(a.uploadedAt).getTime() : 0;
+      const timeB = b.uploadedAt ? new Date(b.uploadedAt).getTime() : 0;
+      return timeB - timeA;
     });
 
     setShringars(combined);
