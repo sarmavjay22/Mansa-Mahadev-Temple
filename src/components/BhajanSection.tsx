@@ -462,6 +462,12 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
     setNewSinger(track.singer || '');
     setNewAudioUrl(track.audioUrl);
     setIsEditing(true);
+    setTimeout(() => {
+      const element = document.getElementById("bhajan-edit-form");
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   const handleCancelEditing = () => {
@@ -558,8 +564,8 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                 <div className="relative p-5 bg-gradient-to-r from-orange-50 to-amber-50 text-slate-900 border-b border-orange-200/40 shrink-0 select-none flex items-center gap-3">
                   <BookOpen className="w-6 h-6 text-orange-600 fill-current" />
                   <div>
-                    <h3 className="text-[20px] md:text-[22px] font-black tracking-wide text-orange-950">📖 भक्तिमय भजन संग्रह</h3>
-                    <p className="text-[13px] md:text-[15px] text-orange-600 font-extrabold mt-0.5">भजन, आरती एवं स्तोत्र संग्रह (PDF / Images)</p>
+                    <h3 className="text-[21px] md:text-[23px] font-black tracking-wide text-orange-950">📖 भक्तिमय भजन संग्रह</h3>
+                    <p className="text-[15px] md:text-[17px] text-orange-600 font-extrabold mt-0.5">भजन संग्रह (JPG/PNG/PDF Images)</p>
                   </div>
 
                   {/* Close Button Top Right - FIXED & VISIBLE */}
@@ -631,7 +637,7 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                                 <h4 className="text-sm md:text-base font-extrabold text-slate-800 leading-snug group-hover:text-amber-800 transition duration-200 truncate">
                                   {doc.title}
                                 </h4>
-                                <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase">
+                                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-400 mt-1 uppercase">
                                   {doc.mediaType === 'pdf' ? (
                                     <span className="px-1.5 py-0.5 bg-red-50 text-red-600 border border-red-100 rounded">📄 PDF File</span>
                                   ) : (
@@ -757,8 +763,16 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
 
         {mode === 'admin' && !isEditing && (
           <button
-            onClick={() => setIsEditing(true)}
-            className="flex items-center gap-1 text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 font-bold px-3 py-1.5 rounded-xl transition duration-300"
+            onClick={() => {
+              setIsEditing(true);
+              setTimeout(() => {
+                const element = document.getElementById("bhajan-edit-form");
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }, 100);
+            }}
+            className="flex items-center gap-1 text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 font-bold px-3 py-1.5 rounded-xl transition duration-300 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>भजन जोड़ें</span>
@@ -781,8 +795,8 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
               <div className="relative p-5 bg-gradient-to-r from-orange-50 to-amber-50 text-slate-900 border-b border-orange-200/40 shrink-0 select-none flex items-center gap-3">
                 <BookOpen className="w-6 h-6 text-orange-600 fill-current" />
                 <div>
-                  <h3 className="text-[20px] md:text-[22px] font-black tracking-wide text-orange-950">📖 भक्तिमय भजन संग्रह</h3>
-                  <p className="text-[13px] md:text-[15px] text-orange-600 font-extrabold mt-0.5">भजन, आरती एवं स्तोत्र संग्रह (PDF / Images)</p>
+                  <h3 className="text-[21px] md:text-[23px] font-black tracking-wide text-orange-950">📖 भक्तिमय भजन संग्रह</h3>
+                  <p className="text-[15px] md:text-[17px] text-orange-600 font-extrabold mt-0.5">भजन संग्रह (JPG/PNG/PDF Images)</p>
                 </div>
 
                 {/* Close Button Top Right - FIXED & VISIBLE */}
@@ -854,7 +868,7 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                               <h4 className="text-sm md:text-base font-extrabold text-slate-800 leading-snug group-hover:text-amber-800 transition duration-200 truncate">
                                 {doc.title}
                               </h4>
-                              <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase">
+                              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-400 mt-1 uppercase">
                                 {doc.mediaType === 'pdf' ? (
                                   <span className="px-1.5 py-0.5 bg-red-50 text-red-600 border border-red-100 rounded">📄 PDF File</span>
                                 ) : (
@@ -970,6 +984,7 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
       <AnimatePresence>
         {isEditing && (
           <motion.div
+            id="bhajan-edit-form"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -1357,22 +1372,22 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-[10px] font-mono font-bold text-slate-400 mr-1">{track.duration}</span>
                       {mode === 'admin' && (
-                        <>
+                        <div className="flex items-center gap-1">
                           <button
                             onClick={(e) => handleStartEditBhajan(track, e)}
-                            className="p-1 text-slate-400 hover:text-amber-600 rounded-lg hover:bg-amber-50 transition"
+                            className="p-1.5 text-slate-500 hover:text-amber-700 rounded-lg hover:bg-amber-100/60 border border-amber-200/20 hover:border-amber-200 transition cursor-pointer flex items-center justify-center"
                             title="संशोधित करें"
                           >
                             <Edit className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={(e) => handleDeleteBhajan(track.id, e)}
-                            className="p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition"
+                            className="p-1.5 text-slate-500 hover:text-rose-600 rounded-lg hover:bg-rose-100/60 border border-rose-200/20 hover:border-rose-200 transition cursor-pointer flex items-center justify-center"
                             title="हटाएं"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -1384,7 +1399,7 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
       </div>
 
       {/* Premium Capsule Button for Bhakti Bhajan Collection (Shifted below!) */}
-      {mode !== 'player' && (
+      {mode !== 'player' && mode !== 'admin' && (
         <div className="flex justify-center mt-6 w-full max-w-4xl mx-auto px-4">
           <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3 w-full">
             <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">

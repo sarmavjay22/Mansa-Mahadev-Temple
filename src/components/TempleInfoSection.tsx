@@ -295,40 +295,40 @@ export default function TempleInfoSection() {
       <div className="w-full bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 overflow-hidden">
         
         {/* Navigation Tab Header Row */}
-        <div className="flex border-b border-amber-200/60 bg-amber-100/30 select-none">
+        <div className="flex flex-wrap md:flex-nowrap gap-3 p-4 justify-center border-b border-amber-200/60 bg-amber-100/20 select-none">
           <button
             onClick={() => setActiveTab('timings')}
-            className={`flex-1 py-4 text-sm md:text-base font-bold flex items-center justify-center gap-1.5 transition ${
+            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-full transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base font-black tracking-wider ${
               activeTab === 'timings' 
-                ? 'text-amber-600 bg-white border-b-2 border-amber-500' 
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-amber-100 border-2 border-amber-500 text-amber-950 shadow-md' 
+                : 'bg-white hover:bg-amber-100/50 border-2 border-amber-300 hover:border-amber-400 text-amber-950 shadow-sm'
             }`}
           >
-            <Clock3 className="w-4 h-4" />
+            <Clock3 className="w-4 h-4 text-amber-800" />
             <span>आरती एवं पट समय</span>
           </button>
 
           <button
             onClick={() => setActiveTab('about')}
-            className={`flex-1 py-4 text-sm md:text-base font-bold flex items-center justify-center gap-1.5 transition ${
+            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-full transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base font-black tracking-wider ${
               activeTab === 'about' 
-                ? 'text-amber-600 bg-white border-b-2 border-amber-500' 
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-amber-100 border-2 border-amber-500 text-amber-950 shadow-md' 
+                : 'bg-white hover:bg-amber-100/50 border-2 border-amber-300 hover:border-amber-400 text-amber-950 shadow-sm'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
+            <BookOpen className="w-4 h-4 text-amber-800" />
             <span>इतिहास एवं परिचय</span>
           </button>
 
           <button
             onClick={() => setActiveTab('contact')}
-            className={`flex-1 py-4 text-sm md:text-base font-bold flex items-center justify-center gap-1.5 transition ${
+            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-full transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base font-black tracking-wider ${
               activeTab === 'contact' 
-                ? 'text-amber-600 bg-white border-b-2 border-amber-500' 
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-amber-100 border-2 border-amber-500 text-amber-950 shadow-md' 
+                : 'bg-white hover:bg-amber-100/50 border-2 border-amber-300 hover:border-amber-400 text-amber-950 shadow-sm'
             }`}
           >
-            <MapPin className="w-4 h-4" />
+            <MapPin className="w-4 h-4 text-amber-800" />
             <span>स्थान एवं संपर्क</span>
           </button>
         </div>

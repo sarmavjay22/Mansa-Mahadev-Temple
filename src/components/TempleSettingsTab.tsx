@@ -201,34 +201,6 @@ export default function TempleSettingsTab() {
               />
             </div>
 
-            {/* Temple Logo */}
-            <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-2">
-              <label className="block text-[10px] font-bold text-slate-500">मंदिर लोगो (Temple Logo):</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="file"
-                  onChange={(e) => handleImageUpload(e, 'templeLogo')}
-                  accept="image/*"
-                  className="text-[10px] max-w-[150px]"
-                />
-                {uploadingField === 'templeLogo' && <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-500" />}
-              </div>
-              <input
-                type="text"
-                name="templeLogo"
-                value={form.templeLogo}
-                onChange={handleChange}
-                placeholder="लोगो चित्र URL"
-                className="w-full px-2 py-1 bg-slate-50 border rounded-lg text-[10px]"
-              />
-              {form.templeLogo && (
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] text-slate-400">पूर्वावलोकन:</span>
-                  <img src={form.templeLogo} className="w-7 h-7 object-cover rounded-full border shadow-xs" referrerPolicy="no-referrer" />
-                </div>
-              )}
-            </div>
-
             {/* Temple Cover Image */}
             <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-2">
               <label className="block text-[10px] font-bold text-slate-500">मंदिर मुख्य आवरण चित्र (Cover Image):</label>
@@ -280,26 +252,6 @@ export default function TempleSettingsTab() {
                     <div className="flex items-center gap-1.5 mt-1">
                       <span className="text-[9px] text-slate-400">वर्तमान सक्रिय:</span>
                       <img src={form.templeLogoUrl || form.templeLogo} className="w-6 h-6 object-cover rounded-full border shadow-xs" referrerPolicy="no-referrer" />
-                    </div>
-                  )}
-                </div>
-
-                {/* 4. Festival Banner URL */}
-                <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex flex-col gap-1.5">
-                  <label className="block text-[10px] font-bold text-slate-500">पर्व/उत्सव बैनर यूआरएल (Festival Banner URL):</label>
-                  <input
-                    type="text"
-                    name="festivalBannerUrl"
-                    value={form.festivalBannerUrl || ''}
-                    onChange={handleChange}
-                    placeholder="उत्सव के विशेष बैनर का सीधा इमेज यूआरएल"
-                    className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
-                  />
-                  <p className="text-[9px] text-slate-400">यहाँ यूआरएल देने पर यह वेबसाइट के सबसे ऊपर सुंदर बैनर के रूप में दिखेगा।</p>
-                  {form.festivalBannerUrl && (
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-[9px] text-slate-400">पूर्वावलोकन:</span>
-                      <img src={form.festivalBannerUrl} className="w-10 h-6 object-cover rounded border shadow-xs" referrerPolicy="no-referrer" />
                     </div>
                   )}
                 </div>
