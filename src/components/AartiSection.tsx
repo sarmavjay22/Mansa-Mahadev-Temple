@@ -125,7 +125,7 @@ export default function AartiSection() {
 
   return (
     <section id="aarti-section" className="w-full max-w-4xl mx-auto px-4">
-      <h2 className="text-2xl md:text-3xl font-black text-amber-950 flex items-center gap-2 mb-6">
+      <h2 className="text-[22px] md:text-[26px] font-black text-amber-950 flex items-center gap-2 mb-6">
         <span>🚩 नित्य आरती एवं पाठ संग्रह</span>
         <span className="text-xs font-bold px-3 py-1 rounded-full bg-orange-100 text-orange-700 animate-pulse border border-orange-200">स्तुति वंदना</span>
       </h2>
@@ -157,9 +157,9 @@ export default function AartiSection() {
                     setActiveAarti(shivAartiObj);
                     setSearchQuery('');
                   }}
-                  className="w-full text-center py-2 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wide shadow-sm transition-all duration-200 hover:scale-102 cursor-pointer text-sm md:text-base"
+                  className="w-full text-center py-2.5 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wider shadow-sm transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base"
                 >
-                  🔱 भोलेनाथ की आरती
+                  <span className="font-black">🔱 भोलेनाथ की आरती</span>
                 </button>
               )}
               
@@ -169,9 +169,9 @@ export default function AartiSection() {
                     setActiveAarti(rudraAartiObj);
                     setSearchQuery('');
                   }}
-                  className="w-full text-center py-2 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wide shadow-sm transition-all duration-200 hover:scale-102 cursor-pointer text-sm md:text-base"
+                  className="w-full text-center py-2.5 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wider shadow-sm transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base"
                 >
-                  🔱 शिव रुद्राष्टकम
+                  <span className="font-black">🔱 शिव रुद्राष्टकम</span>
                 </button>
               )}
 
@@ -181,9 +181,9 @@ export default function AartiSection() {
                     setActiveAarti(stutiAartiObj);
                     setSearchQuery('');
                   }}
-                  className="w-full text-center py-2 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wide shadow-sm transition-all duration-200 hover:scale-102 cursor-pointer text-sm md:text-base"
+                  className="w-full text-center py-2.5 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wider shadow-sm transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base"
                 >
-                  🔱 शिव स्तुति
+                  <span className="font-black">🔱 शिव स्तुति</span>
                 </button>
               )}
             </div>
@@ -215,9 +215,9 @@ export default function AartiSection() {
                     setActiveAarti(hanumanAartiObj);
                     setSearchQuery('');
                   }}
-                  className="w-full text-center py-2 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wide shadow-sm transition-all duration-200 hover:scale-102 cursor-pointer text-sm md:text-base"
+                  className="w-full text-center py-2.5 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wider shadow-sm transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base"
                 >
-                  🚩 हनुमान जी की आरती
+                  <span className="font-black">🚩 हनुमान जी की आरती</span>
                 </button>
               )}
               
@@ -227,9 +227,9 @@ export default function AartiSection() {
                     setActiveAarti(chalisaAartiObj);
                     setSearchQuery('');
                   }}
-                  className="w-full text-center py-2 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wide shadow-sm transition-all duration-200 hover:scale-102 cursor-pointer text-sm md:text-base"
+                  className="w-full text-center py-2.5 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wider shadow-sm transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base"
                 >
-                  🚩 हनुमान चालीसा
+                  <span className="font-black">🚩 हनुमान चालीसा</span>
                 </button>
               )}
 
@@ -239,9 +239,9 @@ export default function AartiSection() {
                     setActiveAarti(ramStutiObj);
                     setSearchQuery('');
                   }}
-                  className="w-full text-center py-2 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wide shadow-sm transition-all duration-200 hover:scale-102 cursor-pointer text-sm md:text-base"
+                  className="w-full text-center py-2.5 px-4 rounded-full bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 font-black tracking-wider shadow-sm transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base"
                 >
-                  🚩 श्रीराम स्तुति
+                  <span className="font-black">🚩 श्रीराम स्तुति</span>
                 </button>
               )}
             </div>

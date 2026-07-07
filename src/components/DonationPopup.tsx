@@ -13,6 +13,13 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
   const [settings, setSettings] = useState<DonationSettings>(db.getDonationSettings());
   const [copied, setCopied] = useState(false);
 
+  const getDisplayMessage = (msg: string) => {
+    if (!msg || msg === "मंदिर के धार्मिक कार्यों, सेवा एवं विकास में अपना सहयोग प्रदान करें।" || msg === "मंदिर के धार्मिक कार्यों, सेवा एवं विकास में अपना Online आर्थिक सहयोग प्रदान कर धार्मिक लाभ लेवें") {
+      return "मंदिर के धार्मिक कार्यों, सेवा एवं विकास में अपना Online आर्थिक सहयोग प्रदान कर धर्म लाभ लेवें";
+    }
+    return msg;
+  };
+
   useEffect(() => {
     setSettings(db.getDonationSettings());
     const unsubscribe = subscribeToDBUpdates(() => {
@@ -55,10 +62,10 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
               <Heart className="w-5 h-5 text-white fill-white" />
             </div>
             <div>
-              <h2 className="text-base md:text-lg font-extrabold tracking-wide text-slate-800">
+              <h2 className="text-xl md:text-2xl font-extrabold tracking-wide text-slate-800">
                 ❤️ मंदिर सेवा एवं दान
               </h2>
-              <p className="text-[10px] md:text-xs text-amber-700 font-bold">
+              <p className="text-xs md:text-sm text-amber-700 font-bold">
                 Mansa Mahadev Mandir Seva & Donation
               </p>
             </div>
@@ -74,17 +81,17 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto flex flex-col items-center text-center gap-6">
+        <div className="p-4 md:p-5 overflow-y-auto flex flex-col items-center text-center gap-4">
           
           {/* Donation Message */}
-          <div className="bg-amber-50/50 border border-amber-200/30 rounded-2xl p-4 w-full max-w-sm shadow-sm">
-            <p className="text-xs md:text-sm text-amber-900 font-bold leading-relaxed">
-              🙏 "{settings.message || "मंदिर के धार्मिक कार्यों, सेवा एवं विकास में अपना सहयोग प्रदान करें।"}"
+          <div className="bg-amber-50/50 border border-amber-200/30 rounded-2xl p-3 w-full max-w-sm shadow-sm">
+            <p className="text-sm md:text-base text-amber-900 font-bold leading-relaxed">
+              🙏 "{getDisplayMessage(settings.message)}"
             </p>
           </div>
 
           {/* QR Code Container */}
-          <div className="relative bg-white p-4 rounded-3xl border border-amber-200/40 shadow-md max-w-[200px] w-full aspect-square flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-amber-300">
+          <div className="relative bg-white p-2 rounded-3xl border border-amber-200/40 shadow-md max-w-[240px] w-full aspect-square flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-amber-300">
             {settings.qrCodeUrl ? (
               <img 
                 src={settings.qrCodeUrl} 
@@ -101,20 +108,20 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
 
           {/* Recipient Details Section */}
           {(settings.committeeName || settings.trusteeName) && (
-            <div className="w-full max-w-sm bg-amber-50/40 border border-amber-200/30 rounded-2xl p-3.5 text-left flex flex-col gap-2 shadow-sm">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800 border-b border-amber-200/30 pb-1 flex items-center gap-1 select-none">
-                🚩 दान प्राप्तकर्ता (Donation Recipient)
+            <div className="w-full max-w-sm bg-amber-50/40 border border-amber-200/30 rounded-2xl p-3 text-left flex flex-col gap-1.5 shadow-sm">
+              <span className="text-[15px] font-extrabold uppercase tracking-wider text-amber-800 border-b border-amber-200/30 pb-1 flex items-center gap-1 select-none">
+                🚩 दान प्राप्तकर्ता
               </span>
               {settings.committeeName && (
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">मंदिर प्रबंधन समिति</span>
-                  <span className="text-xs font-black text-slate-800 leading-tight mt-0.5">{settings.committeeName}</span>
+                  <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">मंदिर प्रबंधन समिति</span>
+                  <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.committeeName}</span>
                 </div>
               )}
               {settings.trusteeName && (
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">अधिकृत व्यक्ति / Trustee</span>
-                  <span className="text-xs font-black text-slate-800 leading-tight mt-0.5">{settings.trusteeName}</span>
+                  <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">अधिकृत व्यक्ति / Trustee</span>
+                  <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.trusteeName}</span>
                 </div>
               )}
             </div>
@@ -123,25 +130,25 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
 
 
           {/* UPI Section */}
-          <div className="w-full max-w-sm flex flex-col gap-3">
+          <div className="w-full max-w-sm flex flex-col gap-2.5">
             
             {/* UPI ID Display & Copy */}
-            <div className="flex items-center gap-2 bg-white border border-amber-200/40 p-1 pl-3.5 rounded-full shadow-sm">
-              <span className="font-mono text-xs text-slate-600 font-semibold truncate flex-1 text-left">
+            <div className="flex items-center gap-2 bg-white border border-amber-200/40 p-0.5 pl-3 rounded-full shadow-sm">
+              <span className="font-mono text-sm text-slate-800 font-bold truncate flex-1 text-left">
                 {settings.upiId || "mansamahadev@upi"}
               </span>
               <button
                 onClick={handleCopyUPI}
-                className="inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] py-1.5 px-3 rounded-full transition duration-300 shadow-sm shrink-0"
+                className="inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-1.5 px-3.5 rounded-full transition duration-300 shadow-sm shrink-0"
               >
                 {copied ? (
                   <>
-                    <Check className="w-3 h-3" />
+                    <Check className="w-3.5 h-3.5" />
                     <span>Copied!</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3 h-3" />
+                    <Copy className="w-3.5 h-3.5" />
                     <span>UPI ID Copy Karein</span>
                   </>
                 )}
@@ -154,7 +161,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                 href={settings.upiLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs md:text-sm py-2.5 px-5 rounded-full transition duration-300 shadow-md shadow-orange-500/10 hover:shadow-lg active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs md:text-sm py-2 px-5 rounded-full transition duration-300 shadow-md shadow-orange-500/10 hover:shadow-lg active:scale-[0.98]"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
                 <span>UPI App Se Donate Karein</span>
@@ -164,10 +171,10 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
           </div>
 
           {/* Saffron Divider */}
-          <div className="w-full max-w-xs h-[1px] bg-gradient-to-r from-transparent via-amber-300 to-transparent my-1"></div>
+          <div className="w-full max-w-xs h-[1px] bg-gradient-to-r from-transparent via-amber-300 to-transparent my-0.5"></div>
 
           {/* Closing Message */}
-          <p className="text-[10px] md:text-xs text-slate-500 font-semibold leading-relaxed max-w-xs">
+          <p className="text-xs md:text-sm text-slate-700 font-bold leading-relaxed max-w-xs">
             🙏 "आपका सहयोग मंदिर सेवा एवं धार्मिक कार्यों में अमूल्य योगदान है। हर हर महादेव।"
           </p>
 

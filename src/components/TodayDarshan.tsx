@@ -273,15 +273,14 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
     return (
       <section id="today-darshan-title" className="w-full max-w-4xl mx-auto px-4">
         {/* Golden Accented Title Card */}
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-3 flex items-center justify-center gap-3 text-center">
-          <h2 className="text-lg md:text-xl font-extrabold text-slate-800 flex items-center justify-center gap-2 flex-wrap">
-            <Sparkles className="w-6 h-6 text-amber-500 fill-amber-500 animate-pulse shrink-0" />
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3">
+          <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
             <button
               onClick={() => setIsShringarOpen(true)}
               title="दिव्य श्रृंगार दर्शन देखने के लिए यहाँ क्लिक करें"
-              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group"
+              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
             >
-              <span>भोलेनाथ के श्रृंगार दर्शन</span>
+              <span className="font-black">🌸 भोलेनाथ के श्रृंगार दर्शन</span>
             </button>
           </h2>
         </div>
@@ -660,15 +659,14 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
     return (
       <section id="today-darshan" className="w-full max-w-4xl mx-auto px-4 pt-4 pb-0">
         {/* Golden Accented Title Card */}
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-3 mb-4 flex items-center justify-center gap-3 text-center">
-          <h2 className="text-lg md:text-xl font-extrabold text-slate-800 flex items-center justify-center gap-2 flex-wrap">
-            <Sparkles className="w-6 h-6 text-amber-500 fill-amber-500 animate-pulse shrink-0" />
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3">
+          <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
             <button
               onClick={() => setIsShringarOpen(true)}
               title="दिव्य श्रृंगार दर्शन देखने के लिए यहाँ क्लिक करें"
-              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group"
+              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
             >
-              <span>भोलेनाथ के श्रृंगार दर्शन</span>
+              <span className="font-black">🌸 भोलेनाथ के श्रृंगार दर्शन</span>
             </button>
           </h2>
         </div>
@@ -682,15 +680,14 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
   return (
     <section id="today-darshan" className="w-full max-w-4xl mx-auto px-4 pt-4 pb-0">
       {/* Golden Accented Title Card */}
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-3 mb-4 flex items-center justify-center gap-3 text-center">
-        <h2 className="text-lg md:text-xl font-extrabold text-slate-800 flex items-center justify-center gap-2 flex-wrap">
-          <Sparkles className="w-6 h-6 text-amber-500 fill-amber-500 animate-pulse shrink-0" />
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3">
+        <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
           <button
             onClick={() => setIsShringarOpen(true)}
             title="दिव्य श्रृंगार दर्शन देखने के लिए यहाँ क्लिक करें"
-            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group"
+            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
           >
-            <span>भोलेनाथ के श्रृंगार दर्शन</span>
+            <span className="font-black">🌸 भोलेनाथ के श्रृंगार दर्शन</span>
           </button>
         </h2>
       </div>

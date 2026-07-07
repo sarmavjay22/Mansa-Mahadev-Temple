@@ -229,27 +229,22 @@ export default function TempleGallery() {
     <section id="temple-gallery-section" className="w-full max-w-4xl mx-auto px-4">
       {/* "भोलेनाथ के श्रृंगार दर्शन" style Accent Card */}
       <div 
-        onClick={() => setIsOpen(true)}
-        className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 p-8 flex flex-col items-center justify-center gap-4 text-center cursor-pointer select-none transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"
+        className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 pt-5 pb-5 px-6 md:px-8 flex flex-col items-center justify-center gap-2 text-center select-none transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"
       >
         <h2 className="text-2xl md:text-3xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-8 h-8 text-amber-500 fill-amber-500 animate-pulse shrink-0" />
-            <span>मँदिर दर्शन दीर्घा</span>
-          </div>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsOpen(true);
             }}
             title="मँदिर दर्शन दीर्घा (गैलरी) देखने के लिए यहाँ क्लिक करें"
-            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-8 py-3.5 rounded-full shadow-md hover:shadow-lg text-lg md:text-xl font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group"
+            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
           >
-            <span>📸 मँदिर दर्शन दीर्घा (गैलरी) देखें</span>
+            <span className="font-black">📸 मँदिर दर्शन दीर्घा (गैलरी)</span>
           </button>
         </h2>
 
-        <p className="text-base md:text-lg text-amber-950 font-black mt-2 text-center max-w-lg px-4 leading-relaxed">
+        <p className="text-sm md:text-base text-black font-normal mt-0 text-center max-w-lg px-4 leading-relaxed">
           मँदिर परिसर, उत्सवों एवं सुंदर भक्तिमय क्षणों की अलौकिक सुंदर छवियों का संग्रह
         </p>
       </div>
@@ -276,7 +271,7 @@ export default function TempleGallery() {
               <div className="p-5 border-b border-amber-100 flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 shrink-0">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-amber-500 fill-amber-500" />
-                  <h2 className="text-lg md:text-xl font-black text-slate-800">📸 मँदिर दर्शन दीर्घा (गैलरी)</h2>
+                  <h2 className="text-xl md:text-2xl font-black text-slate-800">📸 मँदिर दर्शन दीर्घा (गैलरी)</h2>
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
@@ -288,7 +283,7 @@ export default function TempleGallery() {
 
               {/* Popup Content: 3 Big Options */}
               <div className="p-6 flex flex-col gap-4 flex-1 overflow-y-auto">
-                <p className="text-sm text-amber-800 font-bold text-center mb-1">
+                <p className="text-base md:text-lg text-amber-800 font-bold text-center mb-1">
                   मंसा महादेव मंदिर दर्शन दीर्घा की पावन श्रेणियां:
                 </p>
 
@@ -303,8 +298,8 @@ export default function TempleGallery() {
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200/60 mb-3 flex items-center justify-center shadow-inner">
                       <span className="text-3xl">🛕</span>
                     </div>
-                    <span className="font-extrabold text-slate-800 text-sm">मँदिर एवं परिसर</span>
-                    <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold mt-2">
+                    <span className="font-extrabold text-slate-800 text-base">मँदिर एवं परिसर</span>
+                    <span className="text-sm bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold mt-2">
                       {activeItems.filter(item => item.category === 'mandir_parisar').length} चित्र
                     </span>
                   </motion.button>
@@ -319,8 +314,8 @@ export default function TempleGallery() {
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200/60 mb-3 flex items-center justify-center shadow-inner">
                       <span className="text-3xl">🎉</span>
                     </div>
-                    <span className="font-extrabold text-slate-800 text-sm">उत्सव</span>
-                    <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold mt-2">
+                    <span className="font-extrabold text-slate-800 text-base">उत्सव</span>
+                    <span className="text-sm bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold mt-2">
                       {activeItems.filter(item => item.category === 'utsav').length} चित्र
                     </span>
                   </motion.button>
@@ -335,8 +330,8 @@ export default function TempleGallery() {
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-rose-50 to-rose-100 border-2 border-rose-200/60 mb-3 flex items-center justify-center shadow-inner">
                       <span className="text-3xl">🙏</span>
                     </div>
-                    <span className="font-extrabold text-slate-800 text-sm">भक्तिमय क्षण</span>
-                    <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold mt-2">
+                    <span className="font-extrabold text-slate-800 text-base">भक्तिमय क्षण</span>
+                    <span className="text-sm bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-bold mt-2">
                       {activeItems.filter(item => item.category === 'bhaktimay').length} चित्र
                     </span>
                   </motion.button>
@@ -393,7 +388,7 @@ export default function TempleGallery() {
                   </div>
                 </div>
                 <button 
-                  onClick={() => { setSelectedCategory(null); setIsOpen(false); }}
+                  onClick={() => { setSelectedCategory(null); }}
                   className="w-9 h-9 rounded-full bg-white border border-amber-200/50 flex items-center justify-center hover:bg-amber-100 text-slate-500 transition duration-200 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
@@ -463,7 +458,7 @@ export default function TempleGallery() {
                   श्रेणी मेनू
                 </button>
                 <button
-                  onClick={() => { setSelectedCategory(null); setIsOpen(false); }}
+                  onClick={() => { setSelectedCategory(null); }}
                   className="px-5 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs hover:bg-amber-700 transition cursor-pointer"
                 >
                   बंद करें

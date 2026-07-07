@@ -153,21 +153,11 @@ export default function TempleInfoSection() {
       
       {/* Title Header Row */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center gap-2">
+        <h2 className="text-[22px] md:text-[26px] font-black text-amber-950 flex items-center gap-2">
           <Info className="w-5 h-5 text-sky-500 fill-sky-100" />
           <span>मंदिर परिचय एवं समय सारणी</span>
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-600">सम्पर्क सूत्र</span>
         </h2>
-
-        {isAdmin && !isEditing && (
-          <button
-            onClick={handleStartEdit}
-            className="flex items-center gap-1.5 text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-xl transition duration-300"
-          >
-            <Edit2 className="w-3.5 h-3.5" />
-            <span>जानकारी बदलें</span>
-          </button>
-        )}
       </div>
 
       {/* ADMIN INLINE INFORMATION EDITOR */}

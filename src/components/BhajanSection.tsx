@@ -52,7 +52,7 @@ function getYouTubeId(url: string): string | null {
 // across component mounts and prevent multiple audio elements clashing.
 let globalAudioInstance: HTMLAudioElement | null = null;
 
-export default function BhajanSection({ mode }: { mode?: 'player' | 'collection' } = {}) {
+export default function BhajanSection({ mode }: { mode?: 'player' | 'collection' | 'admin' } = {}) {
   const [bhajans, setBhajans] = useState<BhajanItem[]>([]);
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -529,20 +529,19 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
 
   if (mode === 'collection') {
     return (
-      <div className="w-full max-w-4xl mx-auto px-4 flex justify-center select-none">
-        <button
-          onClick={() => setIsBhajanPopupOpen(true)}
-          className="relative inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-slate-950 font-black text-sm md:text-base shadow-xl hover:shadow-orange-200/50 hover:scale-[1.02] active:scale-98 transition-all duration-300 group border-2 border-amber-300/60 overflow-hidden select-none"
-        >
-          {/* Pulsing glow background */}
-          <span className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></span>
-          <BookOpen className="w-5 h-5 text-slate-950 group-hover:rotate-6 transition-transform duration-300" />
-          <span className="tracking-wide">📖 भक्तिमय भजन संग्रह</span>
-          <span className="ml-1.5 flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-950"></span>
-          </span>
-        </button>
+      <div className="w-full max-w-4xl mx-auto px-4 select-none">
+        {/* Golden Accented Title Card */}
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3">
+          <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
+            <button
+              onClick={() => setIsBhajanPopupOpen(true)}
+              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
+            >
+              <BookOpen className="w-5 h-5 text-amber-600 group-hover:rotate-6 transition-transform duration-300" />
+              <span className="font-black">📖 भक्तिमय भजन संग्रह</span>
+            </button>
+          </h2>
+        </div>
 
         {/* 1. Responsive List Popup */}
         <AnimatePresence>
@@ -556,17 +555,17 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                 className="relative w-full max-w-lg h-[80vh] bg-gradient-to-b from-amber-50 to-white rounded-3xl shadow-2xl border-2 border-amber-100/50 overflow-hidden flex flex-col"
               >
                 {/* Header */}
-                <div className="relative p-5 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 border-b border-amber-200/40 shrink-0 select-none flex items-center gap-3">
-                  <BookOpen className="w-6 h-6 text-slate-950 fill-current" />
+                <div className="relative p-5 bg-gradient-to-r from-orange-50 to-amber-50 text-slate-900 border-b border-orange-200/40 shrink-0 select-none flex items-center gap-3">
+                  <BookOpen className="w-6 h-6 text-orange-600 fill-current" />
                   <div>
-                    <h3 className="text-base md:text-lg font-black tracking-wide">📖 भक्तिमय भजन संग्रह</h3>
-                    <p className="text-[10px] md:text-xs text-slate-900 font-bold opacity-80 mt-0.5">भजन, आरती एवं स्तोत्र संग्रह (PDF / Images)</p>
+                    <h3 className="text-[20px] md:text-[22px] font-black tracking-wide text-orange-950">📖 भक्तिमय भजन संग्रह</h3>
+                    <p className="text-[13px] md:text-[15px] text-orange-600 font-extrabold mt-0.5">भजन, आरती एवं स्तोत्र संग्रह (PDF / Images)</p>
                   </div>
 
                   {/* Close Button Top Right - FIXED & VISIBLE */}
                   <button
                     onClick={() => setIsBhajanPopupOpen(false)}
-                    className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-950/10 hover:bg-slate-950/20 text-slate-950 flex items-center justify-center transition duration-200 focus:outline-none"
+                    className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-900/5 hover:bg-slate-900/10 text-slate-700 hover:text-slate-950 flex items-center justify-center transition duration-200 focus:outline-none"
                     aria-label="Close"
                   >
                     <X className="w-5 h-5 font-bold" />
@@ -629,7 +628,7 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                                 {idx + 1}
                               </span>
                               <div className="min-w-0">
-                                <h4 className="text-xs md:text-sm font-extrabold text-slate-800 leading-snug group-hover:text-amber-800 transition duration-200 truncate">
+                                <h4 className="text-sm md:text-base font-extrabold text-slate-800 leading-snug group-hover:text-amber-800 transition duration-200 truncate">
                                   {doc.title}
                                 </h4>
                                 <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase">
@@ -750,13 +749,13 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
   return (
     <section id="bhajan-section" className="w-full max-w-4xl mx-auto px-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-extrabold text-slate-800 flex items-center gap-2">
+        <h2 className="text-[22px] md:text-[26px] font-black text-amber-950 flex items-center gap-2">
           <Music className="w-5 h-5 text-amber-500 fill-amber-100 animate-bounce" />
-          <span>शिव भजन एवं मंत्र</span>
+          <span>यूट्यूब से भक्तिमय भजन संग्रह</span>
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">भक्ति रस</span>
         </h2>
 
-        {!isEditing && (
+        {mode === 'admin' && !isEditing && (
           <button
             onClick={() => setIsEditing(true)}
             className="flex items-center gap-1 text-xs bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 font-bold px-3 py-1.5 rounded-xl transition duration-300"
@@ -779,17 +778,17 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
               className="relative w-full max-w-lg h-[80vh] bg-gradient-to-b from-amber-50 to-white rounded-3xl shadow-2xl border-2 border-amber-100/50 overflow-hidden flex flex-col"
             >
               {/* Header */}
-              <div className="relative p-5 bg-gradient-to-r from-orange-500 to-amber-500 text-slate-950 border-b border-amber-200/40 shrink-0 select-none flex items-center gap-3">
-                <BookOpen className="w-6 h-6 text-slate-950 fill-current" />
+              <div className="relative p-5 bg-gradient-to-r from-orange-50 to-amber-50 text-slate-900 border-b border-orange-200/40 shrink-0 select-none flex items-center gap-3">
+                <BookOpen className="w-6 h-6 text-orange-600 fill-current" />
                 <div>
-                  <h3 className="text-base md:text-lg font-black tracking-wide">📖 भक्तिमय भजन संग्रह</h3>
-                  <p className="text-[10px] md:text-xs text-slate-900 font-bold opacity-80 mt-0.5">भजन, आरती एवं स्तोत्र संग्रह (PDF / Images)</p>
+                  <h3 className="text-[20px] md:text-[22px] font-black tracking-wide text-orange-950">📖 भक्तिमय भजन संग्रह</h3>
+                  <p className="text-[13px] md:text-[15px] text-orange-600 font-extrabold mt-0.5">भजन, आरती एवं स्तोत्र संग्रह (PDF / Images)</p>
                 </div>
 
                 {/* Close Button Top Right - FIXED & VISIBLE */}
                 <button
                   onClick={() => setIsBhajanPopupOpen(false)}
-                  className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-950/10 hover:bg-slate-950/20 text-slate-950 flex items-center justify-center transition duration-200 focus:outline-none"
+                  className="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-900/5 hover:bg-slate-900/10 text-slate-700 hover:text-slate-950 flex items-center justify-center transition duration-200 focus:outline-none"
                   aria-label="Close"
                 >
                   <X className="w-5 h-5 font-bold" />
@@ -852,7 +851,7 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                               {idx + 1}
                             </span>
                             <div className="min-w-0">
-                              <h4 className="text-xs md:text-sm font-extrabold text-slate-800 leading-snug group-hover:text-amber-800 transition duration-200 truncate">
+                              <h4 className="text-sm md:text-base font-extrabold text-slate-800 leading-snug group-hover:text-amber-800 transition duration-200 truncate">
                                 {doc.title}
                               </h4>
                               <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-slate-400 mt-1 uppercase">
@@ -1357,22 +1356,24 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-[10px] font-mono font-bold text-slate-400 mr-1">{track.duration}</span>
-                      <>
-                        <button
-                          onClick={(e) => handleStartEditBhajan(track, e)}
-                          className="p-1 text-slate-400 hover:text-amber-600 rounded-lg hover:bg-amber-50 transition"
-                          title="संशोधित करें"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteBhajan(track.id, e)}
-                          className="p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition"
-                          title="हटाएं"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </>
+                      {mode === 'admin' && (
+                        <>
+                          <button
+                            onClick={(e) => handleStartEditBhajan(track, e)}
+                            className="p-1 text-slate-400 hover:text-amber-600 rounded-lg hover:bg-amber-50 transition"
+                            title="संशोधित करें"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteBhajan(track.id, e)}
+                            className="p-1 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-rose-50 transition"
+                            title="हटाएं"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -1384,20 +1385,18 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
 
       {/* Premium Capsule Button for Bhakti Bhajan Collection (Shifted below!) */}
       {mode !== 'player' && (
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={() => setIsBhajanPopupOpen(true)}
-            className="relative inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 text-slate-950 font-black text-sm md:text-base shadow-xl hover:shadow-orange-200/50 hover:scale-[1.02] active:scale-98 transition-all duration-300 group border-2 border-amber-300/60 overflow-hidden select-none"
-          >
-            {/* Pulsing glow background */}
-            <span className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></span>
-            <BookOpen className="w-5 h-5 text-slate-950 group-hover:rotate-6 transition-transform duration-300" />
-            <span className="tracking-wide">📖 भक्तिमय भजन संग्रह</span>
-            <span className="ml-1.5 flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-950"></span>
-            </span>
-          </button>
+        <div className="flex justify-center mt-6 w-full max-w-4xl mx-auto px-4">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3 w-full">
+            <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
+              <button
+                onClick={() => setIsBhajanPopupOpen(true)}
+                className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
+              >
+                <BookOpen className="w-5 h-5 text-amber-600 group-hover:rotate-6 transition-transform duration-300" />
+                <span className="font-black">📖 भक्तिमय भजन संग्रह</span>
+              </button>
+            </h2>
+          </div>
         </div>
       )}
 

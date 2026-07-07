@@ -236,13 +236,13 @@ export default function App() {
         {/* 6. "नित्य आरती एवं पाठ संग्रह" */}
         <AartiSection />
 
+        {/* 8. "भक्तिमय भजन संग्रह" */}
+        <BhajanSection mode="collection" />
+
         <div className="h-4 md:h-6" />
 
         {/* 7. "शिव भजन एवं मंत्र" */}
         <BhajanSection mode="player" />
-
-        {/* 8. "भक्तिमय भजन संग्रह" */}
-        <BhajanSection mode="collection" />
 
         {/* 9. "मँदिर दर्शन दीर्घा" */}
         <TempleGallery />
@@ -250,7 +250,7 @@ export default function App() {
         {/* 10. "मँदिर सेवा एवं दान निधि" */}
         <DonationCard mode="donation" />
 
-        {/* 11. "मँदिर समिति/ट्रस्टी" */}
+        {/* 11. "मँदिर प्रबंधन समिति/ट्रस्टी" */}
         <DonationCard mode="committee" />
 
         <div className="h-4 md:h-6" />
@@ -272,16 +272,16 @@ export default function App() {
           </div>
 
           {/* Calligraphic Mantra */}
-          <h2 className="text-xl md:text-2xl font-extrabold text-amber-700 tracking-widest font-serif drop-shadow-sm">
+          <h2 className="text-xl md:text-2xl font-black text-amber-700 tracking-widest font-serif drop-shadow-sm">
             ॥ ॐ नमः शिवाय ॥
           </h2>
 
           {/* Credits */}
-          <div className="text-[10px] md:text-xs text-slate-500 font-semibold space-y-1">
-            <p>{settings.footerCopyright || "श्री मंसा महादेव मंदिर सेवा समिति, तितरड़ी, उदयपुर (राज.)"}</p>
-            <p className="text-slate-400 font-medium">सर्व सुखिनः भवन्तु • समस्त मंगल कामनाएं</p>
+          <div className="text-[11px] md:text-xs space-y-1.5">
+            <p className="font-black text-slate-700">{settings.footerCopyright || "श्री मंसा महादेव मंदिर सेवा समिति, तितरड़ी, उदयपुर (राज.)"}</p>
+            <p className="text-slate-500 font-black">सर्व सुखिनः भवन्तु • समस्त मंगल कामनाएं</p>
             {settings.developerName && (
-              <p className="text-amber-700/80 font-mono text-[9px] mt-2">डिजाइन एवं विकसित: {settings.developerName}</p>
+              <p className="text-amber-800 font-mono text-[10px] md:text-xs font-black mt-2">डिजाइन एवं विकसित: {settings.developerName}</p>
             )}
           </div>
         </div>

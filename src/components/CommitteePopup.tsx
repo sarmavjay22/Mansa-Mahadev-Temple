@@ -46,10 +46,10 @@ export default function CommitteePopup({ isOpen, onClose }: CommitteePopupProps)
               <Users className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-base md:text-lg font-extrabold tracking-wide text-slate-800">
+              <h2 className="text-lg md:text-xl font-extrabold tracking-wide text-slate-800">
                 👥 मंदिर प्रबंधन समिति / ट्रस्टी
               </h2>
-              <p className="text-[10px] md:text-xs text-amber-700 font-bold">
+              <p className="text-xs md:text-sm text-amber-700 font-bold">
                 Mansa Mahadev Mandir Committee & Trustees
               </p>
             </div>
@@ -69,19 +69,19 @@ export default function CommitteePopup({ isOpen, onClose }: CommitteePopupProps)
           {/* Recipient Details Card */}
           {(settings.committeeName || settings.trusteeName) && (
             <div className="bg-amber-50/40 border border-amber-200/30 rounded-2xl p-4 flex flex-col gap-2.5 shadow-sm">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-800 border-b border-amber-200/20 pb-1.5 flex items-center gap-1 select-none">
+              <span className="text-[15px] font-extrabold uppercase tracking-wider text-amber-800 border-b border-amber-200/20 pb-1.5 flex items-center gap-1 select-none">
                 🚩 मंदिर प्रबंधन एवं दायित्व
               </span>
               {settings.committeeName && (
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">समिति नाम:</span>
-                  <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.committeeName}</span>
+                  <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">समिति नाम:</span>
+                  <span className="text-base font-black text-slate-800 leading-tight mt-0.5">{settings.committeeName}</span>
                 </div>
               )}
               {settings.trusteeName && (
                 <div className="flex flex-col mt-1">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">अधिकृत व्यक्ति / Trustee:</span>
-                  <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.trusteeName}</span>
+                  <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">अधिकृत व्यक्ति / Trustee:</span>
+                  <span className="text-base font-black text-slate-800 leading-tight mt-0.5">{settings.trusteeName}</span>
                 </div>
               )}
             </div>
@@ -89,12 +89,12 @@ export default function CommitteePopup({ isOpen, onClose }: CommitteePopupProps)
 
           {/* Members List */}
           <div className="flex flex-col gap-3">
-            <span className="text-xs font-black text-slate-500 uppercase tracking-wider select-none px-1">
+            <span className="text-sm font-black text-slate-500 uppercase tracking-wider select-none px-1">
               👥 समिति सदस्य सूची ({members.length})
             </span>
 
             {members.length === 0 ? (
-              <div className="text-center p-8 bg-amber-50/10 border border-dashed border-amber-200/30 rounded-2xl text-slate-400 font-medium select-none">
+              <div className="text-center p-8 bg-amber-50/10 border border-dashed border-amber-200/30 rounded-2xl text-sm text-slate-400 font-medium select-none">
                 कोई सदस्य उपलब्ध नहीं है।
               </div>
             ) : (
@@ -104,8 +104,8 @@ export default function CommitteePopup({ isOpen, onClose }: CommitteePopupProps)
                     key={member.id} 
                     className="bg-white border border-amber-200/20 rounded-2xl p-4 flex flex-col gap-1 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-amber-200 hover:shadow-md transition duration-300"
                   >
-                    <span className="text-sm font-black text-slate-800 leading-tight">{member.name}</span>
-                    <span className="text-xs font-black text-amber-700">{member.designation}</span>
+                    <span className="text-[15px] font-black text-slate-800 leading-tight">{member.name}</span>
+                    <span className="text-sm font-black text-amber-700">{member.designation}</span>
                   </div>
                 ))}
               </div>
@@ -114,7 +114,7 @@ export default function CommitteePopup({ isOpen, onClose }: CommitteePopupProps)
 
           {/* Footer Text */}
           <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-amber-200 to-transparent my-1"></div>
-          <p className="text-[10px] md:text-xs text-slate-400 font-semibold text-center leading-relaxed max-w-sm mx-auto">
+          <p className="text-xs md:text-sm text-slate-500 font-black text-center leading-relaxed max-w-sm mx-auto">
             🙏 "श्री मंसा महादेव मंदिर सेवा समिति सदैव श्रद्धालुओं की सेवा में समर्पित है।"
           </p>
         </div>

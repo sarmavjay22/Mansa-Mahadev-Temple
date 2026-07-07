@@ -29,10 +29,12 @@ import {
   Share2,
   Heart,
   BookOpen,
-  Send
+  Send,
+  Music
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import TempleSettingsTab from './TempleSettingsTab';
+import BhajanSection from './BhajanSection';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -44,7 +46,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'upload_video' | 'temple_settings' | 'festival_banners' | 'temple_gallery' | 'social_share' | 'donation' | 'bhajan_documents' | 'push_notifications'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'upload_video' | 'temple_settings' | 'festival_banners' | 'temple_gallery' | 'social_share' | 'donation' | 'bhajan_documents' | 'push_notifications' | 'bhajans_playlist'>('overview');
 
   // Push Notifications Admin State
   const [pushTitle, setPushTitle] = useState('');
@@ -1177,6 +1179,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 >
                   <BookOpen className="w-4 h-4 text-orange-500" />
                   <span>भजन संग्रह ({stats.bhajanDocCount})</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('bhajans_playlist')}
+                  className={`flex-1 min-w-[140px] py-3.5 flex items-center justify-center gap-1.5 transition ${
+                    activeTab === 'bhajans_playlist' ? 'text-amber-600 bg-white border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <Music className="w-4 h-4 text-amber-500" />
+                  <span>शिव भजन प्लेलिस्ट ({stats.bhajanCount})</span>
                 </button>
 
                 <button
@@ -3306,6 +3318,21 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         )}
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {activeTab === 'bhajans_playlist' && (
+                  <div className="flex flex-col gap-5 text-xs text-slate-700">
+                    <div className="bg-amber-50/60 border border-amber-100 p-5 rounded-2xl flex flex-col gap-4">
+                      <h4 className="text-sm font-bold text-amber-950 flex items-center gap-1.5 border-b border-amber-100 pb-2">
+                        <Music className="w-5 h-5 text-amber-500 fill-amber-100 animate-bounce" />
+                        <span>शिव भजन प्लेलिस्ट प्रबंधन</span>
+                      </h4>
+                      <p className="text-[11px] text-slate-500 font-medium -mt-2 leading-relaxed">
+                        यहाँ से आप मुख्य स्क्रीन पर प्रदर्शित होने वाली "शिव भजन एवं मंत्र" प्लेलिस्ट के भजन जोड़, संपादित और हटा सकते हैं।
+                      </p>
+                    </div>
+                    <BhajanSection mode="admin" />
                   </div>
                 )}
 
