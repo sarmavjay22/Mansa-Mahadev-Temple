@@ -193,20 +193,5 @@ export interface DonationSettings {
   members?: DonationMember[];
 }
 
-export interface PushNotificationPayload {
-  id: string;
-  title: string;
-  message: string;
-  imageUrl?: string;
-  targetUrl?: string;
-  sentAt: string;
-}
-
-export interface PushNotificationSubscription {
-  id: string;
-  subscribedAt: string;
-  userAgent?: string;
-}
-
 
 

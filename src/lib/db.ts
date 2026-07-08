@@ -15,9 +15,7 @@ import {
   TempleGalleryItem,
   SocialShareSettings,
   DonationSettings,
-  BhajanDocument,
-  PushNotificationPayload,
-  PushNotificationSubscription
+  BhajanDocument
 } from '../types';
 
 // Default / Seed Data using the generated high-quality spiritual assets
@@ -982,41 +980,6 @@ onSnapshot(collection(firestoreDb, 'bhajan_documents'), (snapshot) => {
   console.error("Firestore bhajan_documents subscription error:", error);
 });
 
-export let firestorePushSubscriptions: PushNotificationSubscription[] = [];
-export let firestorePushNotifications: PushNotificationPayload[] = [];
-
-// Subscribe to firestore 'notification_subscriptions' collection
-onSnapshot(collection(firestoreDb, 'notification_subscriptions'), (snapshot) => {
-  const items: PushNotificationSubscription[] = [];
-  snapshot.forEach((docSnap) => {
-    items.push({
-      id: docSnap.id,
-      ...docSnap.data()
-    } as PushNotificationSubscription);
-  });
-  firestorePushSubscriptions = items;
-  localStorage.setItem('mm_push_subscriptions', JSON.stringify(items));
-  notifyDBChange();
-}, (error) => {
-  console.error("Firestore notification_subscriptions subscription error:", error);
-});
-
-// Subscribe to firestore 'push_notifications' collection
-onSnapshot(collection(firestoreDb, 'push_notifications'), (snapshot) => {
-  const items: PushNotificationPayload[] = [];
-  snapshot.forEach((docSnap) => {
-    items.push({
-      id: docSnap.id,
-      ...docSnap.data()
-    } as PushNotificationPayload);
-  });
-  firestorePushNotifications = items;
-  localStorage.setItem('mm_push_notifications', JSON.stringify(items));
-  notifyDBChange();
-}, (error) => {
-  console.error("Firestore push_notifications subscription error:", error);
-});
-
 // Subscribe to firestore 'notifications' collection
 onSnapshot(collection(firestoreDb, 'notifications'), (snapshot) => {
   const items: NotificationItem[] = [];
@@ -1751,48 +1714,6 @@ export const db = {
       await setDoc(doc(firestoreDb, 'bhajan_documents', id), updatedFields, { merge: true });
     } catch (e) {
       console.error("Failed to update bhajan document in Firestore:", e);
-    }
-  },
-
-  // Push Notifications API
-  getPushSubscriptions(): PushNotificationSubscription[] {
-    const cached = localStorage.getItem('mm_push_subscriptions');
-    return cached ? JSON.parse(cached) : firestorePushSubscriptions;
-  },
-
-  async addPushSubscription(subscriptionId: string) {
-    const subscription: PushNotificationSubscription = {
-      id: subscriptionId,
-      subscribedAt: new Date().toISOString(),
-      userAgent: navigator.userAgent
-    };
-    try {
-      await setDoc(doc(firestoreDb, 'notification_subscriptions', subscriptionId), subscription);
-    } catch (e) {
-      console.error("Failed to add push subscription to Firestore:", e);
-    }
-  },
-
-  getPushNotifications(): PushNotificationPayload[] {
-    const cached = localStorage.getItem('mm_push_notifications');
-    const items: PushNotificationPayload[] = cached ? JSON.parse(cached) : firestorePushNotifications;
-    return items.sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
-  },
-
-  async sendPushNotification(notification: Omit<PushNotificationPayload, 'id' | 'sentAt'>) {
-    const id = "pnotif_" + Date.now();
-    const newNotification: PushNotificationPayload = {
-      id,
-      title: notification.title,
-      message: notification.message,
-      imageUrl: notification.imageUrl || '',
-      targetUrl: notification.targetUrl || '',
-      sentAt: new Date().toISOString()
-    };
-    try {
-      await setDoc(doc(firestoreDb, 'push_notifications', id), newNotification);
-    } catch (e) {
-      console.error("Failed to send push notification to Firestore:", e);
     }
   }
 };

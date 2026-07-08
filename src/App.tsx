@@ -14,7 +14,6 @@ import { Sparkles } from 'lucide-react';
 import { subscribeToTempleSettings, getCachedTempleSettings } from './lib/settings';
 import { TempleSettings } from './types';
 import { db, subscribeToDBUpdates } from './lib/db';
-import NotificationManager from './components/NotificationManager';
 
 const AdminPanel = lazy(() => import('./components/AdminPanel'));
 
@@ -203,7 +202,6 @@ export default function App() {
         background: `linear-gradient(to bottom, ${settings.primaryThemeColor || '#e3f2fd'}, ${settings.secondaryThemeColor || '#f7f9fc'}, ${settings.primaryThemeColor || '#e3f2fd'})`
       }}
     >
-      <NotificationManager />
       
       {/* Decorative Aura Background Elements */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-sky-400/5 via-sky-300/2 to-transparent rounded-full blur-3xl pointer-events-none"></div>

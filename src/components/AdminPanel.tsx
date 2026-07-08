@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
-import { NotificationItem, GalleryItem, DailyDarshan, VideoDarshan, FestivalBanner, TempleGalleryItem, DonationMember, BhajanDocument, PushNotificationPayload, PushNotificationSubscription } from '../types';
+import { NotificationItem, GalleryItem, DailyDarshan, VideoDarshan, FestivalBanner, TempleGalleryItem, DonationMember, BhajanDocument } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
 import { 
   ShieldCheck, 
@@ -46,17 +46,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'upload_video' | 'temple_settings' | 'festival_banners' | 'temple_gallery' | 'social_share' | 'donation' | 'bhajan_documents' | 'push_notifications' | 'bhajans_playlist'>('overview');
-
-  // Push Notifications Admin State
-  const [pushTitle, setPushTitle] = useState('');
-  const [pushMsg, setPushMsg] = useState('');
-  const [pushImageUrl, setPushImageUrl] = useState('');
-  const [pushTargetUrl, setPushTargetUrl] = useState('');
-  const [pushSuccess, setPushSuccess] = useState(false);
-  const [pushSending, setPushSending] = useState(false);
-  const [sentPushList, setSentPushList] = useState<PushNotificationPayload[]>([]);
-  const [subscriberCount, setSubscriberCount] = useState(0);
+  const [activeTab, setActiveTab] = useState<'overview' | 'notifications' | 'upload_gallery' | 'upload_video' | 'temple_settings' | 'festival_banners' | 'temple_gallery' | 'social_share' | 'donation' | 'bhajan_documents' | 'bhajans_playlist'>('overview');
 
   // Stats State
   const [stats, setStats] = useState({
@@ -210,6 +200,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [editBdocMediaUrl, setEditBdocMediaUrl] = useState('');
   const [editBdocIsOn, setEditBdocIsOn] = useState(true);
   const [deleteConfirmBdocId, setDeleteConfirmBdocId] = useState<string | null>(null);
+  const [deleteConfirmMemberId, setDeleteConfirmMemberId] = useState<string | null>(null);
   const [bdocSuccess, setBdocSuccess] = useState(false);
 
   useEffect(() => {
@@ -346,14 +337,13 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   };
 
   const handleDeleteDonationMember = (id: string) => {
-    if (confirm("क्या आप इस सदस्य को हटाना चाहते हैं?")) {
-      setDonationMembers(prev => prev.filter(m => m.id !== id));
-      if (editingMemberId === id) {
-        setEditingMemberId(null);
-        setNewMemberName('');
-        setNewMemberDesignation('');
-      }
+    setDonationMembers(prev => prev.filter(m => m.id !== id));
+    if (editingMemberId === id) {
+      setEditingMemberId(null);
+      setNewMemberName('');
+      setNewMemberDesignation('');
     }
+    setDeleteConfirmMemberId(null);
   };
 
   const handleCancelEditDonationMember = () => {
@@ -421,8 +411,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     const bannerItems = db.getFestivalBanners();
     const templeGalleryItems = db.getTempleGallery();
     const bhajanDocItems = db.getBhajanDocuments();
-    const pushSubscribers = db.getPushSubscriptions();
-    const pushList = db.getPushNotifications();
 
     setStats({
       galleryCount: galleryItems.length,
@@ -440,8 +428,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     setBanners(bannerItems);
     setTempleGalList(templeGalleryItems);
     setBhajanDocs(bhajanDocItems);
-    setSubscriberCount(pushSubscribers.length);
-    setSentPushList(pushList);
   };
 
   const handleTgImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -945,37 +931,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     alert("भजन संग्रह दस्तावेज़ सफलतापूर्वक हटा दिया गया!");
   };
 
-  const handleSendPush = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!pushTitle.trim() || !pushMsg.trim()) {
-      alert("कृपया अधिसूचना का शीर्षक और संदेश दर्ज करें।");
-      return;
-    }
-
-    try {
-      setPushSending(true);
-      await db.sendPushNotification({
-        title: pushTitle.trim(),
-        message: pushMsg.trim(),
-        imageUrl: pushImageUrl.trim() || undefined,
-        targetUrl: pushTargetUrl.trim() || undefined
-      });
-
-      setPushTitle('');
-      setPushMsg('');
-      setPushImageUrl('');
-      setPushTargetUrl('');
-      setPushSuccess(true);
-      setTimeout(() => setPushSuccess(false), 2000);
-      alert("पुश नोटिफिकेशन सफलतापूर्वक भेजा गया!");
-    } catch (err) {
-      console.error(err);
-      alert("पुश नोटिफिकेशन भेजने में त्रुटि हुई!");
-    } finally {
-      setPushSending(false);
-    }
-  };
-
   const handleClose = () => {
     if (isLoggedIn && activeTab !== 'overview') {
       setActiveTab('overview');
@@ -1189,16 +1144,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 >
                   <Music className="w-4 h-4 text-amber-500" />
                   <span>शिव भजन प्लेलिस्ट ({stats.bhajanCount})</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('push_notifications')}
-                  className={`flex-1 min-w-[140px] py-3.5 flex items-center justify-center gap-1.5 transition ${
-                    activeTab === 'push_notifications' ? 'text-amber-600 bg-white border-b-2 border-amber-500' : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  <Bell className="w-4 h-4 text-emerald-500" />
-                  <span>पुश नोटिफिकेशन</span>
                 </button>
               </div>
 
@@ -3080,22 +3025,44 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                                   </div>
 
                                   <div className="flex items-center gap-1 shrink-0">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleStartEditDonationMember(member)}
-                                      title="संपादित करें"
-                                      className="w-7 h-7 rounded-lg hover:bg-amber-50 text-amber-600 flex items-center justify-center transition"
-                                    >
-                                      <Edit2 className="w-3.5 h-3.5" />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDeleteDonationMember(member.id)}
-                                      title="हटाएं"
-                                      className="w-7 h-7 rounded-lg hover:bg-red-50 text-red-500 flex items-center justify-center transition"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
+                                    {deleteConfirmMemberId === member.id ? (
+                                      <div className="flex items-center gap-1 bg-rose-50 border border-rose-100 p-1 rounded-xl">
+                                        <span className="text-[9px] text-rose-600 font-bold px-1">हटाएं?</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteDonationMember(member.id)}
+                                          className="px-2 py-1 bg-rose-500 text-white font-extrabold text-[9px] rounded-lg shadow-sm hover:bg-rose-600 transition"
+                                        >
+                                          हाँ
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setDeleteConfirmMemberId(null)}
+                                          className="px-2 py-1 bg-slate-200 text-slate-700 font-extrabold text-[9px] rounded-lg hover:bg-slate-300 transition"
+                                        >
+                                          नहीं
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleStartEditDonationMember(member)}
+                                          title="संपादित करें"
+                                          className="w-7 h-7 rounded-lg hover:bg-amber-50 text-amber-600 flex items-center justify-center transition"
+                                        >
+                                          <Edit2 className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setDeleteConfirmMemberId(member.id)}
+                                          title="हटाएं"
+                                          className="w-7 h-7 rounded-lg hover:bg-red-50 text-red-500 flex items-center justify-center transition"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </>
+                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -3319,162 +3286,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                   </div>
                 )}
 
-                {/* 11. PUSH NOTIFICATIONS TAB PANEL */}
-                {activeTab === 'push_notifications' && (
-                  <div className="flex flex-col gap-6 text-xs text-slate-700">
-                    
-                    {/* Subscriber count widget & info */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3.5 shadow-sm">
-                        <div className="w-11 h-11 bg-emerald-500 text-white flex items-center justify-center rounded-xl font-bold shrink-0">
-                          <Bell className="w-5 h-5 animate-bounce" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[10px] text-slate-400 font-black tracking-widest uppercase">सक्रिय ग्राहक (Subscribers)</span>
-                          <span className="text-xl font-mono font-black text-emerald-700">{subscriberCount} उपकरण</span>
-                        </div>
-                      </div>
 
-                      <div className="p-4 bg-sky-50 border border-sky-100 rounded-2xl flex items-center gap-3.5 shadow-sm">
-                        <div className="w-11 h-11 bg-sky-500 text-white flex items-center justify-center rounded-xl font-bold shrink-0">
-                          <Send className="w-4 h-4" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[10px] text-slate-400 font-black tracking-widest uppercase">कुल भेजे गए नोटिफिकेशन</span>
-                          <span className="text-xl font-mono font-black text-sky-700">{sentPushList.length} भेजे गए</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Send notification form */}
-                    <form onSubmit={handleSendPush} className="bg-orange-50/40 border border-orange-100 p-5 rounded-3xl flex flex-col gap-4">
-                      <h3 className="text-sm font-bold text-orange-900 flex items-center gap-1.5">
-                        <Plus className="w-4 h-4 text-orange-600" />
-                        <span>नया लाइव पुश नोटिफिकेशन भेजें (Send Push Notification)</span>
-                      </h3>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 mb-1">नोटिफिकेशन का शीर्षक (Title) *:</label>
-                          <input
-                            type="text"
-                            value={pushTitle}
-                            onChange={(e) => setPushTitle(e.target.value)}
-                            placeholder="उदा: आज की शाम की भव्य महाआरती दर्शन"
-                            className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs text-slate-700 font-extrabold"
-                            required
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 mb-1">क्लिक करने पर लक्ष्य यूआरएल (Target URL):</label>
-                          <input
-                            type="text"
-                            value={pushTargetUrl}
-                            onChange={(e) => setPushTargetUrl(e.target.value)}
-                            placeholder="उदा: https://example.com/live-darshan"
-                            className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs text-slate-700 font-bold font-mono"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-500 mb-1">नोटिफिकेशन संदेश (Message) *:</label>
-                        <textarea
-                          value={pushMsg}
-                          onChange={(e) => setPushMsg(e.target.value)}
-                          placeholder="उदा: मंसा महादेव मंदिर तितरड़ी से आज की शाम की आरती का विशेष प्रसारण लाइव देखें। महाप्रसाद वितरण 7:30 बजे से।"
-                          rows={3}
-                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs text-slate-700 font-bold leading-relaxed"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold text-slate-500 mb-1">नोटिफिकेशन बैनर चित्र यूआरएल (Image URL) - वैकल्पिक:</label>
-                        <input
-                          type="text"
-                          value={pushImageUrl}
-                          onChange={(e) => setPushImageUrl(e.target.value)}
-                          placeholder="https://images.unsplash.com/photo-..."
-                          className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs text-slate-700 font-bold font-mono"
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between gap-4 pt-1">
-                        <p className="text-[10px] text-orange-700 font-black">
-                          🚩 बटन दबाते ही यह नोटिफिकेशन सभी सब्सक्राइबर्स को तुरंत (Realtime) प्राप्त हो जाएगा।
-                        </p>
-                        <button
-                          type="submit"
-                          disabled={pushSending}
-                          className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black text-xs rounded-xl shadow-md hover:scale-[1.01] active:scale-95 transition shrink-0 flex items-center gap-1.5 disabled:opacity-50"
-                        >
-                          {pushSending ? (
-                            <>
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span>भेजा जा रहा है...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-4 h-4" />
-                              <span>Send Notification</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </form>
-
-                    {/* Notification History list */}
-                    <div className="flex flex-col gap-3">
-                      <p className="text-[10px] font-black uppercase text-slate-400 mb-1 tracking-widest px-1">
-                        प्रसारित नोटिफिकेशन इतिहास (Sent History - {sentPushList.length}):
-                      </p>
-
-                      {sentPushList.length === 0 ? (
-                        <div className="text-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-3xl text-slate-400 font-medium">
-                          अभी तक कोई पुश नोटिफिकेशन नहीं भेजा गया है।
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-3 max-h-80 overflow-y-auto pr-1">
-                          {sentPushList.map((notif) => (
-                            <div key={notif.id} className="bg-white border border-slate-200/60 p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-start hover:shadow-sm transition">
-                              {notif.imageUrl && (
-                                <img
-                                  src={notif.imageUrl}
-                                  alt=""
-                                  className="w-full sm:w-20 h-16 object-cover rounded-xl border border-slate-100 shrink-0 bg-slate-50"
-                                  referrerPolicy="no-referrer"
-                                />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-3 flex-wrap">
-                                  <h4 className="text-xs font-black text-slate-800">{notif.title}</h4>
-                                  <span className="text-[9px] font-mono text-slate-400 font-bold bg-slate-50 px-2 py-0.5 rounded-full">
-                                    {new Date(notif.sentAt).toLocaleString('hi-IN')}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1.5">{notif.message}</p>
-                                
-                                {notif.targetUrl && (
-                                  <a
-                                    href={notif.targetUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-[10px] text-sky-600 font-extrabold mt-2.5 hover:underline"
-                                  >
-                                    <span>लक्ष्य पृष्ठ पर जाएं (Target URL)</span>
-                                    <X className="w-3 h-3 rotate-45" />
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )}
