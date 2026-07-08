@@ -212,13 +212,15 @@ export default function App() {
       <Header onOpenAdmin={() => setIsAdminOpen(true)} />
 
       {/* 3. Main Multi-Module Content Stack */}
-      <main className="w-full relative z-10 flex flex-col gap-6 mt-2">
+      <main className="w-full relative z-10 flex flex-col gap-4 md:gap-5 mt-2">
         
-        {/* 1. "भोलेनाथ के श्रृंगार दर्शन" */}
-        <TodayDarshan mode="title" />
+        <div className="flex flex-col gap-2 md:gap-2.5 w-full">
+          {/* 1. "भोलेनाथ के श्रृंगार दर्शन" */}
+          <TodayDarshan mode="title" />
 
-        {/* 2. "भोलेनाथ की आरती वीडियो" */}
-        <TodayVideo />
+          {/* 2. "भोलेनाथ की आरती वीडियो" */}
+          <TodayVideo />
+        </div>
 
         {/* 3. "Image banner" */}
         <TodayDarshan mode="main" />
@@ -229,15 +231,11 @@ export default function App() {
         {/* 5. "उत्सव सूचनाएं" */}
         <NotificationBanner />
 
-        <div className="h-4 md:h-6" />
-
         {/* 6. "नित्य आरती एवं पाठ संग्रह" */}
         <AartiSection />
 
         {/* 8. "भक्तिमय भजन संग्रह" */}
         <BhajanSection mode="collection" />
-
-        <div className="h-4 md:h-6" />
 
         {/* 7. "शिव भजन एवं मंत्र" */}
         <BhajanSection mode="player" />
@@ -250,8 +248,6 @@ export default function App() {
 
         {/* 11. "मँदिर प्रबंधन समिति/ट्रस्टी" */}
         <DonationCard mode="committee" />
-
-        <div className="h-4 md:h-6" />
 
         {/* 12. "मंदिर परिचय एवं समय सारणी" */}
         <TempleInfoSection />

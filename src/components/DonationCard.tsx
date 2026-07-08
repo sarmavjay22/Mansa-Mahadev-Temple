@@ -34,22 +34,22 @@ export default function DonationCard({ mode }: { mode?: 'donation' | 'committee'
     return (
       <section id="donation-card-section" className="w-full max-w-4xl mx-auto px-4">
         <div 
-          className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 pt-5 pb-5 px-6 md:px-8 flex flex-col items-center justify-center gap-2 text-center select-none transition-all duration-300 hover:shadow-2xl hover:scale-[1.01]"
+          className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 p-4 md:p-5 flex flex-col items-center justify-center gap-2 text-center select-none transition-all duration-300 hover:shadow-2xl hover:scale-[1.01]"
         >
-          <h2 className="text-2xl md:text-3xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
+          <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsOpen(true);
               }}
               title="मँदिर सेवा एवं दान निधि"
-              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
+              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-5 py-2 rounded-full shadow-sm hover:shadow-md text-sm md:text-base font-extrabold tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
             >
-              <span className="font-black">❤️ मँदिर सेवा एवं दान निधि</span>
+              <span>❤️ मँदिर सेवा एवं दान निधि</span>
             </button>
           </h2>
    
-          <p className="text-sm md:text-base text-black font-normal mt-0 text-center max-w-lg px-4 leading-relaxed">
+          <p className="text-xs md:text-sm text-slate-700 font-medium mt-0 text-center max-w-lg px-4 leading-relaxed">
             {getDisplayMessage(settings.message)}
           </p>
         </div>
@@ -67,14 +67,14 @@ export default function DonationCard({ mode }: { mode?: 'donation' | 'committee'
     return (
       <section id="committee-section" className="w-full max-w-4xl mx-auto px-4 select-none">
         {/* Golden Accented Title Card */}
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3">
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-3 relative flex flex-wrap items-center justify-center gap-3">
           <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
             <button
               onClick={() => setIsCommitteeOpen(true)}
-              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
+              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-5 py-2 rounded-full shadow-sm hover:shadow-md text-sm md:text-base font-extrabold tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
             >
-              <Users className="w-5 h-5 text-amber-600 group-hover:rotate-6 transition-transform duration-300" />
-              <span className="font-black">👥 मँदिर प्रबंधन समिति/ट्रस्टी</span>
+              <Users className="w-4 h-4 text-amber-600 group-hover:rotate-6 transition-transform duration-300" />
+              <span>👥 मँदिर प्रबंधन समिति/ट्रस्टी</span>
             </button>
           </h2>
         </div>

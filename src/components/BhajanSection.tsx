@@ -536,18 +536,18 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
   if (mode === 'collection') {
     return (
       <div className="w-full max-w-4xl mx-auto px-4 select-none">
-        {/* Golden Accented Title Card */}
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3">
-          <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
-            <button
-              onClick={() => setIsBhajanPopupOpen(true)}
-              className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
-            >
-              <BookOpen className="w-5 h-5 text-amber-600 group-hover:rotate-6 transition-transform duration-300" />
-              <span className="font-black">📖 भक्तिमय भजन संग्रह</span>
-            </button>
-          </h2>
-        </div>
+      {/* Golden Accented Title Card */}
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-3 relative flex flex-wrap items-center justify-center gap-3">
+        <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
+          <button
+            onClick={() => setIsBhajanPopupOpen(true)}
+            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-5 py-2 rounded-full shadow-sm hover:shadow-md text-sm md:text-base font-extrabold tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
+          >
+            <BookOpen className="w-4 h-4 text-amber-600 group-hover:rotate-6 transition-transform duration-300" />
+            <span>📖 भक्तिमय भजन संग्रह</span>
+          </button>
+        </h2>
+      </div>
 
         {/* 1. Responsive List Popup */}
         <AnimatePresence>
@@ -755,7 +755,7 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
   return (
     <section id="bhajan-section" className="w-full max-w-4xl mx-auto px-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[22px] md:text-[26px] font-black text-amber-950 flex items-center gap-2">
+        <h2 className="text-xl md:text-2xl font-black text-amber-950 flex items-center gap-2">
           <Music className="w-5 h-5 text-amber-500 fill-amber-100 animate-bounce" />
           <span>यूट्यूब से भक्तिमय भजन संग्रह</span>
           <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">भक्ति रस</span>
@@ -1106,14 +1106,14 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
       </AnimatePresence>
 
       {/* Main Devotional Audio Player Frame */}
-      <div className="w-full bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 p-4 md:p-6 flex flex-col md:flex-row gap-6">
+      <div className="w-full bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 p-4 md:p-5 flex flex-col md:flex-row gap-2 md:gap-3.5">
         
         {/* Left Hand: Album / Spinning Diya & Metadata */}
         {activeTrack ? (
-          <div className="w-full md:w-2/5 flex flex-col items-center text-center justify-center gap-4 border-b md:border-b-0 md:border-r border-sky-100 pb-6 md:pb-0 md:pr-6 shrink-0">
+          <div className="w-full md:w-2/5 flex flex-col items-center text-center justify-center gap-1 md:gap-1.5 border-b md:border-b-0 md:border-r border-sky-100 pb-0 md:pb-0 md:pr-4 shrink-0">
             {activeYtId ? (
               /* YouTube Video Embed Player */
-              <div className="w-full aspect-video rounded-2xl overflow-hidden border-2 border-amber-400/30 shadow-lg bg-slate-950 relative">
+              <div className="w-full aspect-[16/6.1] rounded-2xl overflow-hidden border-2 border-amber-400/30 shadow-lg bg-slate-950 relative">
                 <iframe
                   src={`https://www.youtube.com/embed/${activeYtId}?autoplay=0&rel=0&modestbranding=1`}
                   title={activeTrack.title}
@@ -1155,28 +1155,28 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
 
             {/* Title & Singer HUD */}
             <div className="px-1 max-w-full">
-              <h3 className={`text-md md:text-lg font-bold line-clamp-1 flex items-center justify-center gap-1.5 ${
+              <h3 className={`text-[12px] md:text-[14px] font-bold line-clamp-1 flex items-center justify-center gap-1.5 ${
                 (activeTrack.title.toLowerCase().includes('shriram') || 
-                 activeTrack.title.toLowerCase().includes('shree ram') || 
-                 activeTrack.title.toLowerCase().includes('bethe') || 
-                 activeTrack.title.toLowerCase().includes('baithe') || 
-                 activeTrack.title.includes('श्रीराम')) 
+                  activeTrack.title.toLowerCase().includes('shree ram') || 
+                  activeTrack.title.toLowerCase().includes('bethe') || 
+                  activeTrack.title.toLowerCase().includes('baithe') || 
+                  activeTrack.title.includes('श्रीराम')) 
                   ? 'text-amber-800' 
                   : 'text-slate-800'
               }`}>
                 <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
                 <span>{activeTrack.title}</span>
               </h3>
-              <p className="text-sm text-slate-500 font-bold mt-1">स्वर: {activeTrack.singer}</p>
+              <p className="text-[10px] text-slate-500 font-bold mt-0">स्वर: {activeTrack.singer}</p>
             </div>
             
             {/* Visualizer bars when playing or error message */}
             {playbackError ? (
-              <div className="text-xs font-bold text-rose-500 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200 mt-1 animate-pulse">
+              <div className="text-xs font-bold text-rose-500 bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200 mt-0 animate-pulse">
                 ⚠️ {playbackError}
               </div>
             ) : isPlaying ? (
-              <div className="flex items-end gap-1 h-5 mt-1">
+              <div className="flex items-end gap-1 h-5 mt-0">
                 {[...Array(6)].map((_, i) => (
                   <span 
                     key={i} 
@@ -1188,9 +1188,7 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                   />
                 ))}
               </div>
-            ) : (
-              <div className="text-[10px] font-bold text-slate-400">प्लेबैक थमा हुआ है</div>
-            )}
+            ) : null}
           </div>
         ) : (
           <div className="w-full md:w-2/5 flex flex-col items-center text-center justify-center py-8">
@@ -1200,14 +1198,14 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
         )}
 
         {/* Right Hand: Interactive Controls & Queue List */}
-        <div className="flex-1 flex flex-col justify-between gap-4">
+        <div className="flex-1 flex flex-col justify-start gap-1.5">
           
           {/* Seek Progress Bar Row */}
           {activeTrack && (
             activeYtId ? (
-              <div className="flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-50/40 rounded-2xl border border-amber-100/50 text-amber-800 text-[13px] md:text-[15px] font-bold text-center">
-                <Youtube className="w-4 h-4 text-red-600 animate-pulse shrink-0" />
-                <span>यूट्यूब भजन सक्रिय: नियंत्रण के लिए ऊपर प्लेयर का उपयोग करें</span>
+              <div className="flex items-center justify-center gap-1 px-2.5 py-0.5 bg-amber-50/40 rounded-xl border border-amber-100/50 text-amber-800 text-[11px] md:text-[13px] font-bold text-center">
+                <Youtube className="w-3.5 h-3.5 text-red-600 animate-pulse shrink-0" />
+                <span>यूट्यूब भजन के लिए ऊपर प्लेयर का उपयोग करें</span>
               </div>
             ) : (
               <div className="flex flex-col gap-1 px-1">
@@ -1230,45 +1228,45 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
           )}
 
           {/* Action Controllers Row */}
-          <div className="flex items-center justify-between gap-3 px-2">
+          <div className="flex items-center justify-between gap-2.5 px-2">
             {/* Shuffle Toggle */}
             <button
               onClick={() => setIsShuffle(prev => !prev)}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition active:scale-95 ${
+              className={`w-[21px] h-[21px] rounded-md flex items-center justify-center transition active:scale-95 ${
                 isShuffle ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'text-slate-400 hover:text-slate-600'
               }`}
               title="शफ़ल प्ले (Shuffle)"
             >
-              <Shuffle className="w-4 h-4" />
+              <Shuffle className="w-3 h-3" />
             </button>
 
             {/* Skip Back */}
             <button
               onClick={handlePrevTrack}
-              className="w-10 h-10 rounded-full text-slate-600 hover:text-slate-800 flex items-center justify-center hover:bg-slate-50 transition active:scale-90"
+              className="w-6 h-6 rounded-full text-slate-600 hover:text-slate-800 flex items-center justify-center hover:bg-slate-50 transition active:scale-90"
               title="पिछला ट्रैक"
             >
-              <SkipBack className="w-5 h-5 fill-current" />
+              <SkipBack className="w-[13px] h-[13px] fill-current" />
             </button>
 
             {/* MAIN PLAY-PAUSE ROUND CONTROLLER */}
             {activeYtId ? (
               <div 
-                className="w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-500/20 border-2 border-white/60"
+                className="w-[33px] h-[33px] rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-500/20 border border-white/60"
                 title="यूट्यूब प्लेयर सक्रिय है"
               >
-                <Youtube className="w-6 h-6 text-white fill-current" />
+                <Youtube className="w-[17px] h-[17px] text-white fill-current" />
               </div>
             ) : (
               <button
                 onClick={togglePlay}
-                className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white flex items-center justify-center shadow-lg shadow-orange-500/20 hover:scale-105 transition active:scale-95 border-2 border-white/60"
+                className="w-[33px] h-[33px] rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white flex items-center justify-center shadow-lg shadow-orange-500/20 hover:scale-105 transition active:scale-95 border border-white/60"
                 title={isPlaying ? 'रोकें' : 'बजाएं'}
               >
                 {isPlaying ? (
-                  <Pause className="w-6 h-6 fill-current text-white" />
+                  <Pause className="w-[17px] h-[17px] fill-current text-white" />
                 ) : (
-                  <Play className="w-6 h-6 fill-current text-white translate-x-0.5" />
+                  <Play className="w-[17px] h-[17px] fill-current text-white translate-x-0.5" />
                 )}
               </button>
             )}
@@ -1276,33 +1274,33 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
             {/* Skip Forward */}
             <button
               onClick={() => handleNextTrack()}
-              className="w-10 h-10 rounded-full text-slate-600 hover:text-slate-800 flex items-center justify-center hover:bg-slate-50 transition active:scale-90"
+              className="w-6 h-6 rounded-full text-slate-600 hover:text-slate-800 flex items-center justify-center hover:bg-slate-50 transition active:scale-90"
               title="अगला ट्रैक"
             >
-              <SkipForward className="w-5 h-5 fill-current" />
+              <SkipForward className="w-[13px] h-[13px] fill-current" />
             </button>
 
             {/* Repeat One / Repeat All / No Repeat */}
             <button
               onClick={handleRepeatToggle}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center relative transition active:scale-95 ${
+              className={`w-[21px] h-[21px] rounded-md flex items-center justify-center relative transition active:scale-95 ${
                 isRepeat !== 'none' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'text-slate-400 hover:text-slate-600'
               }`}
               title="रिपीट प्ले (Repeat)"
             >
-              <Repeat className="w-4 h-4" />
+              <Repeat className="w-3 h-3" />
               {isRepeat === 'one' && (
-                <span className="absolute -top-1 -right-1 text-[8px] font-black bg-amber-500 text-slate-900 w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">1</span>
+                <span className="absolute -top-0.5 -right-0.5 text-[7px] font-black bg-amber-500 text-slate-900 w-3 h-3 rounded-full flex items-center justify-center border border-white">1</span>
               )}
               {isRepeat === 'all' && (
-                <span className="absolute -top-1 -right-1 text-[8px] font-black bg-orange-500 text-white w-3.5 h-3.5 rounded-full flex items-center justify-center border border-white">A</span>
+                <span className="absolute -top-0.5 -right-0.5 text-[7px] font-black bg-orange-500 text-white w-3 h-3 rounded-full flex items-center justify-center border border-white">A</span>
               )}
             </button>
           </div>
 
           {/* Volume control slider */}
           {!activeYtId && (
-            <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-100 rounded-2xl px-3.5 py-1.5 self-center">
+            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-2xl px-3 py-1 self-center">
               <button onClick={toggleMute} className="text-slate-500 hover:text-slate-700">
                 {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-rose-500" /> : <Volume2 className="w-4 h-4 text-amber-600" />}
               </button>
@@ -1319,16 +1317,16 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
           )}
 
           {/* Playlist Tracks queue list */}
-          <div className="flex-1 mt-2">
-            <p className="text-[13px] font-extrabold text-slate-400 uppercase mb-2 select-none tracking-widest px-1">प्लेलिस्ट ट्रैक ({bhajans.length}):</p>
-            <div className="max-h-36 overflow-y-auto flex flex-col gap-1.5 pr-1 text-sm scrollbar-thin">
+          <div className="flex-1 mt-0">
+            <p className="text-[13px] font-extrabold text-slate-400 uppercase mb-0 select-none tracking-widest px-1">प्लेलिस्ट ट्रैक ({bhajans.length}):</p>
+            <div className="max-h-24 overflow-y-auto flex flex-col gap-0 pr-1 text-sm scrollbar-thin">
               {bhajans.map((track, idx) => {
                 const isTrackYt = !!getYouTubeId(track.audioUrl);
                 return (
                   <div
                     key={track.id}
                     onClick={() => handleSelectTrack(track.id)}
-                    className={`flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition active:scale-99 ${
+                    className={`flex items-center justify-between py-0 px-2 md:py-0 md:px-2 rounded-md cursor-pointer transition active:scale-99 ${
                       track.id === activeTrack?.id 
                         ? 'bg-amber-50 border border-amber-200/50 text-amber-800 font-bold' 
                         : 'hover:bg-slate-50/50 text-slate-600 font-medium'
@@ -1348,8 +1346,8 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                           idx + 1
                         )}
                       </span>
-                      <div className="min-w-0">
-                        <p className={`truncate text-xs md:text-sm flex items-center gap-1 ${
+                      <div className="min-w-0 py-0.5">
+                        <p className={`truncate text-xs md:text-sm flex items-center gap-1 leading-tight ${
                           (track.title.toLowerCase().includes('shriram') || 
                            track.title.toLowerCase().includes('shree ram') || 
                            track.title.toLowerCase().includes('bethe') || 
@@ -1365,7 +1363,7 @@ export default function BhajanSection({ mode }: { mode?: 'player' | 'collection'
                             </span>
                           )}
                         </p>
-                        <p className="text-[10px] text-slate-400 truncate">{track.singer}</p>
+                        <p className="text-[9px] text-slate-400 truncate leading-none mt-0.5">{track.singer}</p>
                       </div>
                     </div>
 

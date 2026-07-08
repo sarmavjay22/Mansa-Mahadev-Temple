@@ -117,9 +117,9 @@ export default function TempleInfoSection() {
 
   const displayAbout = settings.aboutTemple || info.about;
   const displayHistory = settings.templeHistory || info.history;
-  const displayPhone = settings.phone || info.contact.phone;
+  const displayPhone = (settings.phone || info.contact.phone).replace(/\s+/g, ' ');
   const displayEmail = settings.email || info.contact.email;
-  const displayWhatsApp = settings.whatsApp || info.contact.whatsApp;
+  const displayWhatsApp = (settings.whatsApp || info.contact.whatsApp).replace(/\s+/g, ' ');
   const displayAddress = settings.templeAddress || info.contact.address;
   const displayMapLink = settings.googleMapsLink || info.contact.googleMapsLink;
 
@@ -152,11 +152,11 @@ export default function TempleInfoSection() {
     <section id="temple-info" className="w-full max-w-4xl mx-auto px-4">
       
       {/* Title Header Row */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-[22px] md:text-[26px] font-black text-amber-950 flex items-center gap-2">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl md:text-2xl font-black text-amber-950 flex items-center gap-2">
           <Info className="w-5 h-5 text-sky-500 fill-sky-100" />
           <span>मंदिर परिचय एवं समय सारणी</span>
-          <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-600">सम्पर्क सूत्र</span>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-50 text-sky-600">सम्पर्क सूत्र</span>
         </h2>
       </div>
 
@@ -295,10 +295,10 @@ export default function TempleInfoSection() {
       <div className="w-full bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 overflow-hidden">
         
         {/* Navigation Tab Header Row */}
-        <div className="flex flex-wrap md:flex-nowrap gap-3 p-4 justify-center border-b border-amber-200/60 bg-amber-100/20 select-none">
+        <div className="flex flex-wrap md:flex-nowrap gap-2 p-3 md:p-3.5 justify-center border-b border-amber-200/60 bg-amber-100/20 select-none">
           <button
             onClick={() => setActiveTab('timings')}
-            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-full transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base font-black tracking-wider ${
+            className={`flex-1 min-w-[130px] flex items-center justify-center gap-1.5 py-2 px-4 rounded-full transition-all duration-200 hover:scale-[1.02] cursor-pointer text-xs md:text-sm font-extrabold tracking-wider ${
               activeTab === 'timings' 
                 ? 'bg-amber-100 border-2 border-amber-500 text-amber-950 shadow-md' 
                 : 'bg-white hover:bg-amber-100/50 border-2 border-amber-300 hover:border-amber-400 text-amber-950 shadow-sm'
@@ -310,7 +310,7 @@ export default function TempleInfoSection() {
 
           <button
             onClick={() => setActiveTab('about')}
-            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-full transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base font-black tracking-wider ${
+            className={`flex-1 min-w-[130px] flex items-center justify-center gap-1.5 py-2 px-4 rounded-full transition-all duration-200 hover:scale-[1.02] cursor-pointer text-xs md:text-sm font-extrabold tracking-wider ${
               activeTab === 'about' 
                 ? 'bg-amber-100 border-2 border-amber-500 text-amber-950 shadow-md' 
                 : 'bg-white hover:bg-amber-100/50 border-2 border-amber-300 hover:border-amber-400 text-amber-950 shadow-sm'
@@ -322,7 +322,7 @@ export default function TempleInfoSection() {
 
           <button
             onClick={() => setActiveTab('contact')}
-            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-full transition-all duration-200 hover:scale-[1.02] cursor-pointer text-base font-black tracking-wider ${
+            className={`flex-1 min-w-[130px] flex items-center justify-center gap-1.5 py-2 px-4 rounded-full transition-all duration-200 hover:scale-[1.02] cursor-pointer text-xs md:text-sm font-extrabold tracking-wider ${
               activeTab === 'contact' 
                 ? 'bg-amber-100 border-2 border-amber-500 text-amber-950 shadow-md' 
                 : 'bg-white hover:bg-amber-100/50 border-2 border-amber-300 hover:border-amber-400 text-amber-950 shadow-sm'
@@ -334,18 +334,18 @@ export default function TempleInfoSection() {
         </div>
 
         {/* Tab Contents Frame */}
-        <div className="p-6 md:p-8">
+        <div className="pt-1 pb-4 px-4 md:pt-1 md:pb-5 md:px-5">
           
           {/* 1. TIMINGS VIEW */}
           {activeTab === 'timings' && (
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2 text-lg md:text-xl font-bold text-amber-700 bg-amber-50 border border-amber-100 px-3 py-2 rounded-xl self-start">
-                <Clock className="w-4 h-4" />
+            <div className="flex flex-col gap-0.5 -mt-3.5">
+              <div className="flex items-center gap-1.5 text-sm md:text-base font-bold text-amber-700 bg-amber-50/80 border border-amber-100 px-2 py-1 rounded-xl self-start">
+                <Clock className="w-3.5 h-3.5" />
                 <span>नित्य दर्शन समय सारणी (दैनिक)</span>
               </div>
-
+              
               {/* Timings List */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2 mt-0.5">
                 {displayTimings.map(item => (
                   <div 
                     key={item.id}
@@ -370,26 +370,26 @@ export default function TempleInfoSection() {
 
           {/* 2. ABOUT & HISTORY VIEW */}
           {activeTab === 'about' && (
-            <div className="flex flex-col gap-6 text-slate-600 font-medium">
+            <div className="flex flex-col gap-4 text-slate-600 font-medium">
               
               {/* About description */}
-              <div className="flex flex-col gap-2">
-                <h3 className="text-lg md:text-xl font-bold text-orange-600 flex items-center gap-1.5">
-                  <Sparkles className="w-5 h-5 fill-current" />
+              <div className="flex flex-col gap-1.5">
+                <h3 className="text-md md:text-lg font-bold text-orange-600 flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 fill-current" />
                   <span>मंदिर परिचय</span>
                 </h3>
-                <p className="text-xl md:text-2xl leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap">
+                <p className="text-xs md:text-sm leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap font-semibold text-slate-700">
                   {displayAbout}
                 </p>
               </div>
 
               {/* History details */}
-              <div className="flex flex-col gap-2">
-                <h3 className="text-lg md:text-xl font-bold text-orange-600 flex items-center gap-1.5">
-                  <BookOpen className="w-5 h-5" />
+              <div className="flex flex-col gap-1.5">
+                <h3 className="text-md md:text-lg font-bold text-orange-600 flex items-center gap-1.5">
+                  <BookOpen className="w-4 h-4" />
                   <span>धार्मिक मान्यता एवं इतिहास</span>
                 </h3>
-                <p className="text-xl md:text-2xl leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap">
+                <p className="text-xs md:text-sm leading-relaxed text-justify bg-white/40 p-4 rounded-2xl border border-sky-100/30 whitespace-pre-wrap font-semibold text-slate-700">
                   {displayHistory}
                 </p>
               </div>
@@ -398,49 +398,49 @@ export default function TempleInfoSection() {
 
           {/* 3. CONTACT & LOCATION DIRECTIONS VIEW */}
           {activeTab === 'contact' && (
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex flex-col md:flex-row gap-4 -mt-1">
               
               {/* Left hand details list */}
-              <div className="flex-1 flex flex-col gap-4">
+              <div className="flex-1 flex flex-col gap-1.5">
 
                 {/* Contact Person Card */}
                 {settings.contactPerson && (
-                  <div className="p-4 bg-amber-50/50 rounded-2xl border border-amber-100/50">
-                    <p className="text-[16px] font-bold text-amber-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                      <User className="w-4 h-4 text-amber-500" />
+                  <div className="pt-1 pb-0.5 px-2.5 bg-amber-50/50 rounded-2xl border border-amber-100/50">
+                    <p className="text-[11px] font-bold text-amber-600 uppercase tracking-widest mb-1 flex items-center gap-1">
+                      <User className="w-3.5 h-3.5 text-amber-500" />
                       <span>मुख्य संपर्क व्यक्ति</span>
                     </p>
-                    <p className="text-lg md:text-xl font-normal text-slate-700">
+                    <p className="text-[13px] md:text-[15px] font-normal text-slate-700">
                       {settings.contactPerson}
                     </p>
                   </div>
                 )}
                 
                 {/* Physical address card */}
-                <div className="p-4 bg-sky-50/50 rounded-2xl border border-sky-100/50">
-                  <p className="text-[16px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                    <MapPin className="w-4 h-4 text-orange-500" />
+                <div className="py-1.5 px-2.5 bg-sky-50/50 rounded-2xl border border-sky-100/50">
+                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-orange-500" />
                     <span>मंदिर का मुख्य पता</span>
                   </p>
-                  <p className="text-lg md:text-xl font-normal text-slate-700">
+                  <p className="text-[13px] md:text-[15px] font-normal text-slate-700">
                     {displayAddress}
                   </p>
                 </div>
 
                 {/* Direct Action triggers row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   
                   {/* Dial Phone Button */}
                   <a
                     href={`tel:${displayPhone}`}
-                    className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 transition text-slate-700"
+                    className="flex items-center gap-2 p-3 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 transition text-slate-700"
                   >
-                    <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                      <Phone className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                      <Phone className="w-3.5 h-3.5" />
                     </div>
                     <div>
-                      <p className="text-[15px] font-bold text-slate-500 uppercase">फ़ोन संपर्क</p>
-                      <p className="text-lg font-normal font-mono">{displayPhone}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase">फ़ोन संपर्क</p>
+                      <p className="text-[12px] font-normal font-mono">{displayPhone}</p>
                     </div>
                   </a>
 
@@ -449,28 +449,28 @@ export default function TempleInfoSection() {
                     href={`https://wa.me/91${displayWhatsApp}?text=जय+मंसा+महादेव+जी+मंगला+दर्शन+आरती+की+जानकारी+चाहिए।`}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 transition text-slate-700"
+                    className="flex items-center gap-2 p-3 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 transition text-slate-700"
                   >
-                    <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                      <MessageSquare className="w-4 h-4 fill-current" />
+                    <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
+                      <MessageSquare className="w-3.5 h-3.5 fill-current" />
                     </div>
                     <div>
-                      <p className="text-[15px] font-bold text-slate-500 uppercase">व्हाट्सएप संपर्क</p>
-                      <p className="text-lg font-normal font-mono">चैट शुरू करें</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase">व्हाट्सएप संपर्क</p>
+                      <p className="text-[12px] font-normal font-mono">चैट शुरु करे</p>
                     </div>
                   </a>
 
                   {/* Direct Email trigger */}
                   <a
                     href={`mailto:${displayEmail}`}
-                    className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 transition text-slate-700"
+                    className="flex items-center gap-2 p-3 rounded-2xl bg-white border border-sky-100 hover:border-sky-300 transition text-slate-700"
                   >
-                    <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                      <Mail className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                      <Mail className="w-3.5 h-3.5" />
                     </div>
                     <div>
-                      <p className="text-[15px] font-bold text-slate-500 uppercase">ईमेल आईडी</p>
-                      <p className="text-lg font-normal font-mono truncate max-w-[220px]">{displayEmail}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase">ईमेल आईडी</p>
+                      <p className="text-[12px] font-normal font-mono truncate max-w-[220px]">{displayEmail}</p>
                     </div>
                   </a>
 
@@ -479,14 +479,14 @@ export default function TempleInfoSection() {
                     href={displayMapLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold shadow hover:scale-101 transition"
+                    className="flex items-center gap-2 p-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold shadow hover:scale-101 transition"
                   >
-                    <div className="w-9 h-9 rounded-full bg-white/20 text-white flex items-center justify-center shrink-0">
-                      <Map className="w-4 h-4" />
+                    <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center shrink-0">
+                      <Map className="w-3.5 h-3.5" />
                     </div>
                     <div>
-                      <p className="text-[15px] font-bold text-amber-100 uppercase">नेविगेशन रूट</p>
-                      <p className="text-sm font-black flex items-center gap-0.5">नक्शा खोलें <ExternalLink className="w-3 h-3" /></p>
+                      <p className="text-[10px] font-bold text-amber-100 uppercase">नेविगेशन रूट</p>
+                      <p className="text-[9px] font-black flex items-center gap-0.5">नक्शा खोलें <ExternalLink className="w-3 h-3" /></p>
                     </div>
                   </a>
                 </div>
@@ -508,9 +508,9 @@ export default function TempleInfoSection() {
                   href={displayMapLink}
                   target="_blank"
                   rel="noreferrer"
-                  className="absolute bottom-3 right-3 bg-black/80 hover:bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-md backdrop-blur-sm transition"
+                  className="absolute bottom-3 right-3 bg-black/80 hover:bg-black text-white text-[7.5px] font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-md backdrop-blur-sm transition"
                 >
-                  <MapPin className="w-3 h-3 text-red-500 fill-current" />
+                  <MapPin className="w-2.5 h-2.5 text-red-500 fill-current" />
                   <span>दिशानिर्देश (Directions)</span>
                 </a>
               </div>

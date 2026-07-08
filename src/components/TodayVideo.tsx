@@ -78,12 +78,12 @@ export default function TodayVideo() {
 
   return (
     <section id="today-video" className="w-full max-w-4xl mx-auto px-4">
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-4 relative flex flex-wrap items-center justify-center gap-3">
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-2xl shadow-lg shadow-amber-100/30 p-3 relative flex flex-wrap items-center justify-center gap-3">
         <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
           <button
             onClick={() => setIsAartiVideoOpen(true)}
             title="आरती वीडियो गैलरी देखने के लिए यहाँ क्लिक करें"
-            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
+            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-5 py-2 rounded-full shadow-sm hover:shadow-md text-sm md:text-base font-extrabold tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
           >
             <span>🎥 भोलेनाथ की आरती वीडियो</span>
           </button>

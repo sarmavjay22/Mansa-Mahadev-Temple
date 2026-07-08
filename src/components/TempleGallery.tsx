@@ -229,22 +229,22 @@ export default function TempleGallery() {
     <section id="temple-gallery-section" className="w-full max-w-4xl mx-auto px-4">
       {/* "भोलेनाथ के श्रृंगार दर्शन" style Accent Card */}
       <div 
-        className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 pt-5 pb-5 px-6 md:px-8 flex flex-col items-center justify-center gap-2 text-center select-none transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"
+        className="bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl shadow-xl shadow-amber-100/40 p-4 md:p-5 flex flex-col items-center justify-center gap-2 text-center select-none transition-all duration-300 hover:shadow-xl hover:scale-[1.01]"
       >
-        <h2 className="text-2xl md:text-3xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
+        <h2 className="text-xl md:text-2xl font-black text-amber-950 flex flex-col items-center justify-center gap-3 flex-wrap w-full">
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsOpen(true);
             }}
             title="मँदिर दर्शन दीर्घा (गैलरी) देखने के लिए यहाँ क्लिक करें"
-            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-6 py-2.5 rounded-full shadow-sm hover:shadow-md text-base font-black tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
+            className="inline-flex items-center gap-2 bg-white hover:bg-amber-100 border-2 border-amber-300 hover:border-amber-400 text-amber-950 px-5 py-2 rounded-full shadow-sm hover:shadow-md text-sm md:text-base font-extrabold tracking-wider cursor-pointer transition duration-300 transform hover:scale-105 active:scale-95 group text-center"
           >
-            <span className="font-black">📸 मँदिर दर्शन दीर्घा (गैलरी)</span>
+            <span>📸 मँदिर दर्शन दीर्घा (गैलरी)</span>
           </button>
         </h2>
 
-        <p className="text-sm md:text-base text-black font-normal mt-0 text-center max-w-lg px-4 leading-relaxed">
+        <p className="text-xs md:text-sm text-slate-700 font-medium mt-0 text-center max-w-lg px-4 leading-relaxed">
           मँदिर परिसर, उत्सवों एवं सुंदर भक्तिमय क्षणों की अलौकिक सुंदर छवियों का संग्रह
         </p>
       </div>
