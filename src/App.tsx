@@ -214,7 +214,7 @@ export default function App() {
       {/* 3. Main Multi-Module Content Stack */}
       <main className="w-full relative z-10 flex flex-col gap-3 md:gap-4 mt-2">
         
-        <div className="flex flex-col gap-1.5 md:gap-2 w-full">
+        <div className="flex flex-col gap-1.5 md:gap-2 w-full" id="top-section">
           {/* 1. "भोलेनाथ के श्रृंगार दर्शन" */}
           <TodayDarshan mode="title" />
 
@@ -232,50 +232,137 @@ export default function App() {
         <NotificationBanner />
 
         {/* 6. "नित्य आरती एवं पाठ संग्रह" */}
-        <AartiSection />
+        <div id="aarti-section">
+          <AartiSection />
+        </div>
 
         {/* 8. "भक्तिमय भजन संग्रह" */}
-        <BhajanSection mode="collection" />
+        <div id="bhajan-section">
+          <BhajanSection mode="collection" />
+        </div>
 
         {/* 7. "शिव भजन एवं मंत्र" */}
         <BhajanSection mode="player" />
 
         {/* 9. "मँदिर दर्शन दीर्घा" */}
-        <TempleGallery />
+        <div id="gallery-section">
+          <TempleGallery />
+        </div>
 
         {/* 10. "मँदिर सेवा एवं दान निधि" */}
-        <DonationCard mode="donation" />
+        <div id="donation-section">
+          <DonationCard mode="donation" />
+        </div>
 
         {/* 11. "मँदिर प्रबंधन समिति/ट्रस्टी" */}
-        <DonationCard mode="committee" />
+        <div id="committee-section">
+          <DonationCard mode="committee" />
+        </div>
 
         {/* 12. "मंदिर परिचय एवं समय सारणी" */}
-        <TempleInfoSection />
+        <div id="info-section">
+          <TempleInfoSection />
+        </div>
 
       </main>
 
       {/* 4. Elegant Spiritual Footer */}
-      <footer className="w-full max-w-4xl mx-auto px-4 mt-16 text-center select-none relative z-10">
-        <div className="flex flex-col items-center gap-4">
-          
+      <footer className="w-full max-w-4xl mx-auto px-4 mt-16 relative z-10">
+        {/* Main Footer Card */}
+        <div className="w-full bg-white/80 backdrop-blur-md border border-amber-200/60 rounded-3xl p-6 md:p-8 text-slate-800 shadow-xl shadow-amber-100/20 text-center">
+          <div className="flex flex-col items-center justify-center text-center">
+            {/* Block 2: Quick Links */}
+            <div className="flex flex-col items-center">
+              <h3 className="text-xs md:text-sm font-black uppercase text-slate-400 tracking-wider mb-3">
+                Quick Links
+              </h3>
+              <ul className="flex flex-col gap-2 items-center">
+                <li>
+                  <button
+                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                    className="text-xs md:text-sm font-bold text-slate-700 hover:text-amber-700 transition duration-200 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>🏠 मुख्य पृष्ठ</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => document.getElementById("gallery-section")?.scrollIntoView({ behavior: "smooth" })}
+                    className="text-xs md:text-sm font-bold text-slate-700 hover:text-amber-700 transition duration-200 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>📸 मंदिर दर्शन दीर्घा</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => document.getElementById("aarti-section")?.scrollIntoView({ behavior: "smooth" })}
+                    className="text-xs md:text-sm font-bold text-slate-700 hover:text-amber-700 transition duration-200 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>🙏 आरती एवं पाठ</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => document.getElementById("bhajan-section")?.scrollIntoView({ behavior: "smooth" })}
+                    className="text-xs md:text-sm font-bold text-slate-700 hover:text-amber-700 transition duration-200 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>🎵 भजन संग्रह</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => document.getElementById("donation-section")?.scrollIntoView({ behavior: "smooth" })}
+                    className="text-xs md:text-sm font-bold text-slate-700 hover:text-amber-700 transition duration-200 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>❤️ सेवा एवं दान</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => document.getElementById("committee-section")?.scrollIntoView({ behavior: "smooth" })}
+                    className="text-xs md:text-sm font-bold text-slate-700 hover:text-amber-700 transition duration-200 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>🏛️ मंदिर प्रबंधन समिति</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => document.getElementById("info-section")?.scrollIntoView({ behavior: "smooth" })}
+                    className="text-xs md:text-sm font-bold text-slate-700 hover:text-amber-700 transition duration-200 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>📞 संपर्क करें</span>
+                  </button>
+                </li>
+                <li>
+                  <a
+                    href={settings.googleMapsLink || db.getTempleInfo()?.contact?.googleMapsLink || "https://maps.google.com/?q=Mansa+Mahadev+Temple,+Upla+Phalan,+Titrardi,+Udaipur,+Rajasthan"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs md:text-sm font-bold text-slate-700 hover:text-amber-700 transition duration-200 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>📍 Google Maps</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
           {/* Saffron Divider Accent with Flower Symbol */}
-          <div className="flex items-center gap-4 w-full max-w-xs">
+          <div className="flex items-center gap-4 w-full mt-6 mb-4">
             <span className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-amber-400"></span>
             <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
             <span className="h-[1px] flex-1 bg-gradient-to-r from-amber-400 to-transparent"></span>
           </div>
 
-          {/* Calligraphic Mantra */}
-          <h2 className="text-xl md:text-2xl font-black text-amber-700 tracking-widest font-serif drop-shadow-sm">
-            ॥ ॐ नमः शिवाय ॥
-          </h2>
-
-          {/* Credits */}
-          <div className="text-[11px] md:text-xs space-y-1.5">
-            <p className="font-black text-slate-700">{settings.footerCopyright || "श्री मंसा महादेव मंदिर सेवा समिति, तितरड़ी, उदयपुर (राज.)"}</p>
-            <p className="text-slate-500 font-black">सर्व सुखिनः भवन्तु • समस्त मंगल कामनाएं</p>
+          {/* Copyright Row */}
+          <div className="flex flex-col gap-0.5 border-t border-slate-100 pt-3 text-[11px] md:text-xs text-slate-500 font-bold items-center justify-center text-center">
+            <p className="text-slate-700 font-black whitespace-nowrap">
+              © 2026 श्री मंसा महादेव मंदिर सेवा समिति
+            </p>
             {settings.developerName && (
-              <p className="text-amber-800 font-mono text-[10px] md:text-xs font-black mt-2">डिजाइन एवं विकसित: {settings.developerName}</p>
+              <p className="text-amber-800 font-mono text-[10px] md:text-xs font-black whitespace-nowrap">
+                डिज़ाइन एवं विकास: {settings.developerName === "Google AI Studio Build" ? "Chirag Pharma Software Development Team" : settings.developerName.replace(" Build", "")}
+              </p>
             )}
           </div>
         </div>

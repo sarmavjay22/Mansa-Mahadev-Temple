@@ -31,7 +31,7 @@ export const DEFAULT_SETTINGS: TempleSettings = {
   secondaryThemeColor: "#fffbeb",
   accentColor: "#f97316",
   footerCopyright: "श्री मंसा महादेव मंदिर सेवा समिति, तितरड़ी, उदयपुर (राज.)",
-  developerName: "Google AI Studio Build",
+  developerName: "Chirag Pharma Software Development Team",
   templeLogoUrl: "",
   festivalBannerUrl: "",
   timingPatKhulna: "05:00 AM",
