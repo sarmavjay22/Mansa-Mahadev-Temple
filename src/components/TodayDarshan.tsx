@@ -461,8 +461,8 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
 
             {/* Saffron Floating Indicator Tag */}
             {darshan.festivalName && (
-              <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg shadow-md z-20 flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5 animate-spin text-white" />
+              <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-[8px] px-2 py-0.5 rounded-md shadow-md z-20 flex items-center gap-1">
+                <Sparkles className="w-2 h-2 animate-spin text-white" />
                 <span>{darshan.festivalName}</span>
               </div>
             )}
@@ -518,7 +518,7 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
           </div>
 
           {/* Right Side: Description and Spiritual Meta */}
-          <div className="w-full md:w-1/2 p-4 md:p-5 flex flex-col justify-start gap-4 text-slate-700 bg-amber-50/50 backdrop-blur-sm border-l border-amber-100/60">
+          <div className="w-full md:w-1/2 p-4 md:p-5 flex flex-col justify-start gap-1 md:gap-2 text-slate-700 bg-amber-50/50 backdrop-blur-sm border-l border-amber-100/60">
             <div className="flex flex-col gap-0.5">
               {/* Date Header */}
               <div className="flex items-center gap-2 text-amber-800/80 font-bold text-xs">
@@ -531,19 +531,19 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
 
               {/* Devotional content */}
               <div className="flex flex-col gap-0">
-                <h3 className="text-sm md:text-base font-black text-amber-950 tracking-tight flex items-center gap-1.5">
+                <h3 className="text-[15px] md:text-[17px] font-black text-amber-950 tracking-tight flex items-center gap-1.5">
                   <span className="text-amber-500 text-lg animate-pulse">⚜</span>
                   {darshan.festivalName || "दैनिक दिव्य दर्शन"}
                 </h3>
-                <p className="-mt-0.5 text-xs md:text-sm leading-relaxed text-slate-800 whitespace-pre-wrap font-medium">
-                  {darshan.description || "मंसा महादेव का आज का अति मनोहारी एवं मनवांछित फलदायक दिव्य श्रृंगार दर्शन। नमन करें और पुण्य लाभ कमाएं।"}
+                <p className="-mt-0.5 text-[13px] md:text-[15px] leading-relaxed text-slate-800 whitespace-pre-wrap font-medium">
+                  {darshan.description ? darshan.description.trim() : "मंसा महादेव का आज का अति मनोहारी एवं मनवांछित फलदायक दिव्य श्रृंगार दर्शन। नमन करें और पुण्य लाभ कमाएं।"}
                 </p>
               </div>
             </div>
 
             {/* Quick Share / Information HUD */}
-            <div className="mt-4 md:mt-auto pt-2 border-t border-sky-100 flex items-center justify-between gap-3">
-              <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+            <div className="mt-0 pt-1 border-t border-sky-100 flex items-center justify-between gap-3">
+              <span className="text-[10px] font-extrabold text-slate-700 flex items-center gap-1">
                 <Info className="w-3.5 h-3.5 text-sky-500 shrink-0" />
                 <span>मोबाइल पर पिंच ज़ूम उपलब्ध</span>
               </span>
@@ -854,8 +854,8 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
 
           {/* Saffron Floating Indicator Tag */}
           {darshan.festivalName && (
-            <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg shadow-md z-20 flex items-center gap-1">
-              <Sparkles className="w-2.5 h-2.5 animate-spin text-white" />
+            <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-[8px] px-2 py-0.5 rounded-md shadow-md z-20 flex items-center gap-1">
+              <Sparkles className="w-2 h-2 animate-spin text-white" />
               <span>{darshan.festivalName}</span>
             </div>
           )}
@@ -911,7 +911,7 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
         </div>
 
         {/* Right Side: Description and Spiritual Meta */}
-        <div className="w-full md:w-1/2 p-4 md:p-6 flex flex-col justify-start gap-4 text-slate-700 bg-amber-50/50 backdrop-blur-sm border-l border-amber-100/60">
+        <div className="w-full md:w-1/2 p-4 md:p-6 flex flex-col justify-start gap-1 md:gap-2 text-slate-700 bg-amber-50/50 backdrop-blur-sm border-l border-amber-100/60">
           <div className="flex flex-col gap-0.5">
             {/* Date Header */}
             <div className="flex items-center gap-2 text-amber-800/80 font-bold text-sm">
@@ -924,19 +924,19 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
 
             {/* Devotional content */}
             <div className="flex flex-col gap-0">
-              <h3 className="text-[15px] md:text-[21px] font-black text-amber-900 tracking-tight flex items-center gap-2">
+              <h3 className="text-[16px] md:text-[22px] font-black text-amber-900 tracking-tight flex items-center gap-2">
                 <span className="text-amber-500 text-[20px] animate-pulse">⚜</span>
                 {darshan.festivalName || "दैनिक दिव्य दर्शन"}
               </h3>
-              <p className="-mt-0.5 text-[12px] md:text-[14px] leading-relaxed text-slate-800 whitespace-pre-wrap font-medium">
-                {darshan.description || "मंसा महादेव का आज का अति मनोहारी एवं मनवांछित फलदायक दिव्य श्रृंगार दर्शन। नमन करें और पुण्य लाभ कमाएं।"}
+              <p className="-mt-0.5 text-[13px] md:text-[15px] leading-relaxed text-slate-800 whitespace-pre-wrap font-medium">
+                {darshan.description ? darshan.description.trim() : "मंसा महादेव का आज का अति मनोहारी एवं मनवांछित फलदायक दिव्य श्रृंगार दर्शन। नमन करें और पुण्य लाभ कमाएं।"}
               </p>
             </div>
           </div>
 
           {/* Quick Share / Information HUD */}
-          <div className="mt-4 md:mt-auto pt-2 border-t border-sky-100 flex items-center justify-between gap-3">
-            <span className="text-[11px] font-bold text-black flex items-center gap-1">
+          <div className="mt-0 pt-1 border-t border-sky-100 flex items-center justify-between gap-3">
+            <span className="text-[11px] font-extrabold text-black flex items-center gap-1">
               <Info className="w-3.5 h-3.5 text-sky-500 shrink-0" />
               <span>मोबाइल पर पिंच ज़ूम उपलब्ध</span>
             </span>

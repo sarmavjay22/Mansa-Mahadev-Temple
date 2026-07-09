@@ -212,9 +212,9 @@ export default function App() {
       <Header onOpenAdmin={() => setIsAdminOpen(true)} />
 
       {/* 3. Main Multi-Module Content Stack */}
-      <main className="w-full relative z-10 flex flex-col gap-4 md:gap-5 mt-2">
+      <main className="w-full relative z-10 flex flex-col gap-3 md:gap-4 mt-2">
         
-        <div className="flex flex-col gap-2 md:gap-2.5 w-full">
+        <div className="flex flex-col gap-1.5 md:gap-2 w-full">
           {/* 1. "भोलेनाथ के श्रृंगार दर्शन" */}
           <TodayDarshan mode="title" />
 

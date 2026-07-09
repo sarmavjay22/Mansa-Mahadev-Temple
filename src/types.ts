@@ -187,6 +187,7 @@ export interface DonationSettings {
   qrCodeUrl: string;
   upiId: string;
   upiLink: string;
+  razorpayLink?: string;
   message: string;
   committeeName?: string;
   trusteeName?: string;

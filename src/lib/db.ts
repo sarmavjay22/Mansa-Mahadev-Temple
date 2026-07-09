@@ -513,6 +513,7 @@ export const DEFAULT_DONATION_SETTINGS: DonationSettings = {
   qrCodeUrl: "https://i.ibb.co/DfckK8Pf/file-0000000073a471fbac7baf3abda72214.png", // A high-quality default QR code image
   upiId: "mansamahadev@upi",
   upiLink: "upi://pay?pa=mansamahadev@upi&pn=Mansa%20Mahadev%20Temple&tn=Temple%20Donation",
+  razorpayLink: "https://pages.razorpay.com/mansamahadev",
   message: "मंदिर के धार्मिक कार्यों, सेवा एवं विकास में अपना Online आर्थिक सहयोग प्रदान कर धर्म लाभ लेवें",
   committeeName: "श्री मंसा महादेव मंदिर विकास एवं प्रबंधन समिति",
   trusteeName: "श्री मंसा महादेव मंदिर मुख्य ट्रस्टी",

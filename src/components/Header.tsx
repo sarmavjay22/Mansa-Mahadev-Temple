@@ -62,8 +62,18 @@ export default function Header({ onOpenAdmin }: HeaderProps) {
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400"></div>
 
       <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
-        {/* Top Admin Button Row - Right Aligned for Clean Margins */}
-        <div className="w-full flex justify-end items-center mb-0 text-xs font-medium px-2">
+        {/* Top Admin Button Row - Spaced for Live Database Status Badge and Admin Control */}
+        <div className="w-full flex justify-between items-center mb-0 text-xs font-medium px-2">
+          {/* Live Database Active Badge */}
+          <div className="flex items-center gap-2 bg-white text-slate-800 font-bold text-[11px] md:text-xs px-3 py-1.5 rounded-full shadow-md border border-slate-200 select-none">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <Database className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+            <span>लाईव डेटाबेस : सक्रिय</span>
+          </div>
+
           {/* Admin Control */}
           {isAdmin ? (
             <button

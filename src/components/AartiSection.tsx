@@ -131,7 +131,7 @@ export default function AartiSection() {
       </h2>
 
       {/* Grid of Aarti Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
         {/* Combined Shiv Aartis Card */}
         {(shivAartiObj || rudraAartiObj || stutiAartiObj) && (
           <motion.div

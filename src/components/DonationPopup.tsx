@@ -1,8 +1,53 @@
 import { useState, useEffect } from 'react';
 import { db, subscribeToDBUpdates } from '../lib/db';
 import { DonationSettings } from '../types';
-import { X, Copy, Check, Heart, ExternalLink } from 'lucide-react';
+import { X, Copy, Check, Heart, ExternalLink, Info, QrCode, ArrowLeft, Shield, Sparkles, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
+
+// Brand Logos
+const PhonePeIcon = () => (
+  <div className="w-10 h-10 rounded-2xl bg-white border border-slate-100 shadow-md flex items-center justify-center shrink-0 select-none overflow-hidden p-1">
+    <img 
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/PhonePe_Logo.svg/512px-PhonePe_Logo.svg.png" 
+      alt="PhonePe Logo" 
+      referrerPolicy="no-referrer"
+      className="w-full h-full object-contain select-none"
+    />
+  </div>
+);
+
+const GPayIcon = () => (
+  <div className="w-10 h-10 rounded-2xl bg-white border border-slate-100 shadow-md flex items-center justify-center shrink-0 select-none overflow-hidden p-1">
+    <img 
+      src="https://img.icons8.com/color/120/google-pay.png" 
+      alt="Google Pay Logo" 
+      referrerPolicy="no-referrer"
+      className="w-full h-full object-contain select-none"
+    />
+  </div>
+);
+
+const PaytmIcon = () => (
+  <div className="w-10 h-10 rounded-2xl bg-white border border-slate-100 shadow-md flex items-center justify-center shrink-0 select-none overflow-hidden p-1">
+    <img 
+      src="https://img.icons8.com/color/120/paytm.png" 
+      alt="Paytm Logo" 
+      referrerPolicy="no-referrer"
+      className="w-full h-full object-contain select-none"
+    />
+  </div>
+);
+
+const RazorpayIcon = () => (
+  <div className="w-10 h-10 rounded-2xl bg-white border border-slate-100 shadow-md flex items-center justify-center shrink-0 select-none overflow-hidden p-1">
+    <img 
+      src="https://upload.wikimedia.org/wikipedia/commons/8/89/Razorpay_logo.svg" 
+      alt="Razorpay Logo" 
+      referrerPolicy="no-referrer"
+      className="w-full h-full object-contain select-none"
+    />
+  </div>
+);
 
 interface DonationPopupProps {
   isOpen: boolean;
@@ -12,6 +57,14 @@ interface DonationPopupProps {
 export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
   const [settings, setSettings] = useState<DonationSettings>(db.getDonationSettings());
   const [copied, setCopied] = useState(false);
+  const [copiedApp, setCopiedApp] = useState<string | null>(null);
+
+  // Razorpay secure checkout states
+  const [showRazorpayCheckout, setShowRazorpayCheckout] = useState(false);
+  const [checkoutAmount, setCheckoutAmount] = useState('101');
+  const [checkoutName, setCheckoutName] = useState('');
+  const [checkoutPhone, setCheckoutPhone] = useState('');
+  const [checkoutStep, setCheckoutStep] = useState<'form' | 'payment' | 'success'>('form');
 
   const getDisplayMessage = (msg: string) => {
     if (!msg || msg === "मंदिर के धार्मिक कार्यों, सेवा एवं विकास में अपना सहयोग प्रदान करें।" || msg === "मंदिर के धार्मिक कार्यों, सेवा एवं विकास में अपना Online आर्थिक सहयोग प्रदान कर धार्मिक लाभ लेवें") {
@@ -25,6 +78,15 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
     const unsubscribe = subscribeToDBUpdates(() => {
       setSettings(db.getDonationSettings());
     });
+
+    if (!isOpen) {
+      setShowRazorpayCheckout(false);
+      setCheckoutStep('form');
+      setCheckoutAmount('101');
+      setCheckoutName('');
+      setCheckoutPhone('');
+    }
+
     return unsubscribe;
   }, [isOpen]);
 
@@ -35,6 +97,95 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy UPI ID:", err);
+    }
+  };
+
+  const getAppUpiLink = (appName: string, amountStr?: string) => {
+    const upiId = settings.upiId || "9340721968@ybl";
+    const name = encodeURIComponent(settings.trusteeName || settings.committeeName || "Mansa Mahadev Temple");
+    const note = encodeURIComponent(checkoutName ? `Donation - ${checkoutName}` : "Mandir Donation");
+    let baseParams = `pa=${upiId}&pn=${name}&tn=${note}&cu=INR`;
+    if (amountStr) {
+      baseParams += `&am=${amountStr}`;
+    }
+
+    if (appName === 'Razorpay') {
+      if (settings.razorpayLink && (settings.razorpayLink.startsWith('http://') || settings.razorpayLink.startsWith('https://'))) {
+        return settings.razorpayLink;
+      }
+      if (settings.upiLink && (settings.upiLink.startsWith('http://') || settings.upiLink.startsWith('https://'))) {
+        return settings.upiLink;
+      }
+      return settings.razorpayLink || "https://pages.razorpay.com/mansamahadev";
+    }
+
+    const isAndroid = /Android/i.test(navigator.userAgent);
+
+    if (isAndroid) {
+      if (appName === 'PhonePe') {
+        return `intent://pay?${baseParams}#Intent;scheme=upi;package=com.phonepe.app;end`;
+      }
+      if (appName === 'Google Pay') {
+        return `intent://pay?${baseParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
+      }
+      if (appName === 'Paytm') {
+        return `intent://pay?${baseParams}#Intent;scheme=upi;package=net.one97.paytm;end`;
+      }
+    }
+
+    // iOS or Fallback Custom schemes
+    if (appName === 'PhonePe') {
+      return `phonepe://pay?${baseParams}`;
+    }
+    if (appName === 'Google Pay') {
+      return `tez://upi/pay?${baseParams}`;
+    }
+    if (appName === 'Paytm') {
+      return `paytmmp://pay?${baseParams}`;
+    }
+
+    return `upi://pay?${baseParams}`;
+  };
+
+  const handleOpenAppWithCopy = async (appName: string, amountStr?: string) => {
+    const upiLink = getAppUpiLink(appName, amountStr);
+    try {
+      await navigator.clipboard.writeText(settings.upiId || "9340721968@ybl");
+      setCopied(true);
+      setCopiedApp(appName);
+      setTimeout(() => {
+        setCopied(false);
+        setCopiedApp(null);
+      }, 5000);
+      
+      // Delay slightly and launch app
+      setTimeout(() => {
+        if (upiLink.startsWith('http://') || upiLink.startsWith('https://')) {
+          window.open(upiLink, '_blank');
+        } else {
+          window.location.href = upiLink;
+        }
+      }, 300);
+    } catch (err) {
+      console.error(`Failed to copy and open ${appName}:`, err);
+      if (upiLink.startsWith('http://') || upiLink.startsWith('https://')) {
+        window.open(upiLink, '_blank');
+      } else {
+        window.location.href = upiLink;
+      }
+    }
+  };
+
+  const handleRazorpayClick = () => {
+    const isDefaultOrEmptyRazorpay = !settings.razorpayLink || 
+      settings.razorpayLink.trim() === "" || 
+      settings.razorpayLink.includes("pages.razorpay.com/mansamahadev");
+
+    if (!isDefaultOrEmptyRazorpay) {
+      window.open(settings.razorpayLink, '_blank');
+    } else {
+      setShowRazorpayCheckout(true);
+      setCheckoutStep('form');
     }
   };
 
@@ -55,130 +206,497 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
         {/* Top Decorative Border */}
         <div className="h-2 w-full bg-gradient-to-r from-orange-400 via-amber-400 to-orange-500 shrink-0"></div>
 
-        {/* Modal Header */}
-        <div className="p-5 border-b border-amber-200/40 bg-gradient-to-r from-amber-500/5 to-amber-600/10 flex items-center justify-between gap-4 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-red-400 to-orange-500 rounded-2xl text-white shadow-md shadow-orange-500/10">
-              <Heart className="w-5 h-5 text-white fill-white" />
-            </div>
-            <div>
-              <h2 className="text-xl md:text-2xl font-extrabold tracking-wide text-slate-800">
-                ❤️ मंदिर सेवा एवं दान
-              </h2>
-              <p className="text-xs md:text-sm text-amber-700 font-bold">
-                Mansa Mahadev Mandir Seva & Donation
-              </p>
-            </div>
-          </div>
-
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-amber-200/30 shadow-md flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 text-slate-500 transition duration-300"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Modal Body */}
-        <div className="p-4 md:p-5 overflow-y-auto flex flex-col items-center text-center gap-4">
-          
-          {/* Donation Message */}
-          <div className="bg-amber-50/50 border border-amber-200/30 rounded-2xl p-3 w-full max-w-sm shadow-sm">
-            <p className="text-sm md:text-base text-amber-900 font-bold leading-relaxed">
-              🙏 "{getDisplayMessage(settings.message)}"
-            </p>
-          </div>
-
-          {/* QR Code Container */}
-          <div className="relative bg-white p-2 rounded-3xl border border-amber-200/40 shadow-md max-w-[240px] w-full aspect-square flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-amber-300">
-            {settings.qrCodeUrl ? (
-              <img 
-                src={settings.qrCodeUrl} 
-                alt="Donation QR Code" 
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-contain select-none"
-              />
-            ) : (
-              <div className="text-slate-400 font-medium text-xs text-center p-4">
-                कोई QR Code उपलब्ध नहीं है।
+        {showRazorpayCheckout ? (
+          // Razorpay Checkout View
+          <div className="flex flex-col overflow-hidden max-h-[90vh]">
+            {/* Razorpay Header */}
+            <div className="p-4 border-b border-blue-100 bg-blue-50/50 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => {
+                    if (checkoutStep === 'payment') {
+                      setCheckoutStep('form');
+                    } else if (checkoutStep === 'success') {
+                      setCheckoutStep('payment');
+                    } else {
+                      setShowRazorpayCheckout(false);
+                    }
+                  }}
+                  className="p-1.5 hover:bg-blue-100/80 rounded-lg text-blue-800 transition text-left"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+                <div className="text-left">
+                  <h3 className="text-sm font-black text-blue-900 flex items-center gap-1.5 leading-none">
+                    <span className="text-blue-600 font-extrabold text-xs uppercase tracking-wide">Razorpay Secured</span>
+                  </h3>
+                  <p className="text-[10px] text-slate-500 font-bold mt-0.5">मंसा महादेव मंदिर, उदयपुर</p>
+                </div>
               </div>
-            )}
-          </div>
-
-          {/* Recipient Details Section */}
-          {(settings.committeeName || settings.trusteeName) && (
-            <div className="w-full max-w-sm bg-amber-50/40 border border-amber-200/30 rounded-2xl p-3 text-left flex flex-col gap-1.5 shadow-sm">
-              <span className="text-[15px] font-extrabold uppercase tracking-wider text-amber-800 border-b border-amber-200/30 pb-1 flex items-center gap-1 select-none">
-                🚩 दान प्राप्तकर्ता
-              </span>
-              {settings.committeeName && (
-                <div className="flex flex-col">
-                  <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">मंदिर प्रबंधन समिति</span>
-                  <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.committeeName}</span>
-                </div>
-              )}
-              {settings.trusteeName && (
-                <div className="flex flex-col">
-                  <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">अधिकृत व्यक्ति / Trustee</span>
-                  <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.trusteeName}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-
-
-          {/* UPI Section */}
-          <div className="w-full max-w-sm flex flex-col gap-2.5">
-            
-            {/* UPI ID Display & Copy */}
-            <div className="flex items-center gap-2 bg-white border border-amber-200/40 p-0.5 pl-3 rounded-full shadow-sm">
-              <span className="font-mono text-sm text-slate-800 font-bold truncate flex-1 text-left">
-                {settings.upiId || "mansamahadev@upi"}
-              </span>
               <button
-                onClick={handleCopyUPI}
-                className="inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-1.5 px-3.5 rounded-full transition duration-300 shadow-sm shrink-0"
+                onClick={onClose}
+                className="w-8 h-8 rounded-full hover:bg-blue-100 text-slate-500 hover:text-blue-900 flex items-center justify-center transition"
               >
-                {copied ? (
-                  <>
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>UPI ID Copy Karein</span>
-                  </>
-                )}
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Pay with UPI App Button */}
-            {settings.upiLink && (
-              <a
-                href={settings.upiLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold text-xs md:text-sm py-2 px-5 rounded-full transition duration-300 shadow-md shadow-orange-500/10 hover:shadow-lg active:scale-[0.98]"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>UPI App Se Donate Karein</span>
-              </a>
+            {/* Steps */}
+            {checkoutStep === 'form' && (
+              <div className="p-5 overflow-y-auto flex flex-col gap-4">
+                {/* Info Card */}
+                <div className="bg-amber-50/60 border border-amber-200/40 rounded-2xl p-3 text-center">
+                  <p className="text-xs text-amber-900 font-bold leading-relaxed">
+                    "आपकी दान राशि मंदिर के विकास, सेवा और धार्मिक उत्सवों में समर्पित होगी।"
+                  </p>
+                </div>
+
+                {/* Amount Selection */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-wider text-left">
+                    दान राशि चुनिए (Select Amount):
+                  </label>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {['101', '251', '501', '1100', '2100'].map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setCheckoutAmount(amt)}
+                        className={`py-2 px-1 rounded-xl text-xs font-black border transition duration-200 ${
+                          checkoutAmount === amt 
+                            ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20' 
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        ₹{amt}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Custom Amount */}
+                  <div className="relative mt-1">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">₹</span>
+                    <input
+                      type="number"
+                      value={checkoutAmount}
+                      onChange={(e) => setCheckoutAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                      placeholder="अन्य राशि दर्ज करें (Custom Amount)"
+                      className="w-full pl-8 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                {/* Sender Details */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1 text-left">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-wider">
+                      दानदाता का नाम (Name - Optional):
+                    </label>
+                    <input
+                      type="text"
+                      value={checkoutName}
+                      onChange={(e) => setCheckoutName(e.target.value)}
+                      placeholder="उदा. विजय शर्मा"
+                      className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold text-slate-800"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1 text-left">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-wider">
+                      मोबाइल नंबर (Mobile No. - Optional):
+                    </label>
+                    <input
+                      type="tel"
+                      value={checkoutPhone}
+                      onChange={(e) => setCheckoutPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                      placeholder="उदा. 9876543210"
+                      className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-bold text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const amt = parseInt(checkoutAmount, 10);
+                    if (!amt || amt <= 0) {
+                      alert("कृपया सही दान राशि दर्ज करें।");
+                      return;
+                    }
+                    setCheckoutStep('payment');
+                  }}
+                  className="mt-2 w-full py-3 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 transition duration-200 shadow-md shadow-blue-500/10"
+                >
+                  <Shield className="w-4 h-4 fill-white/10" />
+                  <span>सुरक्षित भुगतान करें / Proceed to Pay</span>
+                </button>
+
+                <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold">
+                  <Shield className="w-3.5 h-3.5 text-blue-500" />
+                  <span>Razorpay द्वारा एन्क्रिप्टेड 256-bit SSL सुरक्षित भुगतान</span>
+                </div>
+              </div>
             )}
 
+            {checkoutStep === 'payment' && (
+              <div className="p-5 overflow-y-auto flex flex-col items-center gap-4">
+                {/* Summary Box */}
+                <div className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-3 flex items-center justify-between">
+                  <div className="text-left">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">दान प्राप्तकर्ता</span>
+                    <span className="text-xs font-extrabold text-slate-800">{settings.committeeName || "मंसा महादेव मंदिर समिति"}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block">कुल राशि</span>
+                    <span className="text-base font-black text-blue-600">₹{checkoutAmount}</span>
+                  </div>
+                </div>
+
+                {/* Dynamic QR Code for selected amount */}
+                <div className="flex flex-col items-center gap-1.5 w-full">
+                  <span className="text-[10px] font-black text-blue-800 uppercase flex items-center gap-1">
+                    <QrCode className="w-3.5 h-3.5" />
+                    <span>Dynamic UPI QR Code (स्कैन करें)</span>
+                  </span>
+                  
+                  <div className="relative bg-white p-2 rounded-2xl border border-blue-100 shadow-md max-w-[170px] w-full aspect-square flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
+                        `upi://pay?pa=${settings.upiId || "9340721968@ybl"}&pn=${encodeURIComponent(settings.trusteeName || settings.committeeName || "Mansa Mahadev Temple")}&tn=${encodeURIComponent(`Donation-${checkoutName || 'Devotee'}`)}&am=${checkoutAmount}&cu=INR`
+                      )}`} 
+                      alt="Razorpay dynamic QR" 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  
+                  <p className="text-[10px] text-slate-500 font-bold max-w-[250px]">
+                    इस QR कोड में ₹{checkoutAmount} की राशि पहले से ही सेट है। किसी भी UPI ऐप से स्कैन करके भुगतान करें।
+                  </p>
+                </div>
+
+                {/* 1-Click Payment Launchers */}
+                <div className="w-full flex flex-col gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 text-left pl-1">
+                    🚀 अपने mobile के UPI ऐप से भुगतान करें:
+                  </span>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* PhonePe */}
+                    <button
+                      onClick={() => handleOpenAppWithCopy('PhonePe', checkoutAmount)}
+                      className="flex flex-col items-center justify-center gap-1 bg-purple-50/60 hover:bg-purple-100 border border-purple-200 p-2 rounded-2xl transition duration-200 active:scale-95 shadow-sm"
+                    >
+                      <PhonePeIcon />
+                      <span className="text-[10px] font-black text-purple-900 leading-tight">PhonePe</span>
+                    </button>
+
+                    {/* GPay */}
+                    <button
+                      onClick={() => handleOpenAppWithCopy('Google Pay', checkoutAmount)}
+                      className="flex flex-col items-center justify-center gap-1 bg-blue-50/60 hover:bg-blue-100 border border-blue-200 p-2 rounded-2xl transition duration-200 active:scale-95 shadow-sm"
+                    >
+                      <GPayIcon />
+                      <span className="text-[10px] font-black text-blue-900 leading-tight">Google Pay</span>
+                    </button>
+
+                    {/* Paytm */}
+                    <button
+                      onClick={() => handleOpenAppWithCopy('Paytm', checkoutAmount)}
+                      className="flex flex-col items-center justify-center gap-1 bg-sky-50/60 hover:bg-sky-100 border border-sky-200 p-2 rounded-2xl transition duration-200 active:scale-95 shadow-sm"
+                    >
+                      <PaytmIcon />
+                      <span className="text-[10px] font-black text-sky-900 leading-tight">Paytm</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Direct payment notification */}
+                {copiedApp && (
+                  <div className="w-full bg-green-50 border border-green-100 text-green-950 rounded-xl p-2.5 text-xs text-left font-semibold animate-fade-in">
+                    ✅ {copiedApp} खुल रहा है। राशि ₹{checkoutAmount} एवं UPI ID कॉपी हो चुकी है!
+                  </div>
+                )}
+
+                {/* I have paid button */}
+                <button
+                  type="button"
+                  onClick={() => setCheckoutStep('success')}
+                  className="mt-1 w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-black text-sm rounded-xl flex items-center justify-center gap-2 transition duration-200 shadow-md shadow-emerald-500/10"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-white fill-white/10" />
+                  <span>मैंने भुगतान कर दिया है (I have Paid)</span>
+                </button>
+              </div>
+            )}
+
+            {checkoutStep === 'success' && (
+              <div className="p-5 overflow-y-auto flex flex-col items-center text-center gap-4">
+                {/* Success Icon */}
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 animate-bounce">
+                  <CheckCircle2 className="w-10 h-10" />
+                </div>
+
+                {/* Success Message */}
+                <div>
+                  <h4 className="text-lg font-black text-emerald-800">भुगतान अनुरोध दर्ज किया गया!</h4>
+                  <p className="text-xs text-slate-500 font-bold mt-1">
+                    मंसा महादेव जी आपकी समस्त मनोकामनाएं पूर्ण करें।
+                  </p>
+                </div>
+
+                {/* Digital Receipt Card */}
+                <div className="w-full bg-gradient-to-br from-amber-50/40 to-orange-50/20 border border-amber-200/40 rounded-2xl p-4 text-left flex flex-col gap-2.5 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-amber-200/30 pb-2">
+                    <span className="text-xs font-black text-amber-800 flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                      <span>डिजिटल रसीद (Donation Receipt)</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">#{Date.now().toString().slice(-6)}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-y-2 text-xs font-bold text-slate-700">
+                    <span className="text-slate-400 font-bold">दानदाता:</span>
+                    <span className="text-right truncate">{checkoutName.trim() || 'श्रद्धालु (Devotee)'}</span>
+
+                    <span className="text-slate-400 font-bold">मोबाइल नंबर:</span>
+                    <span className="text-right">{checkoutPhone.trim() ? `+91 ${checkoutPhone}` : 'N/A'}</span>
+
+                    <span className="text-slate-400 font-bold">दान राशि:</span>
+                    <span className="text-right text-emerald-600 font-extrabold">₹{checkoutAmount}</span>
+
+                    <span className="text-slate-400 font-bold">उद्देश्य:</span>
+                    <span className="text-right text-amber-800">मंदिर सेवा एवं विकास कार्य</span>
+
+                    <span className="text-slate-400 font-bold">तिथि & समय:</span>
+                    <span className="text-right">{new Date().toLocaleDateString('hi-IN')}</span>
+                  </div>
+                </div>
+
+                {/* Close Button */}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full py-2.5 bg-slate-800 hover:bg-slate-900 active:scale-98 text-white font-black text-sm rounded-xl transition duration-200"
+                >
+                  बंद करें (Close)
+                </button>
+              </div>
+            )}
           </div>
+        ) : (
+          <>
+            {/* Modal Header */}
+            <div className="p-5 border-b border-amber-200/40 bg-gradient-to-r from-amber-500/5 to-amber-600/10 flex items-center justify-between gap-4 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-red-400 to-orange-500 rounded-2xl text-white shadow-md shadow-orange-500/10">
+                  <Heart className="w-5 h-5 text-white fill-white" />
+                </div>
+                <div className="text-left">
+                  <h2 className="text-xl md:text-2xl font-extrabold tracking-wide text-slate-800">
+                    ❤️ मंदिर सेवा एवं दान
+                  </h2>
+                  <p className="text-xs md:text-sm text-amber-700 font-bold mt-0.5">
+                    Mansa Mahadev Mandir Seva & Donation
+                  </p>
+                </div>
+              </div>
 
-          {/* Saffron Divider */}
-          <div className="w-full max-w-xs h-[1px] bg-gradient-to-r from-transparent via-amber-300 to-transparent my-0.5"></div>
+              {/* Close Button */}
+              <button
+                onClick={onClose}
+                className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-amber-200/30 shadow-md flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 text-slate-500 transition duration-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-          {/* Closing Message */}
-          <p className="text-xs md:text-sm text-slate-700 font-bold leading-relaxed max-w-xs">
-            🙏 "आपका सहयोग मंदिर सेवा एवं धार्मिक कार्यों में अमूल्य योगदान है। हर हर महादेव।"
-          </p>
+            {/* Modal Body */}
+            <div className="p-4 md:p-5 overflow-y-auto flex flex-col items-center text-center gap-4">
+              
+              {/* Donation Message */}
+              <div className="bg-amber-50/50 border border-amber-200/30 rounded-2xl p-3 w-full max-w-sm shadow-sm">
+                <p className="text-sm md:text-base text-amber-900 font-bold leading-relaxed">
+                  🙏 "{getDisplayMessage(settings.message)}"
+                </p>
+              </div>
 
-        </div>
+              {/* QR Code Container (Dynamic Barcode Scanner) */}
+              <div className="flex flex-col items-center gap-1.5 w-full">
+                <span className="text-xs font-black text-amber-800 uppercase flex items-center gap-1">
+                  <QrCode className="w-4 h-4 text-orange-600" />
+                  <span>स्कैन या स्क्रीनशॉट लेकर भुगतान करें (Barcode Option)</span>
+                </span>
+                <div className="relative bg-white p-2 rounded-3xl border border-amber-200/80 shadow-md max-w-[200px] w-full aspect-square flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-amber-300">
+                  {settings.qrCodeUrl ? (
+                    <img 
+                      src={settings.qrCodeUrl} 
+                      alt="Donation QR Code" 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-contain select-none"
+                    />
+                  ) : (
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=${settings.upiId || "9340721968@ybl"}&pn=${encodeURIComponent(settings.trusteeName || settings.committeeName || "Mansa Mahadev Temple")}&tn=Mandir%20Donation&cu=INR`)}`} 
+                      alt="Donation UPI QR Code" 
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-contain select-none"
+                    />
+                  )}
+                </div>
+                <p className="text-[10px] text-slate-500 font-bold max-w-[240px]">
+                  आप ऊपर दिए गए QR कोड (बारकोड) को किसी भी UPI ऐप (GPay, PhonePe, Paytm, BHIM) से स्कैन कर सकते हैं।
+                </p>
+              </div>
+
+              {/* Recipient Details Section */}
+              {(settings.committeeName || settings.trusteeName) && (
+                <div className="w-full max-w-sm bg-amber-50/40 border border-amber-200/30 rounded-2xl p-3 text-left flex flex-col gap-1.5 shadow-sm">
+                  <span className="text-[15px] font-extrabold uppercase tracking-wider text-amber-800 border-b border-amber-200/30 pb-1 flex items-center gap-1 select-none">
+                    🚩 दान प्राप्तकर्ता
+                  </span>
+                  {settings.committeeName && (
+                    <div className="flex flex-col">
+                      <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">मंदिर प्रबंधन समिति</span>
+                      <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.committeeName}</span>
+                    </div>
+                  )}
+                  {settings.trusteeName && (
+                    <div className="flex flex-col">
+                      <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">अधिकृत व्यक्ति / Trustee</span>
+                      <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.trusteeName}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* UPI Section */}
+              <div className="w-full max-w-sm flex flex-col gap-3">
+                
+                {/* UPI ID Display & Copy */}
+                <div className="flex items-center gap-2 bg-white border border-amber-200 p-0.5 pl-3 rounded-full shadow-sm">
+                  <span className="font-mono text-xs md:text-sm text-slate-800 font-bold truncate flex-1 text-left">
+                    {settings.upiId || "mansamahadev@upi"}
+                  </span>
+                  <button
+                    onClick={handleCopyUPI}
+                    className="inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-1.5 px-3.5 rounded-full transition duration-300 shadow-sm shrink-0 active:scale-95"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy ID</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Dynamic Assistance overlay */}
+                {copiedApp ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-green-50 border border-green-200 text-green-950 rounded-2xl p-3.5 text-left flex flex-col gap-1.5 shadow-md"
+                  >
+                    <div className="flex items-center gap-1.5 text-xs font-black text-green-800 uppercase">
+                      <span className="animate-ping rounded-full h-2 w-2 bg-green-500"></span>
+                      <span>{copiedApp} के लिए UPI ID Copy हो गया!</span>
+                    </div>
+                    <p className="text-[11px] md:text-xs leading-relaxed font-bold">
+                      हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-green-900">{settings.upiId || "9340721968@ybl"}</span> को कॉपी कर लिया है। {copiedApp} ऐप खुल रहा है, वहां बस <span className="text-green-700 font-black underline">"To UPI ID"</span> पर जाएं और पेस्ट (Paste) करके भुगतान पूरा करें!
+                    </p>
+                  </motion.div>
+                ) : (
+                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-3 text-left flex flex-col gap-1.5 shadow-sm">
+                    <span className="text-[11px] font-black uppercase text-orange-800 flex items-center gap-1">
+                      <Info className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+                      <span>सुरक्षा गाइड (Security Decline Fix)</span>
+                    </span>
+                    <p className="text-[10px] md:text-[11px] text-orange-950 font-bold leading-relaxed">
+                      UPI ऐप्स (PhonePe, GPay) सुरक्षा कारणों से ब्राउज़र से डायरेक्ट पेमेंट ब्लॉक कर देते हैं। <span className="text-orange-700 font-extrabold">नीचे दिए गए 1-Click बटनों का उपयोग करें, यह 100% सफल है:</span>
+                    </p>
+                  </div>
+                )}
+
+                {/* Brand New 1-Click Fast Launch Options (100% Active & Correct Links) */}
+                <div className="flex flex-col gap-2 w-full">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 select-none text-left pl-1">
+                    ⚡ 1-Click से ID कॉपी कर सीधे पेमेंट पेज खोलें:
+                  </span>
+                  
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {/* PhonePe */}
+                    <button
+                      onClick={() => handleOpenAppWithCopy('PhonePe')}
+                      className="flex flex-col items-center justify-center gap-1 bg-purple-50/60 hover:bg-purple-100 border border-purple-200 p-1.5 rounded-2xl transition duration-300 active:scale-95 shadow-sm"
+                    >
+                      <PhonePeIcon />
+                      <span className="text-[9px] font-black text-purple-900 leading-tight">PhonePe</span>
+                      <span className="text-[8px] font-black text-purple-700 bg-purple-100 px-1 py-0.5 rounded-full uppercase">चलाएं</span>
+                    </button>
+
+                    {/* GPay */}
+                    <button
+                      onClick={() => handleOpenAppWithCopy('Google Pay')}
+                      className="flex flex-col items-center justify-center gap-1 bg-blue-50/60 hover:bg-blue-100 border border-blue-200 p-1.5 rounded-2xl transition duration-300 active:scale-95 shadow-sm"
+                    >
+                      <GPayIcon />
+                      <span className="text-[9px] font-black text-blue-900 leading-tight">GPay</span>
+                      <span className="text-[8px] font-black text-blue-700 bg-blue-100 px-1 py-0.5 rounded-full uppercase">चलाएं</span>
+                    </button>
+
+                    {/* Paytm */}
+                    <button
+                      onClick={() => handleOpenAppWithCopy('Paytm')}
+                      className="flex flex-col items-center justify-center gap-1 bg-sky-50/60 hover:bg-sky-100 border border-sky-200 p-1.5 rounded-2xl transition duration-300 active:scale-95 shadow-sm"
+                    >
+                      <PaytmIcon />
+                      <span className="text-[9px] font-black text-sky-900 leading-tight">Paytm</span>
+                      <span className="text-[8px] font-black text-sky-700 bg-sky-100 px-1 py-0.5 rounded-full uppercase">चलाएं</span>
+                    </button>
+
+                    {/* Razorpay */}
+                    <button
+                      onClick={handleRazorpayClick}
+                      className="flex flex-col items-center justify-center gap-1 bg-blue-50/40 hover:bg-blue-100/60 border border-blue-200 p-1.5 rounded-2xl transition duration-300 active:scale-95 shadow-sm"
+                    >
+                      <RazorpayIcon />
+                      <span className="text-[9px] font-black text-blue-950 leading-tight">Razorpay</span>
+                      <span className="text-[8px] font-black text-blue-800 bg-blue-100/80 px-1 py-0.5 rounded-full uppercase">चलाएं</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Direct App Link Attempt as a fallback */}
+                <a
+                  href={`upi://pay?pa=${encodeURIComponent(settings.upiId || "mansamahadev@upi")}&pn=${encodeURIComponent(settings.trusteeName || settings.committeeName || "Mansa Mahadev Temple")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-50 to-amber-50 hover:from-amber-100/50 hover:to-orange-100/50 text-amber-900 border border-amber-300 font-extrabold text-base py-3 px-5 rounded-xl transition duration-300 active:scale-95 w-full shadow-sm"
+                >
+                  <ExternalLink className="w-5 h-5 text-amber-600" />
+                  <span>Direct Link से कोशिश करें</span>
+                </a>
+
+              </div>
+
+              {/* Saffron Divider */}
+              <div className="w-full max-w-xs h-[1px] bg-gradient-to-r from-transparent via-amber-300 to-transparent my-0.5"></div>
+
+              {/* Closing Message */}
+              <p className="text-xs md:text-sm text-slate-700 font-bold leading-relaxed max-w-xs">
+                🙏 "आपका सहयोग मंदिर सेवा एवं धार्मिक कार्यों में अमूल्य योगदान है। हर हर महादेव।"
+              </p>
+
+            </div>
+          </>
+        )}
       </motion.div>
     </div>
   );

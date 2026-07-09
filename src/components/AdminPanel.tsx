@@ -179,6 +179,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [donationQRCode, setDonationQRCode] = useState('');
   const [donationUPIId, setDonationUPIId] = useState('');
   const [donationUPILink, setDonationUPILink] = useState('');
+  const [donationRazorpayLink, setDonationRazorpayLink] = useState('');
   const [donationMessage, setDonationMessage] = useState('');
   const [donationCommitteeName, setDonationCommitteeName] = useState('');
   const [donationTrusteeName, setDonationTrusteeName] = useState('');
@@ -288,6 +289,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         qrCodeUrl: donationQRCode.trim(),
         upiId: donationUPIId.trim(),
         upiLink: donationUPILink.trim(),
+        razorpayLink: donationRazorpayLink.trim(),
         message: donationMessage.trim(),
         committeeName: donationCommitteeName.trim(),
         trusteeName: donationTrusteeName.trim(),
@@ -396,6 +398,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       setDonationQRCode(dSettings.qrCodeUrl || '');
       setDonationUPIId(dSettings.upiId || '');
       setDonationUPILink(dSettings.upiLink || '');
+      setDonationRazorpayLink(dSettings.razorpayLink || '');
       setDonationMessage(dSettings.message || '');
       setDonationCommitteeName(dSettings.committeeName || '');
       setDonationTrusteeName(dSettings.trusteeName || '');
@@ -2912,6 +2915,18 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                             value={donationUPILink}
                             onChange={(e) => setDonationUPILink(e.target.value)}
                             placeholder="upi://pay?pa=mansamahadev@upi&pn=Mansa%20Mahadev%20Temple..."
+                            className="w-full px-4 py-2 bg-white border border-amber-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs text-slate-700 font-medium font-mono"
+                          />
+                        </div>
+
+                        {/* Razorpay Link */}
+                        <div>
+                          <label className="block text-xs font-bold text-amber-950 mb-1">रेज़रपे पेमेंट पेज लिंक (Razorpay Payment Page Link):</label>
+                          <input
+                            type="text"
+                            value={donationRazorpayLink}
+                            onChange={(e) => setDonationRazorpayLink(e.target.value)}
+                            placeholder="https://pages.razorpay.com/mansamahadev"
                             className="w-full px-4 py-2 bg-white border border-amber-200/80 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 text-xs text-slate-700 font-medium font-mono"
                           />
                         </div>
