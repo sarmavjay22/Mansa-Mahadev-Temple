@@ -92,7 +92,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
 
   const handleCopyUPI = async () => {
     try {
-      await navigator.clipboard.writeText(settings.upiId);
+      await navigator.clipboard.writeText("9340721968@ybl");
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -101,10 +101,9 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
   };
 
   const getAppUpiLink = (appName: string, amountStr?: string) => {
-    const upiId = settings.upiId || "9340721968@ybl";
-    const name = encodeURIComponent(settings.trusteeName || settings.committeeName || "Mansa Mahadev Temple");
-    const note = encodeURIComponent(checkoutName ? `Donation - ${checkoutName}` : "Mandir Donation");
-    let baseParams = `pa=${upiId}&pn=${name}&tn=${note}&cu=INR`;
+    const upiId = "9340721968@ybl";
+    const name = "Vijay%20Sharma";
+    let baseParams = `pa=${upiId}&pn=${name}&cu=INR`;
     if (amountStr) {
       baseParams += `&am=${amountStr}`;
     }
@@ -119,38 +118,13 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
       return settings.razorpayLink || "https://pages.razorpay.com/mansamahadev";
     }
 
-    const isAndroid = /Android/i.test(navigator.userAgent);
-
-    if (isAndroid) {
-      if (appName === 'PhonePe') {
-        return `intent://pay?${baseParams}#Intent;scheme=upi;package=com.phonepe.app;end`;
-      }
-      if (appName === 'Google Pay') {
-        return `intent://pay?${baseParams}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`;
-      }
-      if (appName === 'Paytm') {
-        return `intent://pay?${baseParams}#Intent;scheme=upi;package=net.one97.paytm;end`;
-      }
-    }
-
-    // iOS or Fallback Custom schemes
-    if (appName === 'PhonePe') {
-      return `phonepe://pay?${baseParams}`;
-    }
-    if (appName === 'Google Pay') {
-      return `tez://upi/pay?${baseParams}`;
-    }
-    if (appName === 'Paytm') {
-      return `paytmmp://pay?${baseParams}`;
-    }
-
     return `upi://pay?${baseParams}`;
   };
 
   const handleOpenAppWithCopy = async (appName: string, amountStr?: string) => {
     const upiLink = getAppUpiLink(appName, amountStr);
     try {
-      await navigator.clipboard.writeText(settings.upiId || "9340721968@ybl");
+      await navigator.clipboard.writeText("9340721968@ybl");
       setCopied(true);
       setCopiedApp(appName);
       setTimeout(() => {
@@ -546,38 +520,13 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                   )}
                 </div>
                 <p className="text-[10px] text-slate-500 font-bold max-w-[240px]">
-                  आप ऊपर दिए गए QR कोड (बारकोड) को किसी भी UPI ऐप (GPay, PhonePe, Paytm, BHIM) से स्कैन कर सकते हैं।
+                  आप QR कोड को स्कैन करके या नीचे दी गई UPI ID कॉपी करके भी भुगतान कर सकते हैं।
                 </p>
-              </div>
 
-              {/* Recipient Details Section */}
-              {(settings.committeeName || settings.trusteeName) && (
-                <div className="w-full max-w-sm bg-amber-50/40 border border-amber-200/30 rounded-2xl p-3 text-left flex flex-col gap-1.5 shadow-sm">
-                  <span className="text-[15px] font-extrabold uppercase tracking-wider text-amber-800 border-b border-amber-200/30 pb-1 flex items-center gap-1 select-none">
-                    🚩 दान प्राप्तकर्ता
-                  </span>
-                  {settings.committeeName && (
-                    <div className="flex flex-col">
-                      <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">मंदिर प्रबंधन समिति</span>
-                      <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.committeeName}</span>
-                    </div>
-                  )}
-                  {settings.trusteeName && (
-                    <div className="flex flex-col">
-                      <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider">अधिकृत व्यक्ति / Trustee</span>
-                      <span className="text-sm font-black text-slate-800 leading-tight mt-0.5">{settings.trusteeName}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* UPI Section */}
-              <div className="w-full max-w-sm flex flex-col gap-3">
-                
                 {/* UPI ID Display & Copy */}
                 <div className="flex items-center gap-2 bg-white border border-amber-200 p-0.5 pl-3 rounded-full shadow-sm">
                   <span className="font-mono text-xs md:text-sm text-slate-800 font-bold truncate flex-1 text-left">
-                    {settings.upiId || "mansamahadev@upi"}
+                    9340721968@ybl
                   </span>
                   <button
                     onClick={handleCopyUPI}
@@ -609,7 +558,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                       <span>{copiedApp} के लिए UPI ID Copy हो गया!</span>
                     </div>
                     <p className="text-[11px] md:text-xs leading-relaxed font-bold">
-                      हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-green-900">{settings.upiId || "9340721968@ybl"}</span> को कॉपी कर लिया है। {copiedApp} ऐप खुल रहा है, वहां बस <span className="text-green-700 font-black underline">"To UPI ID"</span> पर जाएं और पेस्ट (Paste) करके भुगतान पूरा करें!
+                      हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-green-900">9340721968@ybl</span> को कॉपी कर लिया है। {copiedApp} ऐप खुल रहा है, वहां बस <span className="text-green-700 font-black underline">"To UPI ID"</span> पर जाएं और पेस्ट (Paste) करके भुगतान पूरा करें!
                     </p>
                   </motion.div>
                 ) : (
@@ -675,7 +624,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
 
                 {/* Direct App Link Attempt as a fallback */}
                 <a
-                  href={`upi://pay?pa=${encodeURIComponent(settings.upiId || "mansamahadev@upi")}&pn=${encodeURIComponent(settings.trusteeName || settings.committeeName || "Mansa Mahadev Temple")}`}
+                  href="upi://pay?pa=9340721968@ybl&pn=Vijay%20Sharma&cu=INR"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-50 to-amber-50 hover:from-amber-100/50 hover:to-orange-100/50 text-amber-900 border border-amber-300 font-extrabold text-base py-3 px-5 rounded-xl transition duration-300 active:scale-95 w-full shadow-sm"

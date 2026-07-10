@@ -62,6 +62,16 @@ export function getHindiDayAndDate(dateStr: string): { day: string; date: string
   }
 }
 
+export function isMorningShringar(item: GalleryItem): boolean {
+  const text = ((item.festivalName || '') + ' ' + (item.description || '')).toLowerCase();
+  return text.includes('सुबह') || text.includes('प्रातः') || text.includes('shringar') || text.includes('morning') || text.includes('morn') || text.includes('pratah');
+}
+
+export function isEveningShringar(item: GalleryItem): boolean {
+  const text = ((item.festivalName || '') + ' ' + (item.description || '')).toLowerCase();
+  return text.includes('शाम') || text.includes('संध्या') || text.includes('सायं') || text.includes('evening') || text.includes('eve') || text.includes('sandhya') || text.includes('shyam');
+}
+
 export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
   const [shringars, setShringars] = useState<GalleryItem[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -455,9 +465,21 @@ export default function ShringarPopup({ isOpen, onClose }: ShringarPopupProps) {
                         {/* Description Panel */}
                         <div className="p-5 flex-1 flex flex-col justify-between">
                           <div>
-                            <div className="flex items-center gap-1 text-[11px] font-bold text-amber-700 mb-1">
-                              <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                              <span>दिव्य श्रृंगार दर्शन</span>
+                            <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                              <div className="flex items-center gap-1 text-[11px] font-extrabold text-amber-700 bg-amber-100/50 border border-amber-200/30 px-2.5 py-0.5 rounded-full">
+                                <Sparkles className="w-3 h-3 text-amber-500 fill-amber-500" />
+                                <span>दिव्य श्रृंगार दर्शन</span>
+                              </div>
+                              {isMorningShringar(item) && (
+                                <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2.5 py-0.5 rounded-full text-[10px] font-extrabold shadow-xs select-none">
+                                  🌅 सुबह दर्शन
+                                </span>
+                              )}
+                              {isEveningShringar(item) && (
+                                <span className="inline-flex items-center gap-1 bg-blue-900 text-white px-2.5 py-0.5 rounded-full text-[10px] font-extrabold shadow-xs select-none">
+                                  🌙 शाम दर्शन
+                                </span>
+                              )}
                             </div>
                             
                             <h3 className="text-md font-bold text-slate-800 mb-2 leading-snug">

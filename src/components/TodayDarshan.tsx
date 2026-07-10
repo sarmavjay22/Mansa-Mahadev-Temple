@@ -46,6 +46,18 @@ function formatDateHindi(dateStr: string): string {
   }
 }
 
+function isMorningDarshan(item: DailyDarshan | null): boolean {
+  if (!item) return false;
+  const text = ((item.festivalName || '') + ' ' + (item.description || '')).toLowerCase();
+  return text.includes('सुबह') || text.includes('प्रातः') || text.includes('shringar') || text.includes('morning') || text.includes('morn') || text.includes('pratah');
+}
+
+function isEveningDarshan(item: DailyDarshan | null): boolean {
+  if (!item) return false;
+  const text = ((item.festivalName || '') + ' ' + (item.description || '')).toLowerCase();
+  return text.includes('शाम') || text.includes('संध्या') || text.includes('सायं') || text.includes('evening') || text.includes('eve') || text.includes('sandhya') || text.includes('shyam');
+}
+
 export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {}) {
   const [darshan, setDarshan] = useState<DailyDarshan | null>(null);
   const [isAdmin, setIsAdmin] = useState(db.isAdminLoggedIn());
@@ -460,12 +472,24 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
             />
 
             {/* Saffron Floating Indicator Tag */}
-            {darshan.festivalName && (
-              <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-[8px] px-2 py-0.5 rounded-md shadow-md z-20 flex items-center gap-1">
-                <Sparkles className="w-2 h-2 animate-spin text-white" />
-                <span>{darshan.festivalName}</span>
-              </div>
-            )}
+            <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-20">
+              {darshan.festivalName && (
+                <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
+                  <Sparkles className="w-3.5 h-3.5 animate-pulse text-white fill-white" />
+                  <span>{darshan.festivalName}</span>
+                </div>
+              )}
+              {isMorningDarshan(darshan) && (
+                <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
+                  <span>🌞 सुबह का श्रृंगार</span>
+                </div>
+              )}
+              {isEveningDarshan(darshan) && (
+                <div className="bg-blue-900 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-blue-800/30 select-none">
+                  <span>🌙 शाम का श्रृंगार</span>
+                </div>
+              )}
+            </div>
 
             {/* Top-Right Tools HUD */}
             <div className="absolute top-3 right-3 flex items-center gap-1.5 z-20">
@@ -473,7 +497,7 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
               {zoomScale > 1 && (
                 <button
                   onClick={handleResetZoom}
-                  className="bg-black/60 hover:bg-black/80 text-white font-bold text-[10px] px-2 py-1 rounded-lg backdrop-blur-sm transition"
+                  className="bg-black/75 hover:bg-black/90 text-white font-bold text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md transition shadow-md border border-white/10"
                 >
                   रीसेट (1x)
                 </button>
@@ -483,9 +507,9 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
               <button
                 onClick={handleZoomIn}
                 title="ज़ूम इन करें"
-                className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition active:scale-95"
+                className="w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md transition active:scale-95 shadow-md shadow-black/40 border border-white/10"
               >
-                <ZoomIn className="w-4 h-4" />
+                <ZoomIn className="w-4 h-4 text-white" />
               </button>
 
               {/* Zoom Out */}
@@ -493,18 +517,18 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
                 onClick={handleZoomOut}
                 disabled={zoomScale === 1}
                 title="ज़ूम आउट करें"
-                className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 disabled:opacity-40 text-white flex items-center justify-center backdrop-blur-sm transition active:scale-95"
+                className="w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 disabled:opacity-40 text-white flex items-center justify-center backdrop-blur-md transition active:scale-95 shadow-md shadow-black/40 border border-white/10"
               >
-                <ZoomOut className="w-4 h-4" />
+                <ZoomOut className="w-4 h-4 text-white" />
               </button>
 
               {/* Fullscreen Button */}
               <button
                 onClick={() => setIsFullscreen(true)}
                 title="पूर्ण स्क्रीन"
-                className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition active:scale-95"
+                className="w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md transition active:scale-95 shadow-md shadow-black/40 border border-white/10"
               >
-                <Maximize2 className="w-4 h-4" />
+                <Maximize2 className="w-4 h-4 text-white" />
               </button>
             </div>
 
@@ -853,12 +877,24 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
           />
 
           {/* Saffron Floating Indicator Tag */}
-          {darshan.festivalName && (
-            <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-[8px] px-2 py-0.5 rounded-md shadow-md z-20 flex items-center gap-1">
-              <Sparkles className="w-2 h-2 animate-spin text-white" />
-              <span>{darshan.festivalName}</span>
-            </div>
-          )}
+          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-20">
+            {darshan.festivalName && (
+              <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
+                <Sparkles className="w-3.5 h-3.5 animate-pulse text-white fill-white" />
+                <span>{darshan.festivalName}</span>
+              </div>
+            )}
+            {isMorningDarshan(darshan) && (
+              <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
+                <span>🌞 सुबह का श्रृंगार</span>
+              </div>
+            )}
+            {isEveningDarshan(darshan) && (
+              <div className="bg-blue-900 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-blue-800/30 select-none">
+                <span>🌙 शाम का श्रृंगार</span>
+              </div>
+            )}
+          </div>
 
           {/* Top-Right Tools HUD */}
           <div className="absolute top-3 right-3 flex items-center gap-1.5 z-20">
@@ -866,7 +902,7 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
             {zoomScale > 1 && (
               <button
                 onClick={handleResetZoom}
-                className="bg-black/60 hover:bg-black/80 text-white font-bold text-[10px] px-2 py-1 rounded-lg backdrop-blur-sm transition"
+                className="bg-black/75 hover:bg-black/90 text-white font-bold text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md transition shadow-md border border-white/10"
               >
                 रीसेट (1x)
               </button>
@@ -876,9 +912,9 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
             <button
               onClick={handleZoomIn}
               title="ज़ूम इन करें"
-              className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md transition active:scale-95 shadow-md shadow-black/40 border border-white/10"
             >
-              <ZoomIn className="w-4 h-4" />
+              <ZoomIn className="w-4 h-4 text-white" />
             </button>
 
             {/* Zoom Out */}
@@ -886,18 +922,18 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
               onClick={handleZoomOut}
               disabled={zoomScale === 1}
               title="ज़ूम आउट करें"
-              className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 disabled:opacity-40 text-white flex items-center justify-center backdrop-blur-sm transition active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 disabled:opacity-40 text-white flex items-center justify-center backdrop-blur-md transition active:scale-95 shadow-md shadow-black/40 border border-white/10"
             >
-              <ZoomOut className="w-4 h-4" />
+              <ZoomOut className="w-4 h-4 text-white" />
             </button>
 
             {/* Fullscreen Button */}
             <button
               onClick={() => setIsFullscreen(true)}
               title="पूर्ण स्क्रीन"
-              className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-sm transition active:scale-95"
+              className="w-8 h-8 rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md transition active:scale-95 shadow-md shadow-black/40 border border-white/10"
             >
-              <Maximize2 className="w-4 h-4" />
+              <Maximize2 className="w-4 h-4 text-white" />
             </button>
           </div>
 

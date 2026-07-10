@@ -267,9 +267,9 @@ export default function App() {
       </main>
 
       {/* 4. Elegant Spiritual Footer */}
-      <footer className="w-full max-w-4xl mx-auto px-4 mt-16 relative z-10">
+      <footer className="w-full max-w-4xl mx-auto px-4 mt-3 relative z-10">
         {/* Main Footer Card */}
-        <div className="w-full bg-white/80 backdrop-blur-md border border-amber-200/60 rounded-3xl p-6 md:p-8 text-slate-800 shadow-xl shadow-amber-100/20 text-center">
+        <div className="w-full bg-gradient-to-br from-amber-50 to-orange-50/90 border-2 border-amber-200 rounded-3xl p-6 md:p-8 text-slate-800 shadow-xl shadow-amber-100/40 text-center">
           <div className="flex flex-col items-center justify-center text-center">
             {/* Block 2: Quick Links */}
             <div className="flex flex-col items-center">
