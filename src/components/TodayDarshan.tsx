@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, ChangeEvent, MouseEvent, TouchEvent } from
 import { db, subscribeToDBUpdates, formatDateDMY } from '../lib/db';
 import { DailyDarshan } from '../types';
 import { uploadToImageKit } from '../lib/imagekit';
-import ShringarPopup from './ShringarPopup';
+import ShringarPopup, { getHindiDayAndDate } from './ShringarPopup';
 import { 
   Maximize2, 
   Minimize2, 
@@ -473,21 +473,33 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
 
             {/* Saffron Floating Indicator Tag */}
             <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-20">
-              {darshan.festivalName && (
+              {(() => {
+                const info = getHindiDayAndDate(darshan.date);
+                return (
+                  <div className="bg-[#fffdf5]/95 backdrop-blur-md border border-amber-300 px-3 py-1.5 rounded-2xl shadow-md text-slate-800 flex flex-col items-center select-none shrink-0 min-w-[70px]">
+                    <span className="text-[10px] font-bold text-orange-600 tracking-wider">
+                      {info.day}
+                    </span>
+                    <span className="text-[9px] font-extrabold text-slate-700">
+                      {info.date}
+                    </span>
+                  </div>
+                );
+              })()}
+              {darshan.festivalName && 
+               darshan.festivalName.trim() !== "सुबह का श्रृंगार" && 
+               darshan.festivalName.trim() !== "शाम का श्रृंगार" && 
+               darshan.festivalName.trim() !== "दैनिक श्रृंगार" && 
+               darshan.festivalName.trim() !== "दैनिक श्रृंगार दर्शन" && (
                 <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
                   <Sparkles className="w-3.5 h-3.5 animate-pulse text-white fill-white" />
                   <span>{darshan.festivalName}</span>
                 </div>
               )}
-              {isMorningDarshan(darshan) && (
-                <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
-                  <span>🌞 सुबह का श्रृंगार</span>
-                </div>
-              )}
               {isEveningDarshan(darshan) && (
-                <div className="bg-blue-900 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-blue-800/30 select-none">
-                  <span>🌙 शाम का श्रृंगार</span>
-                </div>
+                <span className="inline-flex items-center gap-1 bg-blue-900 text-white px-2.5 py-0.5 rounded-full text-[10px] font-extrabold shadow-xs select-none">
+                  🌙 शाम का श्रृंगार
+                </span>
               )}
             </div>
 
@@ -544,13 +556,20 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
           {/* Right Side: Description and Spiritual Meta */}
           <div className="w-full md:w-1/2 p-4 md:p-5 flex flex-col justify-start gap-1 md:gap-2 text-slate-700 bg-amber-50/50 backdrop-blur-sm border-l border-amber-100/60">
             <div className="flex flex-col gap-0.5">
-              {/* Date Header */}
-              <div className="flex items-center gap-2 text-amber-800/80 font-bold text-xs">
-                <Calendar className="w-3.5 h-3.5 text-orange-500" />
-                <span>दर्शन तिथि:</span>
-                <span className="font-mono text-amber-950 bg-amber-100 px-2.5 py-0.5 rounded-lg border border-amber-200 shadow-xs font-extrabold text-xs">
-                  {darshan ? formatDateHindi(darshan.date) : ''}
+              {/* Date Header / Status Badges */}
+              <div className="flex flex-wrap gap-2 mb-1.5">
+                <span className="inline-flex items-center gap-1 bg-[#fffdf5] text-amber-700 px-2.5 py-1 rounded-full text-[11px] md:text-[13px] font-black border border-amber-300 select-none shadow-xs">
+                  ✨ दिव्य श्रृंगार दर्शन
                 </span>
+                {isEveningDarshan(darshan) ? (
+                  <span className="inline-flex items-center gap-1 bg-blue-900 text-white px-2.5 py-1 rounded-full text-[11px] md:text-[13px] font-extrabold select-none shadow-xs">
+                    🌙 शाम दर्शन
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2.5 py-1 rounded-full text-[11px] md:text-[13px] font-extrabold select-none shadow-xs">
+                    🌅 सुबह दर्शन
+                  </span>
+                )}
               </div>
 
               {/* Devotional content */}
@@ -878,21 +897,33 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
 
           {/* Saffron Floating Indicator Tag */}
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-20">
-            {darshan.festivalName && (
+            {(() => {
+              const info = getHindiDayAndDate(darshan.date);
+              return (
+                <div className="bg-[#fffdf5]/95 backdrop-blur-md border border-amber-300 px-3 py-1.5 rounded-2xl shadow-md text-slate-800 flex flex-col items-center select-none shrink-0 min-w-[70px]">
+                  <span className="text-[10px] font-bold text-orange-600 tracking-wider">
+                    {info.day}
+                  </span>
+                  <span className="text-[9px] font-extrabold text-slate-700">
+                    {info.date}
+                  </span>
+                </div>
+              );
+            })()}
+            {darshan.festivalName && 
+             darshan.festivalName.trim() !== "सुबह का श्रृंगार" && 
+             darshan.festivalName.trim() !== "शाम का श्रृंगार" && 
+             darshan.festivalName.trim() !== "दैनिक श्रृंगार" && 
+             darshan.festivalName.trim() !== "दैनिक श्रृंगार दर्शन" && (
               <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
                 <Sparkles className="w-3.5 h-3.5 animate-pulse text-white fill-white" />
                 <span>{darshan.festivalName}</span>
               </div>
             )}
-            {isMorningDarshan(darshan) && (
-              <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
-                <span>🌞 सुबह का श्रृंगार</span>
-              </div>
-            )}
             {isEveningDarshan(darshan) && (
-              <div className="bg-blue-900 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-blue-800/30 select-none">
-                <span>🌙 शाम का श्रृंगार</span>
-              </div>
+              <span className="inline-flex items-center gap-1 bg-blue-900 text-white px-2.5 py-0.5 rounded-full text-[10px] font-extrabold shadow-xs select-none">
+                🌙 शाम का श्रृंगार
+              </span>
             )}
           </div>
 
@@ -949,13 +980,20 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
         {/* Right Side: Description and Spiritual Meta */}
         <div className="w-full md:w-1/2 p-4 md:p-6 flex flex-col justify-start gap-1 md:gap-2 text-slate-700 bg-amber-50/50 backdrop-blur-sm border-l border-amber-100/60">
           <div className="flex flex-col gap-0.5">
-            {/* Date Header */}
-            <div className="flex items-center gap-2 text-amber-800/80 font-bold text-sm">
-              <Calendar className="w-4 h-4 text-orange-500" />
-              <span>दर्शन तिथि:</span>
-              <span className="font-mono text-amber-950 bg-amber-100 px-3 py-1 rounded-lg border border-amber-200 shadow-xs font-extrabold text-[13px]">
-                {darshan ? formatDateHindi(darshan.date) : ''}
+            {/* Date Header / Status Badges */}
+            <div className="flex flex-wrap gap-2 mb-1.5">
+              <span className="inline-flex items-center gap-1 bg-[#fffdf5] text-amber-700 px-2.5 py-1 rounded-full text-[11px] md:text-[13px] font-black border border-amber-300 select-none shadow-xs">
+                ✨ दिव्य श्रृंगार दर्शन
               </span>
+              {isEveningDarshan(darshan) ? (
+                <span className="inline-flex items-center gap-1 bg-blue-900 text-white px-2.5 py-1 rounded-full text-[11px] md:text-[13px] font-extrabold select-none shadow-xs">
+                  🌙 शाम दर्शन
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 bg-orange-600 text-white px-2.5 py-1 rounded-full text-[11px] md:text-[13px] font-extrabold select-none shadow-xs">
+                  🌅 सुबह दर्शन
+                </span>
+              )}
             </div>
 
             {/* Devotional content */}
