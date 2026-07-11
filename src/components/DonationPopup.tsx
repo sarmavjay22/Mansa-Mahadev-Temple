@@ -104,10 +104,11 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
   const getAppUpiLink = (appName: string, amountStr?: string) => {
     const upiId = "9340721968@ybl";
     const name = encodeURIComponent("Vijay Sharma");
-    let baseParams = `pa=${upiId}&pn=${name}&cu=INR&tn=Donation`;
-    if (amountStr) {
-      baseParams += `&am=${amountStr}`;
-    }
+    // To comply with NPCI and bank security guidelines for peer-to-peer (P2P) personal accounts,
+    // we MUST NOT include prefilled amounts ('am') or transaction notes ('tn') in mobile browser deep links.
+    // Including them triggers a "Payment declined for security reasons" error in PhonePe, GPay, and Paytm.
+    // Instead, we open the clean payee screen, and copy the amount to the user's clipboard/guide them to enter it manually.
+    let baseParams = `pa=${upiId}&pn=${name}&cu=INR`;
 
     if (appName === 'Razorpay') {
       return "https://razorpay.me/@vijaysharma843";
@@ -395,11 +396,19 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
 
                 {/* Direct payment notification */}
                 {copiedApp && (
-                  <div className="w-full bg-green-50 border border-green-100 text-green-950 rounded-xl p-2.5 text-xs text-left font-semibold animate-fade-in">
+                  <div className="w-full bg-green-50 border border-green-100 text-green-950 rounded-xl p-3 text-xs text-left font-semibold animate-fade-in flex flex-col gap-1.5">
                     {/Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent) ? (
-                      <span>✅ {copiedApp} खुल रहा है। राशि ₹{checkoutAmount} एवं UPI ID कॉपी हो चुकी है!</span>
+                      <>
+                        <span className="text-green-800 font-extrabold flex items-center gap-1">
+                          <span className="animate-ping rounded-full h-2 w-2 bg-green-500"></span>
+                          🚀 {copiedApp} ऐप खुल रहा है!
+                        </span>
+                        <span className="text-[11px] leading-relaxed text-green-900 font-bold block mt-0.5">
+                          ⚠️ सुरक्षा नियमों के कारण ऐप में दान राशि आटोमैटिक दर्ज नहीं होगी। हमने आपकी चुनी हुई राशि <span className="font-extrabold text-orange-600 bg-orange-50 px-1 rounded">₹{checkoutAmount}</span> और UPI ID कॉपी कर ली है। ऐप खुलते ही आप स्वयं <span className="font-extrabold text-orange-600 bg-orange-50 px-1 rounded">₹{checkoutAmount}</span> राशि दर्ज करके भुगतान पूरा करें!
+                        </span>
+                      </>
                     ) : (
-                      <span>📋 UPI ID ({settings.upiId || "9340721968@ybl"}) कॉपी हो गई है! कृपया अपने मोबाइल से QR कोड स्कैन करें या UPI ऐप में ID पेस्ट करके ₹{checkoutAmount} का भुगतान करें।</span>
+                      <span>📋 UPI ID (9340721968@ybl) कॉपी हो गई है! कृपया अपने मोबाइल से QR कोड स्कैन करें या UPI ऐप में ID पेस्ट करके ₹{checkoutAmount} का भुगतान करें।</span>
                     )}
                   </div>
                 )}
@@ -562,7 +571,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                           <span>{copiedApp} के लिए UPI ID Copy हो गया!</span>
                         </div>
                         <p className="text-[11px] md:text-xs leading-relaxed font-bold">
-                          हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-green-900">9340721968@ybl</span> को कॉपी कर लिया है। {copiedApp} ऐप खुल रहा है, वहां बस <span className="text-green-700 font-black underline">"To UPI ID"</span> पर जाएं और पेस्ट (Paste) करके भुगतान पूरा करें!
+                          हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-green-900">9340721968@ybl</span> को कॉपी कर लिया है। {copiedApp} ऐप खुल रहा है, सुरक्षा नियमों के कारण दान राशि आपको स्वयं दर्ज करनी होगी। कृपया अपनी इच्छानुसार दान राशि दर्ज करके भुगतान पूरा करें!
                         </p>
                       </>
                     ) : (
