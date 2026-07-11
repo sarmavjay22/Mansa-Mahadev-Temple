@@ -496,11 +496,7 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
                   <span>{darshan.festivalName}</span>
                 </div>
               )}
-              {isEveningDarshan(darshan) && (
-                <span className="inline-flex items-center gap-1 bg-blue-900 text-white px-2.5 py-0.5 rounded-full text-[10px] font-extrabold shadow-xs select-none">
-                  🌙 शाम का श्रृंगार
-                </span>
-              )}
+
             </div>
 
             {/* Top-Right Tools HUD */}
@@ -920,11 +916,7 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
                 <span>{darshan.festivalName}</span>
               </div>
             )}
-            {isEveningDarshan(darshan) && (
-              <span className="inline-flex items-center gap-1 bg-blue-900 text-white px-2.5 py-0.5 rounded-full text-[10px] font-extrabold shadow-xs select-none">
-                🌙 शाम का श्रृंगार
-              </span>
-            )}
+
           </div>
 
           {/* Top-Right Tools HUD */}
