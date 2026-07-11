@@ -355,64 +355,6 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                   </p>
                 </div>
 
-                {/* 1-Click Payment Launchers */}
-                <div className="w-full flex flex-col gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 text-left pl-1">
-                    🚀 अपने mobile के UPI ऐप से भुगतान करें:
-                  </span>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    {/* PhonePe */}
-                    <a
-                      href={getAppUpiLink('PhonePe', checkoutAmount)}
-                      onClick={(e) => handleAppClick('PhonePe', e, checkoutAmount)}
-                      className="flex flex-col items-center justify-center gap-1 bg-purple-50/60 hover:bg-purple-100 border border-purple-200 p-2 rounded-2xl transition duration-200 active:scale-95 shadow-sm text-center"
-                    >
-                      <PhonePeIcon />
-                      <span className="text-[10px] font-black text-purple-900 leading-tight">PhonePe</span>
-                    </a>
-
-                    {/* GPay */}
-                    <a
-                      href={getAppUpiLink('Google Pay', checkoutAmount)}
-                      onClick={(e) => handleAppClick('Google Pay', e, checkoutAmount)}
-                      className="flex flex-col items-center justify-center gap-1 bg-blue-50/60 hover:bg-blue-100 border border-blue-200 p-2 rounded-2xl transition duration-200 active:scale-95 shadow-sm text-center"
-                    >
-                      <GPayIcon />
-                      <span className="text-[10px] font-black text-blue-900 leading-tight">Google Pay</span>
-                    </a>
-
-                    {/* Paytm */}
-                    <a
-                      href={getAppUpiLink('Paytm', checkoutAmount)}
-                      onClick={(e) => handleAppClick('Paytm', e, checkoutAmount)}
-                      className="flex flex-col items-center justify-center gap-1 bg-sky-50/60 hover:bg-sky-100 border border-sky-200 p-2 rounded-2xl transition duration-200 active:scale-95 shadow-sm text-center"
-                    >
-                      <PaytmIcon />
-                      <span className="text-[10px] font-black text-sky-900 leading-tight">Paytm</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Direct payment notification */}
-                {copiedApp && (
-                  <div className="w-full bg-green-50 border border-green-100 text-green-950 rounded-xl p-3 text-xs text-left font-semibold animate-fade-in flex flex-col gap-1.5">
-                    {/Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent) ? (
-                      <>
-                        <span className="text-green-800 font-extrabold flex items-center gap-1">
-                          <span className="animate-ping rounded-full h-2 w-2 bg-green-500"></span>
-                          🚀 {copiedApp} ऐप खुल रहा है!
-                        </span>
-                        <span className="text-[11px] leading-relaxed text-green-900 font-bold block mt-0.5">
-                          ⚠️ सुरक्षा नियमों के कारण ऐप में दान राशि आटोमैटिक दर्ज नहीं होगी। हमने आपकी चुनी हुई राशि <span className="font-extrabold text-orange-600 bg-orange-50 px-1 rounded">₹{checkoutAmount}</span> और UPI ID कॉपी कर ली है। ऐप खुलते ही आप स्वयं <span className="font-extrabold text-orange-600 bg-orange-50 px-1 rounded">₹{checkoutAmount}</span> राशि दर्ज करके भुगतान पूरा करें!
-                        </span>
-                      </>
-                    ) : (
-                      <span>📋 UPI ID (9340721968@ybl) कॉपी हो गई है! कृपया अपने मोबाइल से QR कोड स्कैन करें या UPI ऐप में ID पेस्ट करके ₹{checkoutAmount} का भुगतान करें।</span>
-                    )}
-                  </div>
-                )}
-
                 {/* I have paid button */}
                 <button
                   type="button"
@@ -518,8 +460,8 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
 
               {/* QR Code Container (Dynamic Barcode Scanner) */}
               <div className="flex flex-col items-center gap-1.5 w-full">
-                <span className="text-xs font-black text-amber-800 uppercase flex items-center gap-1">
-                  <QrCode className="w-4 h-4 text-orange-600" />
+                <span className="text-xs font-black text-black uppercase flex items-center gap-1 animate-pulse">
+                  <QrCode className="w-4 h-4 text-orange-600 animate-bounce" />
                   <span>स्कैन या स्क्रीनशॉट लेकर भुगतान करें (Barcode Option)</span>
                 </span>
                 <div className="relative bg-white p-2 rounded-3xl border border-amber-200/80 shadow-md max-w-[200px] w-full aspect-square flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-amber-300">
@@ -530,135 +472,48 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                     className="w-full h-full object-contain select-none"
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 font-bold max-w-[240px]">
+                <p className="text-[15px] text-slate-900 font-bold max-w-[340px] leading-relaxed">
                   आप QR कोड को स्कैन करके या नीचे दी गई UPI ID कॉपी करके भी भुगतान कर सकते हैं।
                 </p>
 
                 {/* UPI ID Display & Copy */}
-                <div className="flex items-center gap-2 bg-white border border-amber-200 p-0.5 pl-3 rounded-full shadow-sm">
-                  <span className="font-mono text-xs md:text-sm text-slate-800 font-bold truncate flex-1 text-left">
+                <div className="flex items-center gap-2 bg-white border-2 border-amber-300 p-1 pl-4 rounded-full shadow-md w-full max-w-[340px] justify-between">
+                  <span className="font-mono text-[15px] md:text-[17px] text-slate-900 font-extrabold truncate flex-1 text-left select-all">
                     9340721968@ybl
                   </span>
                   <button
                     onClick={handleCopyUPI}
-                    className="inline-flex items-center gap-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-1.5 px-3.5 rounded-full transition duration-300 shadow-sm shrink-0 active:scale-95"
+                    className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[14px] py-2 px-5 rounded-full transition duration-300 shadow-sm shrink-0 active:scale-95"
                   >
                     {copied ? (
                       <>
-                        <Check className="w-3.5 h-3.5" />
+                        <Check className="w-4 h-4" />
                         <span>Copied!</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3.5 h-3.5" />
+                        <Copy className="w-4 h-4" />
                         <span>Copy ID</span>
                       </>
                     )}
                   </button>
                 </div>
 
-                {/* Dynamic Assistance overlay */}
-                {copiedApp ? (
+                {/* Dynamic Assistance overlay on Copy UPI ID */}
+                {copied && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="bg-green-50 border border-green-200 text-green-950 rounded-2xl p-3.5 text-left flex flex-col gap-1.5 shadow-md w-full"
                   >
-                    {/Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent) ? (
-                      <>
-                        <div className="flex items-center gap-1.5 text-xs font-black text-green-800 uppercase">
-                          <span className="animate-ping rounded-full h-2 w-2 bg-green-500"></span>
-                          <span>{copiedApp} के लिए UPI ID Copy हो गया!</span>
-                        </div>
-                        <p className="text-[11px] md:text-xs leading-relaxed font-bold">
-                          हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-green-900">9340721968@ybl</span> को कॉपी कर लिया है। {copiedApp} ऐप खुल रहा है, सुरक्षा नियमों के कारण दान राशि आपको स्वयं दर्ज करनी होगी। कृपया अपनी इच्छानुसार दान राशि दर्ज करके भुगतान पूरा करें!
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-1.5 text-xs font-black text-amber-800 uppercase">
-                          <span>📋 UPI ID कॉपी हो गया!</span>
-                        </div>
-                        <p className="text-[11px] md:text-xs leading-relaxed font-bold text-slate-700">
-                          हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-200 text-amber-900">9340721968@ybl</span> को कॉपी कर लिया है। चूंकि आप कंप्यूटर पर हैं, कृपया अपने मोबाइल से QR कोड को स्कैन करें या अपने UPI ऐप में यह ID पेस्ट करके भुगतान करें!
-                        </p>
-                      </>
-                    )}
-                  </motion.div>
-                ) : (
-                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-3 text-left flex flex-col gap-1.5 shadow-sm">
-                    <span className="text-[11px] font-black uppercase text-orange-800 flex items-center gap-1">
-                      <Info className="w-3.5 h-3.5 text-orange-600 shrink-0" />
-                      <span>सुरक्षा गाइड (Security Decline Fix)</span>
-                    </span>
-                    <p className="text-[10px] md:text-[11px] text-orange-950 font-bold leading-relaxed">
-                      UPI ऐप्स (PhonePe, GPay) सुरक्षा कारणों से ब्राउज़र से डायरेक्ट पेमेंट ब्लॉक कर देते हैं। <span className="text-orange-700 font-extrabold">नीचे दिए गए 1-Click बटनों का उपयोग करें, यह 100% सफल है:</span>
+                    <div className="flex items-center gap-1.5 text-xs font-black text-green-800 uppercase">
+                      <span>📋 UPI ID कॉपी हो गया!</span>
+                    </div>
+                    <p className="text-[11px] md:text-xs leading-relaxed font-bold text-slate-700">
+                      हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-green-900">9340721968@ybl</span> को सफलतापूर्वक कॉपी कर लिया है। अब आप अपने मोबाइल के किसी भी UPI ऐप (जैसे PhonePe, Google Pay, Paytm आदि) को खोलकर इस ID पर आसानी से दान राशि भेज सकते हैं!
                     </p>
-                  </div>
+                  </motion.div>
                 )}
-
-                {/* Brand New 1-Click Fast Launch Options (100% Active & Correct Links) */}
-                <div className="flex flex-col gap-2 w-full">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 select-none text-left pl-1">
-                    ⚡ 1-Click से ID कॉपी कर सीधे पेमेंट पेज खोलें:
-                  </span>
-                  
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {/* PhonePe */}
-                    <a
-                      href={getAppUpiLink('PhonePe')}
-                      onClick={(e) => handleAppClick('PhonePe', e)}
-                      className="flex flex-col items-center justify-center gap-1 bg-purple-50/60 hover:bg-purple-100 border border-purple-200 p-1.5 rounded-2xl transition duration-300 active:scale-95 shadow-sm text-center"
-                    >
-                      <PhonePeIcon />
-                      <span className="text-[9px] font-black text-purple-900 leading-tight">PhonePe</span>
-                      <span className="text-[8px] font-black text-purple-700 bg-purple-100 px-1 py-0.5 rounded-full uppercase">चलाएं</span>
-                    </a>
-
-                    {/* GPay */}
-                    <a
-                      href={getAppUpiLink('Google Pay')}
-                      onClick={(e) => handleAppClick('Google Pay', e)}
-                      className="flex flex-col items-center justify-center gap-1 bg-blue-50/60 hover:bg-blue-100 border border-blue-200 p-1.5 rounded-2xl transition duration-300 active:scale-95 shadow-sm text-center"
-                    >
-                      <GPayIcon />
-                      <span className="text-[9px] font-black text-blue-900 leading-tight">GPay</span>
-                      <span className="text-[8px] font-black text-blue-700 bg-blue-100 px-1 py-0.5 rounded-full uppercase">चलाएं</span>
-                    </a>
-
-                    {/* Paytm */}
-                    <a
-                      href={getAppUpiLink('Paytm')}
-                      onClick={(e) => handleAppClick('Paytm', e)}
-                      className="flex flex-col items-center justify-center gap-1 bg-sky-50/60 hover:bg-sky-100 border border-sky-200 p-1.5 rounded-2xl transition duration-300 active:scale-95 shadow-sm text-center"
-                    >
-                      <PaytmIcon />
-                      <span className="text-[9px] font-black text-sky-900 leading-tight">Paytm</span>
-                      <span className="text-[8px] font-black text-sky-700 bg-sky-100 px-1 py-0.5 rounded-full uppercase">चलाएं</span>
-                    </a>
-
-                    {/* Razorpay */}
-                    <a
-                      href="https://razorpay.me/@vijaysharma843"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center justify-center gap-1 bg-blue-50/40 hover:bg-blue-100/60 border border-blue-200 p-1.5 rounded-2xl transition duration-300 active:scale-95 shadow-sm text-center"
-                    >
-                      <RazorpayIcon />
-                      <span className="text-[9px] font-black text-blue-950 leading-tight">Razorpay</span>
-                      <span className="text-[8px] font-black text-blue-800 bg-blue-100/80 px-1 py-0.5 rounded-full uppercase">चलाएं</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Direct App Link Attempt as a fallback */}
-                <a
-                  href="upi://pay?pa=9340721968@ybl&pn=Vijay%20Sharma&cu=INR&tn=Donation"
-                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-50 to-amber-50 hover:from-amber-100/50 hover:to-orange-100/50 text-amber-900 border border-amber-300 font-extrabold text-base py-3 px-5 rounded-xl transition duration-300 active:scale-95 w-full shadow-sm"
-                >
-                  <ExternalLink className="w-5 h-5 text-amber-600" />
-                  <span>Direct Link से कोशिश करें</span>
-                </a>
 
               </div>
 
