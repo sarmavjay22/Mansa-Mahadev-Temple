@@ -91,7 +91,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
   }, [isOpen]);
 
   const handleCopyUPI = async () => {
-    const upiId = "9340721968@ybl";
+    const upiId = settings.upiId || "9340721968@ybl";
     try {
       await navigator.clipboard.writeText(upiId);
       setCopied(true);
@@ -102,8 +102,8 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
   };
 
   const getAppUpiLink = (appName: string, amountStr?: string) => {
-    const upiId = "9340721968@ybl";
-    const name = encodeURIComponent("Vijay Sharma");
+    const upiId = settings.upiId || "9340721968@ybl";
+    const name = encodeURIComponent(settings.trusteeName || "Vijay Sharma");
     // To comply with NPCI and bank security guidelines for peer-to-peer (P2P) personal accounts,
     // we MUST NOT include prefilled amounts ('am') or transaction notes ('tn') in mobile browser deep links.
     // Including them triggers a "Payment declined for security reasons" error in PhonePe, GPay, and Paytm.
@@ -111,7 +111,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
     let baseParams = `pa=${upiId}&pn=${name}&cu=INR`;
 
     if (appName === 'Razorpay') {
-      return "https://razorpay.me/@vijaysharma843";
+      return settings.razorpayLink || "https://razorpay.me/@vijaysharma843";
     }
 
     const userAgent = navigator.userAgent || '';
@@ -148,7 +148,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
     const isMobileDevice = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
     
     try {
-      await navigator.clipboard.writeText("9340721968@ybl");
+      await navigator.clipboard.writeText(settings.upiId || "9340721968@ybl");
       setCopied(true);
       setCopiedApp(appName);
       setTimeout(() => {
@@ -165,7 +165,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
   };
 
   const handleRazorpayClick = () => {
-    window.open("https://razorpay.me/@vijaysharma843", '_blank');
+    window.open(settings.razorpayLink || "https://razorpay.me/@vijaysharma843", '_blank');
   };
 
   if (!isOpen) return null;
@@ -342,7 +342,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                   <div className="relative bg-white p-2 rounded-2xl border border-blue-100 shadow-md max-w-[170px] w-full aspect-square flex items-center justify-center overflow-hidden">
                     <img 
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
-                        `upi://pay?pa=9340721968@ybl&pn=Vijay%20Sharma&tn=${encodeURIComponent(`Donation-${checkoutName || 'Devotee'}`)}&am=${checkoutAmount}&cu=INR`
+                        `upi://pay?pa=${settings.upiId || "9340721968@ybl"}&pn=${encodeURIComponent(settings.trusteeName || "Vijay Sharma")}&tn=${encodeURIComponent(`Donation-${checkoutName || 'Devotee'}`)}&am=${checkoutAmount}&cu=INR`
                       )}`} 
                       alt="Razorpay dynamic QR" 
                       referrerPolicy="no-referrer"
@@ -466,7 +466,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                 </span>
                 <div className="relative bg-white p-2 rounded-3xl border border-amber-200/80 shadow-md max-w-[200px] w-full aspect-square flex items-center justify-center overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-amber-300">
                   <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=9340721968@ybl&pn=Vijay%20Sharma&cu=INR&tn=Donation`)}`} 
+                    src={settings.qrCodeUrl && settings.qrCodeUrl.startsWith('http') ? settings.qrCodeUrl : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=${settings.upiId || '9340721968@ybl'}&pn=${encodeURIComponent(settings.trusteeName || 'Vijay Sharma')}&cu=INR&tn=Donation`)}`} 
                     alt="Donation UPI QR Code" 
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-contain select-none"
@@ -479,7 +479,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                 {/* UPI ID Display & Copy */}
                 <div className="flex items-center gap-2 bg-white border-2 border-amber-300 p-1 pl-4 rounded-full shadow-md w-full max-w-[340px] justify-between">
                   <span className="font-mono text-[15px] md:text-[17px] text-slate-900 font-extrabold truncate flex-1 text-left select-all">
-                    9340721968@ybl
+                    {settings.upiId || "9340721968@ybl"}
                   </span>
                   <button
                     onClick={handleCopyUPI}
@@ -510,7 +510,7 @@ export default function DonationPopup({ isOpen, onClose }: DonationPopupProps) {
                       <span>📋 UPI ID कॉपी हो गया!</span>
                     </div>
                     <p className="text-[11px] md:text-xs leading-relaxed font-bold text-slate-700">
-                      हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-green-900">9340721968@ybl</span> को सफलतापूर्वक कॉपी कर लिया है। अब आप अपने मोबाइल के किसी भी UPI ऐप (जैसे PhonePe, Google Pay, Paytm आदि) को खोलकर इस ID पर आसानी से दान राशि भेज सकते हैं!
+                      हमने <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-green-200 text-green-900">{settings.upiId || "9340721968@ybl"}</span> को सफलतापूर्वक कॉपी कर लिया है। अब आप अपने मोबाइल के किसी भी UPI ऐप (जैसे PhonePe, Google Pay, Paytm आदि) को खोलकर इस ID पर आसानी से दान राशि भेज सकते हैं!
                     </p>
                   </motion.div>
                 )}
