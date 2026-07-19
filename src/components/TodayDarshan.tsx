@@ -58,6 +58,53 @@ function isEveningDarshan(item: DailyDarshan | null): boolean {
   return text.includes('शाम') || text.includes('संध्या') || text.includes('सायं') || text.includes('evening') || text.includes('eve') || text.includes('sandhya') || text.includes('shyam');
 }
 
+function shouldShowFestivalTag(name: string | undefined | null): boolean {
+  if (!name) return false;
+  const normalized = name.replace(/[\s\u200b\u00a0]+/g, ' ').trim();
+  const lower = normalized.toLowerCase();
+  
+  const excludeTerms = [
+    "सुबह का श्रृंगार",
+    "शाम का श्रृंगार",
+    "दैनिक श्रृंगार",
+    "दैनिक श्रृंगार दर्शन",
+    "शाम का शृंगार",
+    "सुबह का शृंगार",
+    "शाम का श्रंगार",
+    "सुबह का श्रंगार",
+    "दैनिक शृंगार",
+    "दैनिक श्रंगार",
+    "शाम का श्रंगा",
+    "सुबह का श्रंगा",
+    "शाम का श्रृंगा",
+    "सुबह का श्रृंगा",
+    "शाम का शृंगा",
+    "सुबह का शृंगा",
+    "शाम का श्रंग",
+    "शाम का श्रृंग",
+    "शाम का शृंग",
+    "shringar",
+    "shringaar",
+    "shringa"
+  ];
+
+  for (const term of excludeTerms) {
+    if (normalized === term || normalized.includes(term) || lower.includes(term.toLowerCase())) {
+      return false;
+    }
+  }
+
+  // Robust check for any spelling variation of time + shringar/shringa/darshan
+  const hasTimeIndicator = /शाम|सुबह|दैनिक|सायं|संध्या|प्रातः|शामका|सुबहका|daily|morning|evening/i.test(normalized);
+  const hasShringarOrDarshan = /श्रृंगार|शृंगार|श्रंगार|श्रृंगा|शृंगा|श्रंगा|श्रृं|शृं|श्रं|shringar|shringa|shring/i.test(normalized);
+
+  if (hasTimeIndicator && hasShringarOrDarshan) {
+    return false;
+  }
+
+  return true;
+}
+
 export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {}) {
   const [darshan, setDarshan] = useState<DailyDarshan | null>(null);
   const [isAdmin, setIsAdmin] = useState(db.isAdminLoggedIn());
@@ -486,11 +533,7 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
                   </div>
                 );
               })()}
-              {darshan.festivalName && 
-               darshan.festivalName.trim() !== "सुबह का श्रृंगार" && 
-               darshan.festivalName.trim() !== "शाम का श्रृंगार" && 
-               darshan.festivalName.trim() !== "दैनिक श्रृंगार" && 
-               darshan.festivalName.trim() !== "दैनिक श्रृंगार दर्शन" && (
+              {darshan.festivalName && shouldShowFestivalTag(darshan.festivalName) && (
                 <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
                   <Sparkles className="w-3.5 h-3.5 animate-pulse text-white fill-white" />
                   <span>{darshan.festivalName}</span>
@@ -906,11 +949,7 @@ export default function TodayDarshan({ mode }: { mode?: 'title' | 'main' } = {})
                 </div>
               );
             })()}
-            {darshan.festivalName && 
-             darshan.festivalName.trim() !== "सुबह का श्रृंगार" && 
-             darshan.festivalName.trim() !== "शाम का श्रृंगार" && 
-             darshan.festivalName.trim() !== "दैनिक श्रृंगार" && 
-             darshan.festivalName.trim() !== "दैनिक श्रृंगार दर्शन" && (
+            {darshan.festivalName && shouldShowFestivalTag(darshan.festivalName) && (
               <div className="bg-orange-600 text-white font-extrabold text-[10px] md:text-xs px-3 py-1 rounded-full shadow-lg shadow-black/60 flex items-center gap-1.5 border border-orange-500/30 select-none">
                 <Sparkles className="w-3.5 h-3.5 animate-pulse text-white fill-white" />
                 <span>{darshan.festivalName}</span>
